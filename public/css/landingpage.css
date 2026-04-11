@@ -90,6 +90,88 @@
         .pill-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .admin-btn { padding: 11px 18px; font-size: 17px; border-radius: 12px; }
         .admin-btn .pill-icon { width: 17px; height: 17px; }
+        .pill,
+        .cta,
+        .announce-btn,
+        .fbtn,
+        .fmonth,
+        .event-btn,
+        .submit,
+        .eval-submit,
+        .eval-close-cta,
+        .admin-access-btn,
+        .close-modal,
+        .rating-star {
+            transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease, border-color .15s ease, opacity .15s ease;
+        }
+        .pill:hover,
+        .cta:hover,
+        .announce-btn:hover,
+        .fbtn:hover,
+        .fmonth:hover,
+        .event-btn:hover,
+        .submit:hover:not(:disabled),
+        .eval-submit:hover:not(:disabled),
+        .eval-close-cta:hover,
+        .admin-access-btn:hover,
+        .close-modal:hover,
+        .rating-star:hover {
+            transform: translateY(-1px);
+        }
+        .pill:focus-visible,
+        .cta:focus-visible,
+        .announce-btn:focus-visible,
+        .fbtn:focus-visible,
+        .fmonth:focus-visible,
+        .event-btn:focus-visible,
+        .submit:focus-visible,
+        .eval-submit:focus-visible,
+        .eval-close-cta:focus-visible,
+        .admin-access-btn:focus-visible,
+        .close-modal:focus-visible,
+        .rating-star:focus-visible {
+            outline: 3px solid rgba(255, 197, 112, .45);
+            outline-offset: 2px;
+        }
+        .pill:hover,
+        .pill:active {
+            box-shadow: 0 8px 18px rgba(0,0,0,.12);
+        }
+        .pill-gold:hover,
+        .cta:hover,
+        .announce-btn.gold:hover,
+        .event-btn:hover,
+        .submit:hover:not(:disabled),
+        .eval-submit:hover:not(:disabled),
+        .eval-close-cta:hover,
+        .admin-access-btn:hover {
+            filter: brightness(1.03);
+        }
+        .pill-muted:hover,
+        .fbtn:hover,
+        .fmonth:hover,
+        .announce-btn.ghost:hover,
+        .event-btn.outline:hover,
+        .close-modal:hover {
+            background-color: rgba(255,255,255,.12);
+        }
+        .fbtn:hover,
+        .fmonth:hover,
+        .close-modal:hover,
+        .rating-star:hover {
+            box-shadow: 0 6px 14px rgba(0,0,0,.08);
+        }
+        .announce-btn:hover,
+        .event-btn:hover,
+        .submit:hover:not(:disabled),
+        .eval-submit:hover:not(:disabled),
+        .eval-close-cta:hover,
+        .admin-access-btn:hover {
+            box-shadow: 0 10px 18px rgba(0,0,0,.14);
+        }
+        .rating-star:hover svg {
+            stroke-width: 2.1;
+        }
 
         @media (max-width: 900px) {
             .topbar-inner { height: auto; padding: 10px 0; flex-wrap: wrap; gap: 10px; }
