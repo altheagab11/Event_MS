@@ -332,7 +332,7 @@ $regions = [
 
     <div class="modal" id="eventModal">
         <div class="modal-card" id="modalCard">
-            <button class="close-modal" id="closeModal">×</button>
+            <button type="button" class="close-modal" id="closeModal" aria-label="Close modal">×</button>
             <div id="modalContent"></div>
         </div>
     </div>
