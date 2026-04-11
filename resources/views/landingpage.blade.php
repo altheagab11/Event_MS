@@ -418,12 +418,14 @@ $regions = [
         const modalCard = document.getElementById('modalCard');
         const pageBlur = document.getElementById('pageBlur');
         let selectedEvent = null;
+        let registrationData = { firstName: '', lastName: '' };
         let otpTimer = null;
         let countdown = 59;
 
         function closeModal() {
             eventModal.classList.remove('open');
             modalCard.classList.remove('eval-mode');
+            modalCard.classList.remove('success-mode');
             document.body.classList.remove('modal-open');
             pageBlur.classList.remove('open');
             modalContent.innerHTML = '';
@@ -505,6 +507,11 @@ $regions = [
             `;
             document.getElementById('registrationForm').addEventListener('submit', function(e) {
                 e.preventDefault();
+                const formData = new FormData(e.target);
+                registrationData = {
+                    firstName: String(formData.get('firstName') || '').trim(),
+                    lastName: String(formData.get('lastName') || '').trim(),
+                };
                 renderOtpStep();
             });
         }
@@ -551,19 +558,107 @@ $regions = [
         function renderSuccessStep() {
             const isConference = selectedEvent.type === 'Conference Event';
             const code = 'NUL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const fullName = `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name';
+            modalCard.classList.add('success-mode');
             modalContent.innerHTML = `
-                <div class="modal-body" style="padding:48px; text-align:center;">
-                    <h3 style="font-size:36px; color:#1a3263; margin:8px 0;">${isConference ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
-                    <p style="color:#6b7280; max-width:620px; margin:10px auto 28px;">
+                <div class="registration-success">
+                    <span class="success-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <circle cx="12" cy="12" r="9"></circle>
+                            <path d="M8.5 12.3 10.8 14.6 15.8 9.6"></path>
+                        </svg>
+                    </span>
+                        <h3>${isConference ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
+                    <p class="success-copy">
                         ${isConference
                             ? 'Your registration and research paper are now pending review. Once approved by the admin, you will receive an email containing your Digital ID.'
-                            : 'Your Digital ID has been successfully sent to your email.'}
+                            : 'Your Digital ID has been successfully sent to your email. Here is a preview of what you will receive:'}
                     </p>
-                    <div style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:16px; max-width:420px; margin:0 auto 24px; text-align:left;">
-                        <div style="font-size:12px; color:#6b7280; text-transform:uppercase;">Attendee ID</div>
-                        <div style="font-size:22px; color:#1a3263; font-weight:800; letter-spacing:1px;">${code}</div>
+
+                    <div class="success-grid">
+                        <div class="pass-card">
+                            <div class="pass-top">
+                                <div class="pass-kicker">NU LIPA EVENT PASS</div>
+                                <span class="pass-tag">SENIOR HIGH</span>
+                            </div>
+                            <div class="pass-event">${selectedEvent.title}</div>
+                            <div class="pass-name">${fullName}</div>
+                            <div class="pass-meta">
+                                <div class="pass-meta-row">
+                                    <span class="pass-meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <path d="M4 19V5"></path>
+                                            <path d="M4 6h9"></path>
+                                            <path d="M7 9h6"></path>
+                                            <path d="M7 13h4"></path>
+                                        </svg>
+                                    </span>
+                                    <span>${selectedEvent.type}</span>
+                                </div>
+                                <div class="pass-meta-row">
+                                    <span class="pass-meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
+                                            <circle cx="12" cy="11" r="1.9"></circle>
+                                        </svg>
+                                    </span>
+                                    <span>${selectedEvent.location}</span>
+                                </div>
+                            </div>
+                            <div class="pass-divider"></div>
+                            <div class="pass-footer">
+                                <label>Attendee ID</label>
+                                <span class="pass-code">${code}</span>
+                            </div>
+                        </div>
+
+                        <div class="qr-card">
+                            <div class="qr-top">SCAN AT REGISTRATION</div>
+                            <div class="qr-body">
+                                <div class="qr-box" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                        <rect x="4" y="4" width="7" height="7" rx="1.2"></rect>
+                                        <rect x="13" y="4" width="3" height="3" rx=".8"></rect>
+                                        <rect x="18" y="4" width="2" height="2" rx=".5"></rect>
+                                        <rect x="4" y="13" width="4" height="4" rx="1"></rect>
+                                        <rect x="11" y="11" width="3" height="3" rx=".7"></rect>
+                                        <path d="M16 12h2"></path>
+                                        <path d="M18 12v2"></path>
+                                        <path d="M15 17h3"></path>
+                                        <path d="M15 20v-3"></path>
+                                        <path d="M20 18h-2"></path>
+                                        <path d="M20 20v-2"></path>
+                                    </svg>
+                                </div>
+                                <p class="qr-note">This QR code is strictly non-transferable and must be presented during event check-in.</p>
+                            </div>
+                        </div>
                     </div>
-                    <button class="submit" id="doneBtn" style="max-width:300px;">Done</button>
+
+                    <div class="success-actions">
+                        <button type="button" class="success-action-btn">
+                            <span class="success-action-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <path d="M12 3v10"></path>
+                                    <path d="M8.5 9.5 12 13l3.5-3.5"></path>
+                                    <path d="M5 16.5v2.5h14v-2.5"></path>
+                                </svg>
+                            </span>
+                            <span>Download Pass</span>
+                        </button>
+                        <button type="button" class="success-action-btn success-action-secondary">
+                            <span class="success-action-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <path d="M14 4h6v6"></path>
+                                    <path d="M10 14 20 4"></path>
+                                    <path d="M20 14v6h-6"></path>
+                                    <path d="M4 10v6a4 4 0 0 0 4 4h6"></path>
+                                </svg>
+                            </span>
+                            <span>Share to Email</span>
+                        </button>
+                    </div>
+                    <button type="button" class="success-done" id="doneBtn">Done</button>
                 </div>
             `;
             document.getElementById('doneBtn').addEventListener('click', closeModal);
