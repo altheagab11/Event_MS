@@ -58,7 +58,7 @@
                                 <path d="M4.5 8 12 13l7.5-5"></path>
                             </svg>
                         </span>
-                        <input type="email" placeholder="admin@nu.edu.ph" value="admin@nu.edu.ph" readonly>
+                        <input type="email" name="email" placeholder="admin@nu.edu.ph" autocomplete="username" required>
                     </label>
                     <label class="admin-input-wrap">
                         <span class="admin-input-icon" aria-hidden="true">
@@ -67,7 +67,7 @@
                                 <path d="M8 11V8.5a4 4 0 1 1 8 0V11"></path>
                             </svg>
                         </span>
-                        <input type="password" placeholder="password" value="password" readonly>
+                        <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
                     </label>
                     <button type="button" class="admin-access-btn">Access Dashboard</button>
                 </form>
