@@ -50,7 +50,7 @@
                 <h2>Admin Portal</h2>
                 <p>Secure access to NU Lipa EMS</p>
 
-                <form class="admin-form" onsubmit="return false;">
+                <form class="admin-form" action="{{ route('admin.dashboard') }}" method="get">
                     <label class="admin-input-wrap">
                         <span class="admin-input-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -69,7 +69,7 @@
                         </span>
                         <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
                     </label>
-                    <button type="button" class="admin-access-btn">Access Dashboard</button>
+                    <button type="submit" class="admin-access-btn">Access Dashboard</button>
                 </form>
             </div>
         </div>
