@@ -224,7 +224,17 @@ $regions = [
                         <span>Conference</span>
                     </button>
                 </div>
-                <button class="fmonth" id="toggleDateFilter">ðŸ—“ Filter by Month</button>
+                <button class="fmonth" id="toggleDateFilter">
+                    <span class="month-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                            <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                            <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                            <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                        </svg>
+                    </span>
+                    <span>Filter by Month</span>
+                </button>
 
                 <div class="date-pop" id="dateFilterPop">
                     <label for="yearInput">Year</label>
@@ -284,7 +294,14 @@ $regions = [
                                 @if ($event['status'] === 'active')
                                     <button class="event-btn open-register" data-event-id="{{ $event['id'] }}">Register Now</button>
                                 @else
-                                    <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">â˜† Evaluate Event</button>
+                                    <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">
+                                        <span class="eval-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                                <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                                            </svg>
+                                        </span>
+                                        <span>Evaluate Event</span>
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -307,7 +324,7 @@ $regions = [
                 </span>
                 <span class="fbrand-text">NU Lipa Event Management System</span>
             </div>
-            <div class="fcopy">Â© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
+            <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
         </div>
     </footer>
 

@@ -176,7 +176,9 @@
         .fbtn.active { background: var(--navy); color: #fff; }
         .filter-icon { width: 15px; height: 15px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
         .filter-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-        .fmonth { border: 1px solid #d1d5db; background: #fff; border-radius: 16px; padding: 12px 20px; color: var(--navy); font-weight: 600; font-size: 14px; }
+        .fmonth { border: 1px solid #d1d5db; background: #fff; border-radius: 16px; padding: 12px 20px; color: var(--navy); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+        .month-icon { width: 16px; height: 16px; color: #6b7a8a; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+        .month-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         .date-pop { display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 290px; background: #fff; border: 2px solid var(--navy-soft); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.2); z-index: 25; padding: 14px; }
         .date-pop.open { display: block; }
@@ -218,20 +220,23 @@
             line-clamp: 4;
         }
         .event-actions { margin-top: auto; padding-top: 14px; border-top: 1px solid #f1f2f4; }
-        .event-btn { width: 100%; border: 0; border-radius: 10px; background: var(--gold); color: var(--navy); padding: 12px; font-weight: 700; font-size: 16px; }
+        .event-btn { width: 100%; border: 0; border-radius: 10px; background: var(--gold); color: var(--navy); padding: 12px; font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .event-btn.outline { background: #fff; color: var(--navy); border: 1px solid var(--navy-soft); }
+        .eval-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: #7b95af; }
+        .eval-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        .footer { background: var(--navy); color: var(--beige); padding: 20px 0; }
-        .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+        .footer { background: var(--navy); color: var(--beige); padding: 28px 0; }
+        .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 34px; }
         .fbrand { color: var(--gold); display: inline-flex; align-items: center; gap: 8px; }
-        .fbrand-icon { width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+        .fbrand-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
         .fbrand-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .fbrand-text { font-size: 13px; font-weight: 700; line-height: 1; }
-        .fcopy { font-size: 12px; color: #e7d5b9; }
+        .fbrand-text { font-size: 15px; font-weight: 700; line-height: 1; }
+        .fcopy { font-size: 13px; color: #e7d5b9; }
         @media (max-width: 900px) {
             .footer-inner { flex-direction: column; align-items: flex-start; }
-            .fbrand-icon { width: 12px; height: 12px; }
-            .fbrand-text { font-size: 13px; }
+            .fbrand-icon { width: 13px; height: 13px; }
+            .fbrand-text { font-size: 14px; }
+            .fcopy { font-size: 12px; }
         }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px); z-index: 80; display: none; padding: 16px; }
