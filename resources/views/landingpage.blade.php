@@ -460,10 +460,21 @@ $regions = [
                             <div class="field"><label>School Level *</label><select name="schoolLevel" required><option value="">Select Level</option><option>Senior High School</option><option>Undergraduate</option><option>Graduate</option><option>Professional</option></select></div>
                         </div>
                         <div class="upload-wrap" style="display:${showUpload ? 'block' : 'none'}">
-                            <label style="display:block; font-weight:700; color:#1a3263; margin-bottom:8px;">Upload 5-page Research Paper (PDF only)</label>
-                            <div class="upload-box">
-                                <input type="file" accept=".pdf" ${showUpload ? 'required' : ''}>
-                            </div>
+                            <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
+                            <div class="upload-note">Your paper will be subject to admin review before your registration is fully confirmed.</div>
+                            <label class="upload-drop">
+                                <input class="upload-file-input" type="file" accept=".pdf" ${showUpload ? 'required' : ''}>
+                                <span class="upload-drop-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                        <path d="M12 16V6"></path>
+                                        <path d="M8.5 9.5 12 6l3.5 3.5"></path>
+                                        <path d="M6.5 14.5a4 4 0 0 1 .8-7.9A5.5 5.5 0 0 1 18 7.8a3.6 3.6 0 0 1-.8 6.7"></path>
+                                        <path d="M9 16.5h6"></path>
+                                    </svg>
+                                </span>
+                                <span class="upload-drop-main">Click or drag PDF to upload</span>
+                                <span class="upload-drop-sub">Maximum file size: 10MB</span>
+                            </label>
                         </div>
                         <button class="submit" type="submit">Continue Registration</button>
                     </form>
