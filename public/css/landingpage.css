@@ -260,9 +260,15 @@
         }
         .modal-card { background: #fff; width: min(800px, calc(100% - 24px)); max-height: 84vh; overflow: hidden; border-radius: 26px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.35); display: flex; flex-direction: column; }
         #modalContent { flex: 1; overflow-y: auto; }
-        .close-modal { position: absolute; top: 12px; right: 12px; border: 0; width: 40px; height: 40px; border-radius: 50%; color: #fff; background: rgba(0,0,0,.45); font-size: 22px; line-height: 1; z-index: 5; cursor: pointer; }
+        .close-modal { position: absolute; top: 12px; right: 12px; border: 0; width: 40px; height: 40px; border-radius: 50%; color: #fff; background: rgba(0,0,0,.45); font-size: 22px; line-height: 1; z-index: 5; cursor: pointer; transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .15s ease; }
         .modal-card.eval-mode { width: min(560px, calc(100% - 24px)); max-height: none; border-radius: 22px; }
-        .modal-card.eval-mode .close-modal { top: 20px; right: 20px; width: 20px; height: 20px; border: 1px solid #b7c1ce; background: #f3f4f6; color: #8d97a7; font-size: 16px; }
+        .modal-card.eval-mode .close-modal { top: 20px; right: 20px; width: 20px; height: 20px; border: 1px solid #b7c1ce; background: #f3f4f6; color: #8d97a7; font-size: 14px; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; }
+        .modal-card.eval-mode .close-modal:hover {
+            color: #ef4444;
+            background: #fee2e2;
+            border-color: #fca5a5;
+            transform: scale(1.04);
+        }
         .eval-modal { background: #f9fafb; }
         .eval-head { padding: 20px 22px; border-top: 5px solid var(--gold); border-bottom: 1px solid #e5e7eb; }
         .eval-head h3 { margin: 0; display: flex; align-items: center; gap: 10px; color: var(--navy); font-size: 27px; font-weight: 700; }
