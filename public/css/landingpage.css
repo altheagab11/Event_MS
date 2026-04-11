@@ -37,6 +37,20 @@
 
         * { box-sizing: border-box; }
         html { font-size: var(--font-size); }
+        body.landing-page { overflow: hidden; }
+        .landing-scroll {
+            position: fixed;
+            inset: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-gutter: auto;
+        }
+        .landing-scroll-content {
+            min-height: 100%;
+            transform: translateX(var(--landing-scroll-shift, 0px));
+        }
+        body.login-page { scrollbar-gutter: auto; }
         body { margin: 0; font-family: "Poppins", sans-serif; background: var(--navy); color: #fff; }
         .container { width: min(1280px, 100%); margin: 0 auto; padding: 0 16px; }
         @media (min-width: 640px) { .container { padding: 0 24px; } }
@@ -238,6 +252,76 @@
             .fbrand-text { font-size: 14px; }
             .fcopy { font-size: 12px; }
         }
+
+        .admin-portal {
+            position: fixed;
+            inset: 0;
+            z-index: 140;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(rgba(32, 58, 108, .8), rgba(72, 101, 145, .72)), url('https://images.unsplash.com/photo-1664273891579-22f28332f3c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1600') center/cover no-repeat;
+        }
+        .admin-portal.open { display: flex; }
+        .admin-portal-bar { height: 64px; border-bottom: 1px solid rgba(255,255,255,.12); background: rgba(26, 50, 99, .82); }
+        .admin-portal-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .admin-portal-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 28px 16px; }
+        .admin-card {
+            width: min(420px, 100%);
+            background: rgba(88, 108, 146, .62);
+            border: 1px solid rgba(255,255,255,.18);
+            backdrop-filter: blur(8px);
+            border-radius: 18px;
+            box-shadow: 0 20px 44px rgba(0,0,0,.28);
+            padding: 30px;
+            text-align: center;
+            color: #fff;
+        }
+        .admin-card-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 14px;
+            background: var(--gold);
+            margin: 0 auto 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy);
+        }
+        .admin-card-icon svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .admin-card h2 { margin: 0 0 6px; font-size: 46px; line-height: 1.1; }
+        .admin-card p { margin: 0 0 22px; color: #e8d7bf; font-size: 17px; font-weight: 600; }
+        .admin-form { display: grid; gap: 14px; }
+        .admin-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 12px;
+            background: rgba(47, 66, 100, .72);
+            border: 1px solid rgba(255,255,255,.08);
+            padding: 12px 14px;
+        }
+        .admin-input-icon { width: 18px; height: 18px; color: #b8c4d7; display: inline-flex; }
+        .admin-input-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .admin-input-wrap input {
+            width: 100%;
+            border: 0;
+            outline: none;
+            background: transparent;
+            color: #d6dfec;
+            font: 600 16px/1 "Poppins", sans-serif;
+        }
+        .admin-access-btn {
+            margin-top: 2px;
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--gold);
+            color: var(--navy);
+            font: 700 20px/1 "Poppins", sans-serif;
+            cursor: pointer;
+        }
+        .admin-portal-footer { background: rgba(26, 50, 99, .9); border-top: 1px solid rgba(255,255,255,.12); padding: 18px 0; }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px); z-index: 100; display: none; padding: 16px; }
         .modal.open { display: flex; align-items: center; justify-content: center; }

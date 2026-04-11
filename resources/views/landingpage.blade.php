@@ -114,7 +114,9 @@ $regions = [
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('css/landingpage.css') }}">
 </head>
-<body>
+<body class="landing-page">
+    <div class="landing-scroll">
+    <div class="landing-scroll-content">
     <header class="topbar">
         <div class="container topbar-inner">
             <div class="brand" aria-label="NU Lipa EMS">
@@ -130,7 +132,7 @@ $regions = [
             </div>
             <div class="top-actions">
                 <button class="pill pill-muted">Home / Events</button>
-                <button class="pill pill-gold admin-btn">
+                <a href="{{ route('admin.login') }}" class="pill pill-gold admin-btn" style="text-decoration:none;">
                     <span class="pill-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" role="img" focusable="false">
                             <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
@@ -138,7 +140,7 @@ $regions = [
                         </svg>
                     </span>
                     <span>Admin Login</span>
-                </button>
+                </a>
             </div>
         </div>
     </header>
@@ -327,6 +329,8 @@ $regions = [
             <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
         </div>
     </footer>
+    </div>
+    </div>
 
     <div class="page-blur" id="pageBlur" aria-hidden="true"></div>
 
@@ -338,6 +342,23 @@ $regions = [
     </div>
 
     <script>
+        (function setupLandingScrollCompensation() {
+            const isWindows = navigator.userAgent.includes('Windows');
+            const landingScroll = document.querySelector('.landing-scroll');
+            const landingContent = document.querySelector('.landing-scroll-content');
+
+            if (!isWindows || !landingScroll || !landingContent) return;
+
+            const applyCompensation = () => {
+                const scrollbarWidth = Math.max(landingScroll.offsetWidth - landingScroll.clientWidth, 0);
+                const shift = scrollbarWidth > 0 ? (scrollbarWidth / 2) : 0;
+                landingContent.style.setProperty('--landing-scroll-shift', `${shift}px`);
+            };
+
+            applyCompensation();
+            window.addEventListener('resize', applyCompensation);
+        })();
+
         const EVENTS = @json($events);
         const REGIONS = @json($regions);
 
