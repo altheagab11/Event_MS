@@ -1,604 +1,522 @@
+﻿@php
+$months = [
+    ['value' => 0, 'label' => 'Jan'], ['value' => 1, 'label' => 'Feb'], ['value' => 2, 'label' => 'Mar'],
+    ['value' => 3, 'label' => 'Apr'], ['value' => 4, 'label' => 'May'], ['value' => 5, 'label' => 'Jun'],
+    ['value' => 6, 'label' => 'Jul'], ['value' => 7, 'label' => 'Aug'], ['value' => 8, 'label' => 'Sep'],
+    ['value' => 9, 'label' => 'Oct'], ['value' => 10, 'label' => 'Nov'], ['value' => 11, 'label' => 'Dec'],
+];
+
+$events = [
+    [
+        'id' => 1,
+        'title' => 'NU Lipa Foundation Day 2026',
+        'type' => 'School Event',
+        'date' => 'April 20, 2026',
+        'location' => 'Main Campus Grounds',
+        'description' => 'Join us as we celebrate another year of excellence and commitment to nation-building with booths, games, and performances. This event commemorates the founding of our beloved institution. Students from all colleges are invited to participate in various activities including academic exhibits, cultural presentations, and sports tournaments. The day will conclude with a grand concert featuring local bands and our very own student performers. Attendance is mandatory for all freshmen and sophomores. Please register early to secure your food stub and event kit.',
+        'status' => 'active',
+        'image' => 'https://images.unsplash.com/photo-1765474604988-4fc3fa14f46b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50cyUyMHNtaWxpbmclMjBjYW1wdXN8ZW58MXx8fHwxNzc1NTM4NjMzfDA&ixlib=rb-4.1.0&q=80&w=1080',
+    ],
+    [
+        'id' => 2,
+        'title' => 'Tech Innovations Summit',
+        'type' => 'Conference Event',
+        'date' => 'May 15, 2026',
+        'location' => 'Auditorium Hall B',
+        'description' => 'A national conference gathering students and professionals to discuss the latest trends in software and AI. Call for papers is open. This three-day summit will feature keynote speakers from leading tech companies, hands-on workshops on emerging technologies, and a research paper presentation track. We invite scholars, researchers, and students to submit their 5-page research papers on topics including Artificial Intelligence, Cyber Security, Data Science, and Internet of Things. Accepted papers will be published in the conference proceedings. All participants will receive a certificate of participation and a digital ID for venue access.',
+        'status' => 'active',
+        'image' => 'https://images.unsplash.com/photo-1582192904915-d89c7250b235?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb25mZXJlbmNlJTIwdGVjaCUyMHByZXNlbnRhdGlvbnxlbnwxfHx8fDE3NzU1Mzg2MzN8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    ],
+    [
+        'id' => 4,
+        'title' => 'University Intramurals 2026',
+        'type' => 'School Event',
+        'date' => 'June 5-8, 2026',
+        'location' => 'University Gymnasium & Field',
+        'description' => 'Show your college pride! The annual University Intramurals is back with exciting basketball, volleyball, e-sports, and cheering competitions. Form your teams and register now.',
+        'status' => 'active',
+        'image' => 'https://images.unsplash.com/photo-1721339040530-be9c4eff0360?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwc3BvcnRzJTIwYmFza2V0YmFsbCUyMGludHJhbXVyYWxzfGVufDF8fHx8MTc3NTU0MjgxOHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    ],
+    [
+        'id' => 5,
+        'title' => 'Sining at Kultura Festival',
+        'type' => 'School Event',
+        'date' => 'August 12, 2026',
+        'location' => 'Open Amphitheater',
+        'description' => 'A celebration of Filipino heritage through traditional dances, spoken word poetry, and visual arts exhibitions. Join us in preserving and promoting our rich culture.',
+        'status' => 'active',
+        'image' => 'https://images.unsplash.com/photo-1709086566111-dfa0699a6842?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaWxpcGlubyUyMHN0dWRlbnRzJTIwY3VsdHVyYWwlMjBkYW5jaW5nfGVufDF8fHx8MTc3NTU0MjgxOHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    ],
+    [
+        'id' => 6,
+        'title' => 'Medical & Allied Health Research Symposium',
+        'type' => 'Conference Event',
+        'date' => 'September 22, 2026',
+        'location' => 'College of Allied Health Sciences Bldg',
+        'description' => 'Presenting breakthrough researches in the field of Nursing, Pharmacy, and Medical Technology. Open for professional and student researchers nationwide.',
+        'status' => 'active',
+        'image' => 'https://images.unsplash.com/photo-1773828755374-0ee802d9f44b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwaGVhbHRoJTIwc3ltcG9zaXVtJTIwcmVzZWFyY2h8ZW58MXx8fHwxNzc1NTQyODE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+    ],
+    [
+        'id' => 3,
+        'title' => 'Leadership Seminar Series',
+        'type' => 'School Event',
+        'date' => 'March 10, 2026',
+        'location' => 'Student Lounge',
+        'description' => 'Empowering the next generation of leaders. (Event concluded)',
+        'status' => 'ended',
+        'image' => 'https://images.unsplash.com/photo-1664273891579-22f28332f3c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwbW9kZXJufGVufDF8fHx8MTc3NTUzODYzM3ww&ixlib=rb-4.1.0&q=80&w=1080',
+    ],
+];
+
+$announcements = [
+    [
+        'id' => 1,
+        'title' => 'ðŸ“¢ Call for Papers: Tech Innovations Summit',
+        'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
+        'type' => 'important',
+        'eventId' => 2,
+        'buttonText' => 'Register & Submit Paper'
+    ],
+    [
+        'id' => 2,
+        'title' => 'ðŸ€ Intramurals 2026 Team Registration',
+        'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
+        'type' => 'info',
+        'eventId' => 4,
+        'buttonText' => 'View Intramurals'
+    ],
+    [
+        'id' => 3,
+        'title' => 'ðŸ“ Foundation Day Reminders',
+        'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
+        'type' => 'info',
+        'eventId' => 1,
+        'buttonText' => 'Register Now'
+    ],
+];
+
+$regions = [
+    'NCR (National Capital Region)', 'CAR (Cordillera Administrative Region)', 'Region I (Ilocos Region)', 'Region II (Cagayan Valley)',
+    'Region III (Central Luzon)', 'Region IV-A (CALABARZON)', 'MIMAROPA Region', 'Region V (Bicol Region)', 'Region VI (Western Visayas)',
+    'Region VII (Central Visayas)', 'Region VIII (Eastern Visayas)', 'Region IX (Zamboanga Peninsula)', 'Region X (Northern Mindanao)',
+    'Region XI (Davao Region)', 'Region XII (SOCCSKSARGEN)', 'Region XIII (Caraga)', 'BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)'
+];
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>NU Lipa EMS</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --navy: #173568;
-            --navy-dark: #132f5c;
-            --navy-soft: #2b4a80;
-            --gold: #f1bf65;
-            --light: #f5f6fa;
-            --card: #365286;
-            --border-soft: rgba(255, 255, 255, 0.12);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Poppins", sans-serif;
-            background: var(--navy);
-            color: var(--light);
-        }
-
-        .topbar {
-            height: 52px;
-            background: var(--navy);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .topbar-inner {
-            width: min(1280px, 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--gold);
-            font-weight: 700;
-            letter-spacing: 0.1px;
-        }
-
-        .brand svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pill {
-            border: 0;
-            border-radius: 9px;
-            padding: 8px 14px;
-            font: 600 14px/1 "Poppins", sans-serif;
-            cursor: pointer;
-        }
-
-        .pill-muted {
-            background: #5d789c;
-            color: #f4f8ff;
-        }
-
-        .pill-gold {
-            background: var(--gold);
-            color: #173568;
-        }
-
-        .hero {
-            position: relative;
-            min-height: 380px;
-            background-image:
-                linear-gradient(rgba(18, 44, 87, 0.62), rgba(18, 44, 87, 0.62)),
-                url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=80");
-            background-size: cover;
-            background-position: center;
-            display: grid;
-            place-items: center;
-            text-align: center;
-            padding: 80px 16px;
-        }
-
-        .hero h1 {
-            margin: 0;
-            font-size: 36px;
-            line-height: 1.1;
-            font-weight: 800;
-            color: #ffffff;
-        }
-
-        .hero h1 span {
-            color: var(--gold);
-        }
-
-        .hero p {
-            max-width: 672px;
-            margin: 16px auto 32px;
-            color: #f0dcb8;
-            font-size: 20px;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-
-        .hero-cta {
-            border: 0;
-            border-radius: 999px;
-            background: var(--gold);
-            color: #143463;
-            font: 700 18px/1 "Poppins", sans-serif;
-            padding: 12px 24px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .section {
-            background: var(--navy);
-            padding: 48px 16px;
-        }
-
-        .container {
-            width: min(1280px, 100%);
-            margin: 0 auto;
-        }
-
-        .section-title {
-            margin: 0 0 32px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 30px;
-            line-height: 1.1;
-            font-weight: 700;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border-soft);
-            border-radius: 16px;
-            padding: 24px;
-            min-height: 260px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card h3 {
-            margin: 0 0 10px;
-            font-size: 20px;
-            line-height: 1.2;
-            color: #ffffff;
-        }
-
-        .card h3.highlight {
-            color: var(--gold);
-        }
-
-        .card p {
-            margin: 0;
-            color: #d8e1f5;
-            font-size: 14px;
-            line-height: 1.625;
-            font-weight: 500;
-        }
-
-        .card-btn {
-            margin-top: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            background: transparent;
-            color: #f6f8ff;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font: 700 16px/1 "Poppins", sans-serif;
-            cursor: pointer;
-        }
-
-        .card-btn.gold {
-            border: 0;
-            background: var(--gold);
-            color: #163668;
-        }
-
-        .discover {
-            background: #e8cfad;
-            color: #173568;
-            padding: 72px 16px 64px;
-        }
-
-        .discover-heading {
-            text-align: center;
-            margin-bottom: 22px;
-        }
-
-        .discover-heading h2 {
-            margin: 0;
-            font-size: 42px;
-            font-weight: 700;
-        }
-
-        .discover-heading p {
-            margin: 10px 0 0;
-            font-size: 29px;
-            color: #2f4e80;
-        }
-
-        .discover-filters {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 6px;
-            background: #eef2f6;
-            border: 1px solid #d8dfe8;
-            border-radius: 16px;
-            padding: 6px;
-        }
-
-        .filter-pill {
-            border: 0;
-            border-radius: 12px;
-            padding: 10px 18px;
-            font: 700 14px/1 "Poppins", sans-serif;
-            color: #547792;
-            background: transparent;
-        }
-
-        .filter-pill.active {
-            background: #1a3263;
-            color: #ffffff;
-        }
-
-        .filter-month {
-            border: 1px solid #d8dfe8;
-            border-radius: 14px;
-            background: #ffffff;
-            color: #1a3263;
-            font: 700 14px/1 "Poppins", sans-serif;
-            padding: 12px 20px;
-        }
-
-        .events-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 22px;
-        }
-
-        .event-card {
-            background: #f5f7fb;
-            border: 2px solid #547792;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 4px 4px 0 #547792;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .event-image {
-            height: 175px;
-            object-fit: cover;
-            width: 100%;
-        }
-
-        .event-body {
-            padding: 18px 22px 20px;
-            display: flex;
-            flex-direction: column;
-            min-height: 280px;
-        }
-
-        .event-title {
-            margin: 0 0 8px;
-            color: #1a3263;
-            font-size: 18px;
-            line-height: 1.25;
-            font-weight: 700;
-        }
-
-        .event-meta {
-            margin: 0;
-            color: #547792;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-
-        .event-desc {
-            margin: 12px 0 18px;
-            color: #2e4e80;
-            font-size: 14px;
-            line-height: 1.5;
-            flex-grow: 1;
-        }
-
-        .event-btn {
-            border: 0;
-            border-radius: 10px;
-            background: var(--gold);
-            color: #173568;
-            font: 700 16px/1 "Poppins", sans-serif;
-            padding: 12px 16px;
-        }
-
-        .event-btn.outline {
-            background: #ffffff;
-            color: #1a3263;
-            border: 1px solid #6a89ad;
-        }
-
-        .site-footer {
-            background: #1a3263;
-            color: #f0dcb8;
-            padding: 24px 16px;
-        }
-
-        .site-footer-inner {
-            width: min(1280px, 100%);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .footer-brand {
-            font-size: 31px;
-            font-weight: 700;
-            color: var(--gold);
-        }
-
-        .footer-copy {
-            font-size: 13px;
-            color: #e4d0af;
-        }
-
-        @media (min-width: 640px) {
-            .hero {
-                padding: 84px 24px;
-            }
-
-            .section {
-                padding: 48px 24px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .hero {
-                padding-top: 96px;
-                padding-bottom: 96px;
-            }
-
-            .hero h1 {
-                font-size: 60px;
-            }
-
-            .hero p {
-                font-size: 24px;
-            }
-
-            .cards {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-
-            .events-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .hero {
-                padding-left: 32px;
-                padding-right: 32px;
-            }
-
-            .section {
-                padding-left: 32px;
-                padding-right: 32px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .topbar {
-                height: auto;
-                padding: 10px 14px;
-            }
-
-            .topbar-inner {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .discover-heading h2 {
-                font-size: 32px;
-            }
-
-            .discover-heading p {
-                font-size: 18px;
-            }
-
-            .site-footer-inner {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .footer-brand {
-                font-size: 22px;
-            }
-        }
-    </style>
+        <link rel="stylesheet" href="{{ asset('css/landingpage.css') }}">
 </head>
 <body>
     <header class="topbar">
-        <div class="topbar-inner">
-            <div class="brand">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" stroke-width="2"/>
-                    <path d="M8 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M16 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M3 10H21" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span>NU Lipa EMS</span>
+        <div class="container topbar-inner">
+            <div class="brand" aria-label="NU Lipa EMS">
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                        <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                        <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                        <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                    </svg>
+                </span>
+                <span class="brand-text">NU Lipa EMS</span>
             </div>
-
             <div class="top-actions">
                 <button class="pill pill-muted">Home / Events</button>
-                <button class="pill pill-gold">Admin Login</button>
+                <button class="pill pill-gold admin-btn">
+                    <span class="pill-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
+                            <path d="M9.5 12l2 2 3.5-3.5"></path>
+                        </svg>
+                    </span>
+                    <span>Admin Login</span>
+                </button>
             </div>
         </div>
     </header>
 
     <section class="hero">
-        <div>
+        <div class="container hero-inner">
             <h1>Welcome to <span>NU Lipa Events</span></h1>
-            <p>
-                The unified platform for typical school events and research conferences.
-                Register, participate, and evaluate all in one place.
-            </p>
-            <button class="hero-cta">View Upcoming Events <span aria-hidden="true">&rarr;</span></button>
+            <p>The unified platform for typical school events and research conferences. Register, participate, and evaluate all in one place.</p>
+            <a href="#events" class="cta">
+                <span>View Upcoming Events</span>
+                <span class="cta-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <line x1="4" y1="12" x2="20" y2="12"></line>
+                        <polyline points="13,5 20,12 13,19"></polyline>
+                    </svg>
+                </span>
+            </a>
         </div>
     </section>
 
-    <section class="section">
+    <section class="announce">
         <div class="container">
-            <h2 class="section-title">
-                <span aria-hidden="true">&#128276;</span>
+            <h2 class="announce-title">
+                <span class="announce-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3l2 2H4l2-2v-3a7 7 0 0 1 4-6"></path>
+                        <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
+                    </svg>
+                </span>
                 <span>Latest Announcements</span>
             </h2>
-
-            <div class="cards">
-                <article class="card">
-                    <div>
-                        <h3 class="highlight">&#128227; Call for Papers: Tech Innovations Summit</h3>
-                        <p>
-                            Call for Papers for the Tech Innovations Summit is now open! Register and
-                            submit your PDF manuscripts until May 1, 2026.
-                        </p>
+            <div class="announce-grid">
+                @foreach ($announcements as $a)
+                    <div class="announce-card {{ $a['type'] === 'important' ? 'important' : '' }}">
+                        <div>
+                            <h3 style="color: {{ $a['type'] === 'important' ? '#ffc570' : '#fff' }}">{{ $a['title'] }}</h3>
+                            <p>{{ $a['description'] }}</p>
+                        </div>
+                        <button class="announce-btn {{ str_contains($a['buttonText'], 'Register') ? 'gold' : 'ghost' }} open-register" data-event-id="{{ $a['eventId'] }}">{{ $a['buttonText'] }}</button>
                     </div>
-                    <button class="card-btn gold">Register &amp; Submit Paper</button>
-                </article>
-
-                <article class="card">
-                    <div>
-                        <h3>&#127936; Intramurals 2026 Team Registration</h3>
-                        <p>
-                            Team registrations for Basketball and Volleyball are now ongoing at the
-                            Student Council Office.
-                        </p>
-                    </div>
-                    <button class="card-btn">View Intramurals</button>
-                </article>
-
-                <article class="card">
-                    <div>
-                        <h3>&#128221; Foundation Day Reminders</h3>
-                        <p>
-                            Attendance is mandatory for all freshmen and sophomores. Please register
-                            early to secure your event kit.
-                        </p>
-                    </div>
-                    <button class="card-btn gold">Register Now</button>
-                </article>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <section class="discover">
+    <section id="events" class="events">
         <div class="container">
-            <div class="discover-heading">
+            <div class="events-head">
                 <h2>Discover Events</h2>
                 <p>Browse through school gatherings and major conferences.</p>
             </div>
 
-            <div class="discover-filters">
+            <div class="filters">
                 <div class="filter-group">
-                    <button class="filter-pill active">All</button>
-                    <button class="filter-pill">School</button>
-                    <button class="filter-pill">Conference</button>
+                    <button class="fbtn active" data-category="All">
+                        <span class="filter-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                                <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                                <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                            </svg>
+                        </span>
+                        <span>All</span>
+                    </button>
+                    <button class="fbtn" data-category="School Event">
+                        <span class="filter-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <path d="M3 9l9-4 9 4-9 4-9-4z"></path>
+                                <path d="M6.5 10.6V14c0 2.1 2.6 3.8 5.5 3.8s5.5-1.7 5.5-3.8v-3.4"></path>
+                            </svg>
+                        </span>
+                        <span>School</span>
+                    </button>
+                    <button class="fbtn" data-category="Conference Event">
+                        <span class="filter-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <rect x="4" y="7" width="16" height="12" rx="2"></rect>
+                                <line x1="9" y1="7" x2="9" y2="19"></line>
+                                <path d="M10.8 7V5.8a1.8 1.8 0 0 1 1.8-1.8h.8a1.8 1.8 0 0 1 1.8 1.8V7"></path>
+                            </svg>
+                        </span>
+                        <span>Conference</span>
+                    </button>
                 </div>
-                <button class="filter-month">Filter by Month</button>
+                <button class="fmonth" id="toggleDateFilter">ðŸ—“ Filter by Month</button>
+
+                <div class="date-pop" id="dateFilterPop">
+                    <label for="yearInput">Year</label>
+                    <input id="yearInput" type="number" placeholder="e.g. 2026">
+                    <label>Month</label>
+                    <div class="month-grid" id="monthBtns">
+                        <button class="mbtn month-all active" data-month="All">All Months</button>
+                        @foreach($months as $m)
+                            <button class="mbtn" data-month="{{ $m['value'] }}">{{ $m['label'] }}</button>
+                        @endforeach
+                    </div>
+                    <div class="dp-actions">
+                        <button class="clear" id="clearDateFilter">Clear</button>
+                        <button class="apply" id="applyDateFilter">Apply</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="events-grid">
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1765474604988-4fc3fa14f46b?auto=format&fit=crop&w=1080&q=80" alt="Foundation Day">
-                    <div class="event-body">
-                        <h3 class="event-title">NU Lipa Foundation Day 2026</h3>
-                        <p class="event-meta">April 20, 2026<br>Main Campus Grounds</p>
-                        <p class="event-desc">Join us as we celebrate another year of excellence and commitment to nation-building with booths, games, and performances.</p>
-                        <button class="event-btn">Register Now</button>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1582192904915-d89c7250b235?auto=format&fit=crop&w=1080&q=80" alt="Tech Summit">
-                    <div class="event-body">
-                        <h3 class="event-title">Tech Innovations Summit</h3>
-                        <p class="event-meta">May 15, 2026<br>Auditorium Hall B</p>
-                        <p class="event-desc">A national conference gathering students and professionals to discuss the latest trends in software and AI. Call for papers is open.</p>
-                        <button class="event-btn">Register Now</button>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1721339040530-be9c4eff0360?auto=format&fit=crop&w=1080&q=80" alt="Intramurals">
-                    <div class="event-body">
-                        <h3 class="event-title">University Intramurals 2026</h3>
-                        <p class="event-meta">June 5-8, 2026<br>University Gymnasium &amp; Field</p>
-                        <p class="event-desc">Show your college pride! The annual University Intramurals is back with exciting basketball, volleyball, e-sports, and cheering competitions.</p>
-                        <button class="event-btn">Register Now</button>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1709086566111-dfa0699a6842?auto=format&fit=crop&w=1080&q=80" alt="Sining at Kultura">
-                    <div class="event-body">
-                        <h3 class="event-title">Sining at Kultura Festival</h3>
-                        <p class="event-meta">August 12, 2026<br>Open Amphitheater</p>
-                        <p class="event-desc">A celebration of Filipino heritage through traditional dances, spoken word poetry, and visual arts exhibitions.</p>
-                        <button class="event-btn">Register Now</button>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1773828755374-0ee802d9f44b?auto=format&fit=crop&w=1080&q=80" alt="Medical Symposium">
-                    <div class="event-body">
-                        <h3 class="event-title">Medical &amp; Allied Health Research Symposium</h3>
-                        <p class="event-meta">September 22, 2026<br>College of Allied Health Sciences Bldg</p>
-                        <p class="event-desc">Presenting breakthrough researches in Nursing, Pharmacy, and Medical Technology. Open for professional and student researchers nationwide.</p>
-                        <button class="event-btn">Register Now</button>
-                    </div>
-                </article>
-
-                <article class="event-card">
-                    <img class="event-image" src="https://images.unsplash.com/photo-1664273891579-22f28332f3c4?auto=format&fit=crop&w=1080&q=80" alt="Leadership Seminar">
-                    <div class="event-body">
-                        <h3 class="event-title">Leadership Seminar Series</h3>
-                        <p class="event-meta">March 10, 2026<br>Student Lounge</p>
-                        <p class="event-desc">Empowering the next generation of leaders. (Event concluded)</p>
-                        <button class="event-btn outline">Evaluate Event</button>
-                    </div>
-                </article>
+            <div class="events-grid" id="eventsGrid">
+                @foreach ($events as $event)
+                    @php
+                        preg_match('/([a-zA-Z]+).*\s(\d{4})/', $event['date'], $match);
+                        $monthIndex = isset($match[1]) ? date('n', strtotime($match[1] . ' 1, 2000')) - 1 : -1;
+                        $year = $match[2] ?? '';
+                    @endphp
+                    <article class="event-card" data-id="{{ $event['id'] }}" data-type="{{ $event['type'] }}" data-month="{{ $monthIndex }}" data-year="{{ $year }}">
+                        <div class="event-media">
+                            <img src="{{ $event['image'] }}" alt="{{ $event['title'] }}">
+                            <span class="badge {{ $event['type'] === 'Conference Event' ? 'conference' : '' }}">{{ $event['type'] }}</span>
+                        </div>
+                        <div class="event-body">
+                            <h3 class="event-title">{{ $event['title'] }}</h3>
+                            <p class="meta">
+                                <span class="meta-row">
+                                    <span class="meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                                            <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                                            <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                                            <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                                        </svg>
+                                    </span>
+                                    <span>{{ $event['date'] }}</span>
+                                </span>
+                                <span class="meta-row">
+                                    <span class="meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <path d="M12 21s-6-5.1-6-10a6 6 0 1 1 12 0c0 4.9-6 10-6 10Z"></path>
+                                            <circle cx="12" cy="11" r="2.2"></circle>
+                                        </svg>
+                                    </span>
+                                    <span>{{ $event['location'] }}</span>
+                                </span>
+                            </p>
+                            <p class="desc">{{ $event['description'] }}</p>
+                            <div class="event-actions">
+                                @if ($event['status'] === 'active')
+                                    <button class="event-btn open-register" data-event-id="{{ $event['id'] }}">Register Now</button>
+                                @else
+                                    <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">â˜† Evaluate Event</button>
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <footer class="site-footer">
-        <div class="site-footer-inner">
-            <div class="footer-brand">NU Lipa Event Management System</div>
-            <div class="footer-copy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="fbrand">ðŸ“… NU Lipa Event Management System</div>
+            <div class="fcopy">Â© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
         </div>
     </footer>
+
+    <div class="modal" id="eventModal">
+        <div class="modal-card" id="modalCard">
+            <button class="close-modal" id="closeModal">Ã—</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const EVENTS = @json($events);
+        const REGIONS = @json($regions);
+
+        let filterCategory = 'All';
+        let filterMonth = 'All';
+        let filterYear = '';
+
+        const dateFilterPop = document.getElementById('dateFilterPop');
+        document.getElementById('toggleDateFilter').addEventListener('click', () => {
+            dateFilterPop.classList.toggle('open');
+        });
+
+        document.querySelectorAll('.fbtn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterCategory = btn.dataset.category;
+                applyFilters();
+            });
+        });
+
+        document.querySelectorAll('.mbtn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterMonth = btn.dataset.month;
+            });
+        });
+
+        document.getElementById('clearDateFilter').addEventListener('click', () => {
+            filterMonth = 'All';
+            filterYear = '';
+            document.getElementById('yearInput').value = '';
+            document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.month-all').classList.add('active');
+            applyFilters();
+            dateFilterPop.classList.remove('open');
+        });
+
+        document.getElementById('applyDateFilter').addEventListener('click', () => {
+            filterYear = document.getElementById('yearInput').value.trim();
+            applyFilters();
+            dateFilterPop.classList.remove('open');
+        });
+
+        function applyFilters() {
+            document.querySelectorAll('.event-card').forEach(card => {
+                const matchesCategory = filterCategory === 'All' || card.dataset.type === filterCategory;
+                const matchesMonth = filterMonth === 'All' || card.dataset.month === String(filterMonth);
+                const matchesYear = !filterYear || card.dataset.year === filterYear;
+                card.style.display = (matchesCategory && matchesMonth && matchesYear) ? '' : 'none';
+            });
+        }
+
+        const eventModal = document.getElementById('eventModal');
+        const modalContent = document.getElementById('modalContent');
+        let selectedEvent = null;
+        let otpTimer = null;
+        let countdown = 59;
+
+        function closeModal() {
+            eventModal.classList.remove('open');
+            modalContent.innerHTML = '';
+            selectedEvent = null;
+            if (otpTimer) clearInterval(otpTimer);
+        }
+
+        function makeOtpInputs() {
+            return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => `<input maxlength="1" data-otp="${i}" required>`).join('')}</div>`;
+        }
+
+        function renderFormStep() {
+            const showUpload = selectedEvent.type === 'Conference Event';
+            modalContent.innerHTML = `
+                <div class="event-head">
+                    <img src="${selectedEvent.image}" alt="${selectedEvent.title}">
+                    <div class="event-overlay">
+                        <div>
+                            <span class="badge ${selectedEvent.type === 'Conference Event' ? 'conference' : ''}">${selectedEvent.type}</span>
+                            <h2>${selectedEvent.title}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="chips">
+                        <div>ðŸ“… ${selectedEvent.date}</div>
+                        <div>ðŸ“ ${selectedEvent.location}</div>
+                    </div>
+                    <div class="desc-block">${selectedEvent.description}</div>
+                    <div class="step-tag">STEP 1 OF 2: REGISTRATION</div>
+                    <h3 style="color:#1a3263; margin: 16px 0; font-size: 28px;">Registration Form</h3>
+                    <form id="registrationForm">
+                        <div class="grid-2">
+                            <div class="field"><label>First Name *</label><input name="firstName" required></div>
+                            <div class="field"><label>Last Name *</label><input name="lastName" required></div>
+                            <div class="field"><label>Email Address *</label><input type="email" name="email" required></div>
+                            <div class="field"><label>Region in the Philippines *</label><select name="region" required><option value="">Select Region</option>${REGIONS.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
+                            <div class="field"><label>School From *</label><input name="schoolFrom" required></div>
+                            <div class="field"><label>School Level *</label><select name="schoolLevel" required><option value="">Select Level</option><option>Senior High School</option><option>Undergraduate</option><option>Graduate</option><option>Professional</option></select></div>
+                        </div>
+                        <div class="upload-wrap" style="display:${showUpload ? 'block' : 'none'}">
+                            <label style="display:block; font-weight:700; color:#1a3263; margin-bottom:8px;">Upload 5-page Research Paper (PDF only)</label>
+                            <div class="upload-box">
+                                <input type="file" accept=".pdf" ${showUpload ? 'required' : ''}>
+                            </div>
+                        </div>
+                        <button class="submit" type="submit">Continue Registration</button>
+                    </form>
+                </div>
+            `;
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                renderOtpStep();
+            });
+        }
+
+        function renderOtpStep() {
+            countdown = 59;
+            modalContent.innerHTML = `
+                <div class="modal-body" style="padding:48px; text-align:center;">
+                    <div class="step-tag">STEP 2 OF 2: VERIFICATION</div>
+                    <h3 style="font-size:34px; color:#1a3263; margin:20px 0 8px;">Verify Your Email</h3>
+                    <p style="color:#6b7280; max-width:520px; margin:0 auto 12px;">We've sent a 6-digit alphanumeric code to your email. Please enter it below to verify your identity.</p>
+                    <form id="otpForm">
+                        ${makeOtpInputs()}
+                        <button class="submit" type="submit">Verify & Submit</button>
+                    </form>
+                    <div style="margin-top:14px; color:#6b7280;" id="countdown">0:59</div>
+                </div>
+            `;
+
+            const otpInputs = Array.from(document.querySelectorAll('[data-otp]'));
+            otpInputs.forEach((input, idx) => {
+                input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.slice(-1).toUpperCase();
+                    if (e.target.value && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && idx > 0) otpInputs[idx - 1].focus();
+                });
+            });
+
+            if (otpTimer) clearInterval(otpTimer);
+            otpTimer = setInterval(() => {
+                countdown -= 1;
+                document.getElementById('countdown').textContent = `0:${String(Math.max(countdown, 0)).padStart(2, '0')}`;
+                if (countdown <= 0) clearInterval(otpTimer);
+            }, 1000);
+
+            document.getElementById('otpForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                renderSuccessStep();
+            });
+        }
+
+        function renderSuccessStep() {
+            const isConference = selectedEvent.type === 'Conference Event';
+            const code = 'NUL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            modalContent.innerHTML = `
+                <div class="modal-body" style="padding:48px; text-align:center;">
+                    <h3 style="font-size:36px; color:#1a3263; margin:8px 0;">${isConference ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
+                    <p style="color:#6b7280; max-width:620px; margin:10px auto 28px;">
+                        ${isConference
+                            ? 'Your registration and research paper are now pending review. Once approved by the admin, you will receive an email containing your Digital ID.'
+                            : 'Your Digital ID has been successfully sent to your email.'}
+                    </p>
+                    <div style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:16px; max-width:420px; margin:0 auto 24px; text-align:left;">
+                        <div style="font-size:12px; color:#6b7280; text-transform:uppercase;">Attendee ID</div>
+                        <div style="font-size:22px; color:#1a3263; font-weight:800; letter-spacing:1px;">${code}</div>
+                    </div>
+                    <button class="submit" id="doneBtn" style="max-width:300px;">Done</button>
+                </div>
+            `;
+            document.getElementById('doneBtn').addEventListener('click', closeModal);
+        }
+
+        function openRegister(eventId) {
+            selectedEvent = EVENTS.find(e => e.id === Number(eventId));
+            if (!selectedEvent) return;
+            eventModal.classList.add('open');
+            renderFormStep();
+        }
+
+        function openEvaluate(eventId) {
+            selectedEvent = EVENTS.find(e => e.id === Number(eventId));
+            if (!selectedEvent) return;
+            eventModal.classList.add('open');
+            modalContent.innerHTML = `
+                <div class="modal-body" style="padding:48px; text-align:center;">
+                    <h3 style="font-size:34px; color:#1a3263; margin:12px 0;">Evaluate Event</h3>
+                    <p style="color:#6b7280;">Evaluation form for <strong>${selectedEvent.title}</strong> can be integrated here.</p>
+                    <button class="submit" id="doneBtn" style="max-width:260px; margin-top:18px;">Done</button>
+                </div>
+            `;
+            document.getElementById('doneBtn').addEventListener('click', closeModal);
+        }
+
+        document.querySelectorAll('.open-register').forEach(btn => {
+            btn.addEventListener('click', () => openRegister(btn.dataset.eventId));
+        });
+        document.querySelectorAll('.open-evaluate').forEach(btn => {
+            btn.addEventListener('click', () => openEvaluate(btn.dataset.eventId));
+        });
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        eventModal.addEventListener('click', (e) => {
+            if (e.target === eventModal) closeModal();
+        });
+    </script>
 </body>
 </html>
+
