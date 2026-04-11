@@ -72,7 +72,7 @@ $events = [
 $announcements = [
     [
         'id' => 1,
-        'title' => 'ðŸ“¢ Call for Papers: Tech Innovations Summit',
+        'title' => 'Call for Papers: Tech Innovations Summit',
         'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
         'type' => 'important',
         'eventId' => 2,
@@ -80,7 +80,7 @@ $announcements = [
     ],
     [
         'id' => 2,
-        'title' => 'ðŸ€ Intramurals 2026 Team Registration',
+        'title' => 'Intramurals 2026 Team Registration',
         'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
         'type' => 'info',
         'eventId' => 4,
@@ -88,7 +88,7 @@ $announcements = [
     ],
     [
         'id' => 3,
-        'title' => 'ðŸ“ Foundation Day Reminders',
+        'title' => 'Foundation Day Reminders',
         'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
         'type' => 'info',
         'eventId' => 1,
@@ -271,10 +271,10 @@ $regions = [
                                 <span class="meta-row">
                                     <span class="meta-icon" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                            <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                                            <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                                            <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                                            <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                                            <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
+                                            <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
+                                            <line x1="8" y1="3.8" x2="8" y2="7"></line>
+                                            <line x1="16" y1="3.8" x2="16" y2="7"></line>
                                         </svg>
                                     </span>
                                     <span>{{ $event['date'] }}</span>
@@ -282,8 +282,8 @@ $regions = [
                                 <span class="meta-row">
                                     <span class="meta-icon" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                            <path d="M12 21s-6-5.1-6-10a6 6 0 1 1 12 0c0 4.9-6 10-6 10Z"></path>
-                                            <circle cx="12" cy="11" r="2.2"></circle>
+                                            <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
+                                            <circle cx="12" cy="11" r="1.9"></circle>
                                         </svg>
                                     </span>
                                     <span>{{ $event['location'] }}</span>
@@ -328,9 +328,11 @@ $regions = [
         </div>
     </footer>
 
+    <div class="page-blur" id="pageBlur" aria-hidden="true"></div>
+
     <div class="modal" id="eventModal">
         <div class="modal-card" id="modalCard">
-            <button class="close-modal" id="closeModal">Ã—</button>
+            <button class="close-modal" id="closeModal">×</button>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -392,12 +394,15 @@ $regions = [
 
         const eventModal = document.getElementById('eventModal');
         const modalContent = document.getElementById('modalContent');
+        const pageBlur = document.getElementById('pageBlur');
         let selectedEvent = null;
         let otpTimer = null;
         let countdown = 59;
 
         function closeModal() {
             eventModal.classList.remove('open');
+            document.body.classList.remove('modal-open');
+            pageBlur.classList.remove('open');
             modalContent.innerHTML = '';
             selectedEvent = null;
             if (otpTimer) clearInterval(otpTimer);
@@ -421,8 +426,26 @@ $regions = [
                 </div>
                 <div class="modal-body">
                     <div class="chips">
-                        <div>ðŸ“… ${selectedEvent.date}</div>
-                        <div>ðŸ“ ${selectedEvent.location}</div>
+                        <div class="chip-item">
+                            <span class="chip-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
+                                    <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
+                                    <line x1="8" y1="3.8" x2="8" y2="7"></line>
+                                    <line x1="16" y1="3.8" x2="16" y2="7"></line>
+                                </svg>
+                            </span>
+                            <span>${selectedEvent.date}</span>
+                        </div>
+                        <div class="chip-item">
+                            <span class="chip-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
+                                    <circle cx="12" cy="11" r="1.9"></circle>
+                                </svg>
+                            </span>
+                            <span>${selectedEvent.location}</span>
+                        </div>
                     </div>
                     <div class="desc-block">${selectedEvent.description}</div>
                     <div class="step-tag">STEP 1 OF 2: REGISTRATION</div>
@@ -516,6 +539,8 @@ $regions = [
             selectedEvent = EVENTS.find(e => e.id === Number(eventId));
             if (!selectedEvent) return;
             eventModal.classList.add('open');
+            document.body.classList.add('modal-open');
+            pageBlur.classList.add('open');
             renderFormStep();
         }
 
@@ -523,6 +548,8 @@ $regions = [
             selectedEvent = EVENTS.find(e => e.id === Number(eventId));
             if (!selectedEvent) return;
             eventModal.classList.add('open');
+            document.body.classList.add('modal-open');
+            pageBlur.classList.add('open');
             modalContent.innerHTML = `
                 <div class="modal-body" style="padding:48px; text-align:center;">
                     <h3 style="font-size:34px; color:#1a3263; margin:12px 0;">Evaluate Event</h3>
