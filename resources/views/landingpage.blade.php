@@ -610,6 +610,12 @@ $regions = [
                                 <label>Attendee ID</label>
                                 <span class="pass-code">${code}</span>
                             </div>
+                            <span class="pass-shield" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
+                                    <path d="M9.5 12l2 2 3.5-3.5"></path>
+                                </svg>
+                            </span>
                         </div>
 
                         <div class="qr-card">
@@ -617,17 +623,23 @@ $regions = [
                             <div class="qr-body">
                                 <div class="qr-box" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                        <rect x="4" y="4" width="7" height="7" rx="1.2"></rect>
-                                        <rect x="13" y="4" width="3" height="3" rx=".8"></rect>
-                                        <rect x="18" y="4" width="2" height="2" rx=".5"></rect>
-                                        <rect x="4" y="13" width="4" height="4" rx="1"></rect>
-                                        <rect x="11" y="11" width="3" height="3" rx=".7"></rect>
-                                        <path d="M16 12h2"></path>
-                                        <path d="M18 12v2"></path>
-                                        <path d="M15 17h3"></path>
-                                        <path d="M15 20v-3"></path>
-                                        <path d="M20 18h-2"></path>
-                                        <path d="M20 20v-2"></path>
+                                        <rect x="2.5" y="2.5" width="8" height="8" rx="1.6"></rect>
+                                        <rect x="4.5" y="4.5" width="4" height="4" rx="1"></rect>
+
+                                        <rect x="14.5" y="2.5" width="4" height="4" rx="1"></rect>
+                                        <rect x="20" y="2.5" width="1.5" height="1.5" rx=".4"></rect>
+
+                                        <rect x="2.5" y="14.5" width="4" height="4" rx="1"></rect>
+                                        <rect x="8.5" y="12.5" width="3.5" height="3.5" rx=".9"></rect>
+                                        <rect x="13.5" y="10.5" width="2.5" height="2.5" rx=".7"></rect>
+                                        <rect x="17" y="12" width="2" height="2" rx=".6"></rect>
+                                        <rect x="19.5" y="15.5" width="2.5" height="2.5" rx=".7"></rect>
+                                        <rect x="14" y="18.5" width="3" height="3" rx=".8"></rect>
+                                        <rect x="18.5" y="19" width="1.5" height="1.5" rx=".4"></rect>
+
+                                        <rect x="9" y="19" width="2" height="2" rx=".5"></rect>
+                                        <rect x="12.2" y="19" width="1.4" height="1.4" rx=".35"></rect>
+                                        <rect x="20" y="9" width="2" height="2" rx=".5"></rect>
                                     </svg>
                                 </div>
                                 <p class="qr-note">This QR code is strictly non-transferable and must be presented during event check-in.</p>
