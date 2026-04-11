@@ -261,6 +261,32 @@
         .modal-card { background: #fff; width: min(800px, calc(100% - 24px)); max-height: 84vh; overflow: hidden; border-radius: 26px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.35); display: flex; flex-direction: column; }
         #modalContent { flex: 1; overflow-y: auto; }
         .close-modal { position: absolute; top: 12px; right: 12px; border: 0; width: 40px; height: 40px; border-radius: 50%; color: #fff; background: rgba(0,0,0,.45); font-size: 22px; line-height: 1; z-index: 5; cursor: pointer; }
+        .modal-card.eval-mode { width: min(560px, calc(100% - 24px)); max-height: none; border-radius: 22px; }
+        .modal-card.eval-mode .close-modal { top: 20px; right: 20px; width: 20px; height: 20px; border: 1px solid #b7c1ce; background: #f3f4f6; color: #8d97a7; font-size: 16px; }
+        .eval-modal { background: #f9fafb; }
+        .eval-head { padding: 20px 22px; border-top: 5px solid var(--gold); border-bottom: 1px solid #e5e7eb; }
+        .eval-head h3 { margin: 0; display: flex; align-items: center; gap: 10px; color: var(--navy); font-size: 27px; font-weight: 700; }
+        .eval-head-icon { width: 20px; height: 20px; color: var(--gold); display: inline-flex; }
+        .eval-head-icon svg { width: 100%; height: 100%; fill: currentColor; stroke: currentColor; }
+        .eval-body { padding: 22px; text-align: center; }
+        .eval-copy { margin: 14px 0 18px; color: #4b5563; font-size: 13px; line-height: 1.5; }
+        .eval-stars { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .rating-star { border: 0; background: transparent; width: 44px; height: 44px; color: #c7ced8; cursor: pointer; padding: 0; transition: transform .15s ease, color .2s ease; }
+        .rating-star:hover { transform: scale(1.1); }
+        .rating-star svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; }
+        .rating-star.active { color: var(--gold); }
+        .eval-label { display: block; text-align: left; color: var(--navy); font-size: 13px; font-weight: 700; letter-spacing: .4px; margin-bottom: 10px; }
+        .eval-text { width: 100%; min-height: 126px; resize: vertical; border: 1px solid #d7dce3; border-radius: 12px; padding: 14px; font: 500 16px/1.4 "Poppins", sans-serif; color: #374151; background: #fff; }
+        .eval-submit { width: 100%; margin-top: 20px; border: 2px solid var(--navy); border-radius: 12px; padding: 15px; font: 700 18px/1 "Poppins", sans-serif; color: #fff; background: var(--navy); box-shadow: 4px 4px 0 #547792; transition: background .2s ease, opacity .2s ease, box-shadow .2s ease; }
+        .eval-submit:hover:not(:disabled) { background: #0f1d3a; }
+        .eval-submit:disabled { opacity: .5; box-shadow: none; cursor: not-allowed; }
+        .eval-success { text-align: center; padding-top: 28px; padding-bottom: 28px; }
+        .eval-success-icon { width: 74px; height: 74px; margin: 0 auto 14px; color: #22c55e; display: inline-flex; }
+        .eval-success-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .eval-success h4 { margin: 0 0 8px; color: var(--navy); font-size: 32px; font-weight: 700; }
+        .eval-success p { margin: 0 auto 20px; color: #6b7280; max-width: 280px; }
+        .eval-close-cta { border: 0; border-radius: 12px; background: var(--navy); color: #fff; padding: 12px 28px; font: 700 16px/1 "Poppins", sans-serif; cursor: pointer; }
+        .eval-close-cta:hover { background: #0f1d3a; }
         .step-tag { background: var(--navy); color: #fff; border-radius: 8px; text-align: center; padding: 8px 10px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
         .event-head { height: 300px; position: relative; }
         .event-head img { width: 100%; height: 100%; object-fit: cover; }

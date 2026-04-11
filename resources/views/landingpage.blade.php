@@ -394,6 +394,7 @@ $regions = [
 
         const eventModal = document.getElementById('eventModal');
         const modalContent = document.getElementById('modalContent');
+        const modalCard = document.getElementById('modalCard');
         const pageBlur = document.getElementById('pageBlur');
         let selectedEvent = null;
         let otpTimer = null;
@@ -401,6 +402,7 @@ $regions = [
 
         function closeModal() {
             eventModal.classList.remove('open');
+            modalCard.classList.remove('eval-mode');
             document.body.classList.remove('modal-open');
             pageBlur.classList.remove('open');
             modalContent.innerHTML = '';
@@ -549,6 +551,7 @@ $regions = [
         function openRegister(eventId) {
             selectedEvent = EVENTS.find(e => e.id === Number(eventId));
             if (!selectedEvent) return;
+            modalCard.classList.remove('eval-mode');
             eventModal.classList.add('open');
             document.body.classList.add('modal-open');
             pageBlur.classList.add('open');
@@ -558,17 +561,110 @@ $regions = [
         function openEvaluate(eventId) {
             selectedEvent = EVENTS.find(e => e.id === Number(eventId));
             if (!selectedEvent) return;
+            modalCard.classList.add('eval-mode');
             eventModal.classList.add('open');
             document.body.classList.add('modal-open');
             pageBlur.classList.add('open');
-            modalContent.innerHTML = `
-                <div class="modal-body" style="padding:48px; text-align:center;">
-                    <h3 style="font-size:34px; color:#1a3263; margin:12px 0;">Evaluate Event</h3>
-                    <p style="color:#6b7280;">Evaluation form for <strong>${selectedEvent.title}</strong> can be integrated here.</p>
-                    <button class="submit" id="doneBtn" style="max-width:260px; margin-top:18px;">Done</button>
-                </div>
-            `;
-            document.getElementById('doneBtn').addEventListener('click', closeModal);
+            let rating = 0;
+            let hoveredRating = 0;
+            let evalSubmitted = false;
+
+            function renderEvaluateState() {
+                if (evalSubmitted) {
+                    modalContent.innerHTML = `
+                        <div class="eval-modal">
+                            <div class="eval-head">
+                                <h3>
+                                    <span class="eval-head-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                                        </svg>
+                                    </span>
+                                    Evaluate Event
+                                </h3>
+                            </div>
+                            <div class="eval-body eval-success">
+                                <span class="eval-success-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                        <circle cx="12" cy="12" r="9"></circle>
+                                        <path d="M8.5 12.3 10.8 14.6 15.8 9.6"></path>
+                                    </svg>
+                                </span>
+                                <h4>Thank You!</h4>
+                                <p>Your feedback helps us improve future events.</p>
+                                <button type="button" class="eval-close-cta" id="doneBtn">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('doneBtn').addEventListener('click', closeModal);
+                    return;
+                }
+
+                modalContent.innerHTML = `
+                    <div class="eval-modal">
+                        <div class="eval-head">
+                            <h3>
+                                <span class="eval-head-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                        <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                                    </svg>
+                                </span>
+                                Evaluate Event
+                            </h3>
+                        </div>
+                        <div class="eval-body">
+                            <p class="eval-copy">Please rate your experience at ${selectedEvent.title}.</p>
+                            <div class="eval-stars" role="radiogroup" aria-label="Rate event">
+                                ${Array.from({ length: 5 }, (_, i) => `
+                                    <button type="button" class="rating-star" data-rate="${i + 1}" aria-label="${i + 1} star">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                                        </svg>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <label class="eval-label">ADDITIONAL COMMENTS (OPTIONAL)</label>
+                            <textarea class="eval-text" rows="4" placeholder="What did you like? What can we improve?"></textarea>
+                            <button type="button" class="eval-submit" id="evalSubmitBtn" ${rating === 0 ? 'disabled' : ''}>Submit Evaluation</button>
+                        </div>
+                    </div>
+                `;
+
+                const stars = Array.from(document.querySelectorAll('.rating-star'));
+                const submitBtn = document.getElementById('evalSubmitBtn');
+
+                function paintStars(activeValue) {
+                    stars.forEach((star, idx) => {
+                        star.classList.toggle('active', idx < activeValue);
+                    });
+                }
+
+                paintStars(hoveredRating || rating);
+
+                stars.forEach((star, idx) => {
+                    star.addEventListener('mouseenter', () => {
+                        hoveredRating = idx + 1;
+                        paintStars(hoveredRating);
+                    });
+                    star.addEventListener('mouseleave', () => {
+                        hoveredRating = 0;
+                        paintStars(rating);
+                    });
+                    star.addEventListener('click', () => {
+                        rating = idx + 1;
+                        paintStars(rating);
+                        submitBtn.disabled = rating === 0;
+                    });
+                });
+
+                submitBtn.addEventListener('click', () => {
+                    if (rating === 0) return;
+                    evalSubmitted = true;
+                    renderEvaluateState();
+                });
+            }
+
+            renderEvaluateState();
         }
 
         document.querySelectorAll('.open-register').forEach(btn => {
