@@ -296,7 +296,17 @@ $regions = [
 
     <footer class="footer">
         <div class="container footer-inner">
-            <div class="fbrand">ðŸ“… NU Lipa Event Management System</div>
+            <div class="fbrand" aria-label="NU Lipa Event Management System">
+                <span class="fbrand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                        <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                        <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                        <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                    </svg>
+                </span>
+                <span class="fbrand-text">NU Lipa Event Management System</span>
+            </div>
             <div class="fcopy">Â© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
         </div>
     </footer>
