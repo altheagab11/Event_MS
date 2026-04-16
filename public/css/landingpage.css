@@ -459,6 +459,57 @@
         .eval-success p { margin: 0 auto 20px; color: #6b7280; max-width: 280px; }
         .eval-close-cta { border: 0; border-radius: 12px; background: var(--navy); color: #fff; padding: 12px 28px; font: 700 16px/1 "Poppins", sans-serif; cursor: pointer; }
         .eval-close-cta:hover { background: #0f1d3a; }
+        .modal-card.success-mode { width: min(860px, calc(100% - 24px)); max-height: none; border-radius: 20px; }
+        .registration-success { padding: 30px 26px 28px; text-align: center; background: #fff; }
+        .success-icon { width: 56px; height: 56px; margin: 0 auto 10px; color: #5e7f9d; display: inline-flex; }
+        .success-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+        .registration-success h3 { margin: 0 0 10px; color: var(--navy); font-size: 30px; font-weight: 700; }
+        .registration-success .success-copy { margin: 0 auto 22px; max-width: 520px; color: #6b7280; font-size: 12px; line-height: 1.45; }
+        .success-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: stretch; margin-bottom: 20px; }
+        @media (min-width: 768px) { .success-grid { grid-template-columns: 1fr 1fr; gap: 14px; } }
+        .pass-card, .qr-card { border-radius: 16px; overflow: hidden; box-shadow: 4px 4px 0 #547792; border: 2px solid var(--navy-soft); min-height: 225px; }
+        .pass-card { background: #1f3c76; color: #fff; padding: 14px; text-align: left; position: relative; }
+        .pass-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+        .pass-kicker { font-size: 11px; letter-spacing: 1.2px; color: rgba(255,255,255,.65); text-transform: uppercase; }
+        .pass-tag { border-radius: 999px; background: rgba(255,255,255,.16); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 8px; white-space: nowrap; }
+        .pass-event { font-size: 11px; color: rgba(255,255,255,.68); margin-bottom: 10px; }
+        .pass-name { font-size: 26px; font-weight: 800; line-height: 1.05; letter-spacing: .2px; margin-bottom: 8px; text-transform: uppercase; }
+        .pass-meta { display: grid; gap: 4px; color: rgba(255,255,255,.78); font-size: 11px; }
+        .pass-meta-row { display: inline-flex; align-items: center; gap: 6px; }
+        .pass-meta-icon { width: 12px; height: 12px; display: inline-flex; color: rgba(255,255,255,.55); }
+        .pass-meta-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .pass-divider { height: 1px; background: rgba(255,255,255,.14); margin: 10px 0; }
+        .pass-footer { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+        .pass-footer label { font-size: 10px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .8px; }
+        .pass-code { display: inline-flex; align-items: center; background: #13264d; color: #ffc35f; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; }
+        .pass-shield {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 22px;
+            height: 22px;
+            color: rgba(255,255,255,.18);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .pass-shield svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .qr-card { background: #f0d4aa; color: #1a3263; }
+        .qr-top { background: #ffc570; border-bottom: 2px solid var(--navy-soft); color: var(--navy); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; padding: 8px 10px; text-transform: uppercase; }
+        .qr-body { padding: 18px 18px 16px; text-align: center; }
+        .qr-box { width: 138px; height: 138px; margin: 0 auto 12px; border-radius: 12px; border: 4px solid var(--navy); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.08); }
+        .qr-box svg { width: 110px; height: 110px; fill: currentColor; color: var(--navy); }
+        .qr-note { margin: 0; font-size: 10px; font-weight: 700; line-height: 1.35; color: var(--navy); }
+        .success-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+        .success-action-btn { border: 2px solid var(--navy); border-radius: 12px; background: var(--gold); color: var(--navy); padding: 12px 18px; font: 700 15px/1 "Poppins", sans-serif; display: inline-flex; align-items: center; gap: 8px; box-shadow: 4px 4px 0 #547792; }
+        .success-action-btn:hover { background: #ffd080; }
+        .success-action-secondary { background: #fff; }
+        .success-action-secondary:hover { background: #f8fafc; }
+        .success-action-icon { width: 16px; height: 16px; display: inline-flex; color: var(--navy); }
+        .success-action-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .success-done { display: block; margin: 0 auto; border: 2px solid var(--navy); border-radius: 12px; background: var(--gold); color: var(--navy); padding: 12px 30px; font: 700 18px/1 "Poppins", sans-serif; box-shadow: 4px 4px 0 #547792; }
+        .success-done:hover { background: #ffd080; }
         .step-tag { background: var(--navy); color: #fff; border-radius: 8px; text-align: center; padding: 8px 10px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
         .event-head { height: 300px; position: relative; }
         .event-head img { width: 100%; height: 100%; object-fit: cover; }
