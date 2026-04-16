@@ -136,8 +136,8 @@
         .page-title {
             margin: 0;
             color: var(--ink);
-            font-size: 24px;
-            line-height: 1.05;
+            font-size: 42px;
+            line-height: 1.04;
             font-weight: 800;
         }
 
@@ -366,6 +366,136 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Modal styles for Create New Event */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 18, 34, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            z-index: 1200;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            /* Keep header/footer visible; allow the body to scroll when needed */
+            display: flex;
+            flex-direction: column;
+            width: 920px;
+            max-width: calc(100% - 56px);
+            max-height: calc(100vh - 80px);
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden; /* clip header/footer, body will scroll */
+            box-shadow: 0 10px 40px rgba(10,20,40,0.3);
+        }
+
+        .modal-header {
+            background: var(--blue-900);
+            color: var(--gold);
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: .3px;
+        }
+
+        .modal-header p {
+            margin: 6px 0 0;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 500;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            border: 2px solid rgba(255,255,255,0.12);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 20px 22px 28px;
+            display: block;
+            gap: 18px;
+            overflow-y: auto;
+            /* allow the body to take remaining space inside the modal and scroll */
+            flex: 1 1 auto;
+        }
+
+        .card-panel {
+            background: #fff;
+            border: 2px solid #eef2f6;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .card-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+            color: var(--blue-900);
+            font-weight: 800;
+        }
+
+        .row { display: flex; gap: 12px; }
+        .col { flex: 1; }
+
+        .input, textarea, .select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #e6edf6;
+            font-family: inherit;
+            font-size: 14px;
+            color: #12345a;
+            background: #fbfdff;
+        }
+
+        textarea { min-height: 100px; resize: vertical; }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 22px 26px;
+            align-items: center;
+        }
+
+        .btn-cancel {
+            border: 2px solid #edf2f6;
+            background: #fff;
+            color: #233b6a;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+        }
+
+        .btn-publish {
+            border: 0;
+            border-radius: 14px;
+            background: var(--gold);
+            color: #15386f;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(17, 42, 84, .12);
+        }
     </style>
 </head>
 <body>
@@ -510,5 +640,103 @@
             </section>
         </main>
     </div>
-</body>
+
+        <!-- Create Event Modal -->
+        <div id="event-modal-overlay" class="modal-overlay" aria-hidden="true">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <div class="modal-header">
+                    <div>
+                        <h2 id="modal-title">Create New Event</h2>
+                        <p>Fill in the details for the upcoming event.</p>
+                    </div>
+                    <button type="button" class="modal-close" aria-label="Close modal">✕</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="card-panel">
+                        <h3>Basic Info</h3>
+
+                        <div style="display:flex; gap:12px; margin-bottom:12px;">
+                            <button type="button" class="input" style="border:2px solid #213a6e; background:#f6f8ff; font-weight:800;">School Event<br><small style="font-weight:500; color:#7c8fae;">Regular campus activities</small></button>
+                            <button type="button" class="input" style="background:#fff;"><span style="font-weight:700; color:#2b3f66;">Conference Event</span><br><small style="font-weight:500; color:#9aa7c3;">Requires PDF research paper</small></button>
+                        </div>
+
+                        <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
+                        <input class="input" type="text" placeholder="e.g. IT Week 2026">
+                    </div>
+
+                    <div class="card-panel">
+                        <h3>Schedule &amp; Location</h3>
+                        <div class="row">
+                            <div class="col">
+                                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
+                                <input class="input" type="text" placeholder="mm/dd/yyyy">
+                            </div>
+                            <div class="col">
+                                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
+                                <input class="input" type="text" placeholder="e.g. Main Auditorium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-panel">
+                        <h3>Content &amp; Media</h3>
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Full Description</label>
+                        <textarea class="input" placeholder="Write detailed information..."></textarea>
+
+                        <div style="margin-top:14px;">
+                            <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Event Banner Image</label>
+                            <div style="border:2px dashed #e6edf6; border-radius:10px; padding:26px; text-align:center; color:#7081a1;">Upload a picture or drag and drop<br><small style="display:block; margin-top:8px; color:#9fb0cc;">PNG, JPG, WEBP up to 5MB</small></div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel">Cancel</button>
+                        <button type="button" class="btn-publish">Publish Event</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+            (function(){
+                const openBtn = document.querySelector('.create-btn');
+                const overlay = document.getElementById('event-modal-overlay');
+                const closeBtn = overlay ? overlay.querySelector('.modal-close') : null;
+                const cancelBtn = overlay ? overlay.querySelector('.btn-cancel') : null;
+
+                function openModal(){
+                    if(!overlay) return;
+                    overlay.classList.add('open');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    // focus first input for convenience
+                    const first = overlay.querySelector('input, textarea, button');
+                    if(first) first.focus();
+                }
+
+                function closeModal(){
+                    if(!overlay) return;
+                    overlay.classList.remove('open');
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+
+                if(openBtn) openBtn.addEventListener('click', openModal);
+                if(closeBtn) closeBtn.addEventListener('click', closeModal);
+                if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+                // close when clicking outside the modal
+                if(overlay){
+                    overlay.addEventListener('click', function(e){
+                        if(e.target === overlay) closeModal();
+                    });
+                }
+
+                // close on Escape
+                document.addEventListener('keydown', function(e){
+                    if(e.key === 'Escape') closeModal();
+                });
+            })();
+        </script>
+    </body>
 </html>

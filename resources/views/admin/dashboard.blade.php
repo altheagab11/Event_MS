@@ -137,11 +137,11 @@
             gap: 12px;
         }
 
-        h1 {
+        h1, .page-title {
             margin: 0;
             color: var(--ink);
-            font-size: 35px;
-            line-height: 1.05;
+            font-size: 42px;
+            line-height: 1.04;
             font-weight: 800;
             letter-spacing: .2px;
         }
@@ -434,7 +434,7 @@
         }
 
         @media (max-width: 1300px) {
-            h1 { font-size: 32px; }
+            h1, .page-title { font-size: 32px; }
             .section-title { font-size: 28px; }
             .subtitle { font-size: 16px; }
             .value { font-size: 34px; }
@@ -478,6 +478,134 @@
                 display: none;
             }
         }
+        /* QR modal styles */
+        .qr-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9,18,34,0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1300;
+        }
+        .qr-overlay.open { display: flex; }
+
+        .qr-modal {
+            width: 480px;
+            max-width: calc(100% - 48px);
+            max-height: calc(100vh - 80px);
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(10,20,40,0.35);
+        }
+
+        .qr-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            border-bottom: 1px solid #eef3f8;
+        }
+
+        .qr-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--blue-900);
+            font-weight: 800;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .qr-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #e6eef6;
+            display: grid;
+            place-items: center;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 800;
+            color: #23457e;
+        }
+
+        .qr-body {
+            padding: 18px 20px 22px;
+            overflow-y: auto;
+            flex: 1 1 auto;
+            text-align: center;
+            color: #5e738f;
+        }
+
+        .camera-box {
+            width: 220px;
+            height: 220px;
+            margin: 18px auto 12px;
+            border-radius: 12px;
+            background: linear-gradient(180deg,#071226 0%, #0f233a 100%);
+            border: 6px solid rgba(35,69,126,0.12);
+            box-shadow: 0 6px 14px rgba(17,36,64,0.18) inset;
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        .camera-inner {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed rgba(255,255,255,0.08);
+            border-radius: 6px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .scan-line {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(0,200,120,0) 0%, rgba(0,200,120,0.9) 50%, rgba(0,200,120,0) 100%);
+            transform: translateY(-50%);
+            box-shadow: 0 0 18px rgba(0,200,120,0.35);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan { 0%{transform:translateY(-60%)}50%{transform:translateY(0)}100%{transform:translateY(60%)} }
+
+        .qr-footer {
+            padding: 14px 18px 18px;
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .pill {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:10px 18px;
+            border-radius:999px;
+            background:#f4f6fa;
+            color:#163a70;
+            font-weight:700;
+        }
+
+        .btn-sim {
+            padding:10px 18px;
+            border-radius:10px;
+            border:2px solid transparent;
+            background:#fff;
+            font-weight:800;
+            cursor:pointer;
+        }
+
+        .btn-valid { border-color:#bfeeda; background:#f6fffb; color:#0a8a3f; }
+        .btn-invalid { border-color:#f7c8c8; background:#fff7f7; color:#d64545; }
     </style>
 </head>
 <body>
@@ -519,7 +647,7 @@
         <main class="content">
             <div class="topbar">
                 <div>
-                    <h1>Dashboard Overview</h1>
+                    <h1 class="page-title">Dashboard Overview</h1>
                     <p class="subtitle">Summary and statistics for all events.</p>
                 </div>
 
@@ -623,5 +751,80 @@
             </section>
         </main>
     </div>
+
+    <!-- QR Scanner Modal -->
+    <div id="qr-overlay" class="qr-overlay" aria-hidden="true">
+        <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+            <div class="qr-header">
+                <h3 id="qr-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#23457e" stroke-width="2"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="3" width="6" height="6" rx="1"></rect><rect x="3" y="15" width="6" height="6" rx="1"></rect></svg> QR Check-in</h3>
+                <button type="button" class="qr-close" aria-label="Close">✕</button>
+            </div>
+
+            <div class="qr-body">
+                <p style="margin:0 0 12px; color:#6f839e;">Position the participant's QR code within the frame to scan.</p>
+
+                <div class="camera-box" aria-hidden="true">
+                    <div class="camera-inner">
+                        <div class="scan-line" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <span class="pill">Scanning...</span>
+                </div>
+            </div>
+
+            <div class="qr-footer">
+                <button type="button" class="btn-sim btn-valid">Simulate Valid</button>
+                <button type="button" class="btn-sim btn-invalid">Simulate Invalid</button>
+            </div>
+        </div>
+    <script>
+        (function(){
+            const openBtn = document.querySelector('.scan-btn');
+            const overlay = document.getElementById('qr-overlay');
+            const closeBtn = overlay ? overlay.querySelector('.qr-close') : null;
+            const validBtn = overlay ? overlay.querySelector('.btn-valid') : null;
+            const invalidBtn = overlay ? overlay.querySelector('.btn-invalid') : null;
+
+            function openModal(){
+                if(!overlay) return;
+                overlay.classList.add('open');
+                overlay.setAttribute('aria-hidden','false');
+            }
+
+            function closeModal(){
+                if(!overlay) return;
+                overlay.classList.remove('open');
+                overlay.setAttribute('aria-hidden','true');
+            }
+
+            if(openBtn) openBtn.addEventListener('click', openModal);
+            if(closeBtn) closeBtn.addEventListener('click', closeModal);
+
+            // close when clicking outside the modal
+            if(overlay){
+                overlay.addEventListener('click', function(e){
+                    if(e.target === overlay) closeModal();
+                });
+            }
+
+            // Escape to close
+            document.addEventListener('keydown', function(e){
+                if(e.key === 'Escape') closeModal();
+            });
+
+            // Simulation buttons (placeholder behavior)
+            if(validBtn) validBtn.addEventListener('click', function(){
+                alert('Simulated: Valid QR scanned.');
+                closeModal();
+            });
+
+            if(invalidBtn) invalidBtn.addEventListener('click', function(){
+                alert('Simulated: Invalid QR.');
+            });
+        })();
+    </script>
+</div>
 </body>
 </html>
