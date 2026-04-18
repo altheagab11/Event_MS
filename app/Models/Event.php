@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -25,5 +26,20 @@ class Event extends Model
     return [
       'event_date' => 'date',
     ];
+  }
+
+  public function getBannerUrlAttribute(): ?string
+  {
+    if (! $this->banner_image) {
+      return null;
+    }
+
+    if (filter_var($this->banner_image, FILTER_VALIDATE_URL)) {
+      return $this->banner_image;
+    }
+
+    return Storage::disk('public')->exists($this->banner_image)
+      ? '/storage/' . ltrim($this->banner_image, '/')
+      : null;
   }
 }

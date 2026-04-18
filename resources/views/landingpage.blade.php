@@ -46,6 +46,7 @@ $regions = [
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>NU Lipa EMS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -302,6 +303,9 @@ $regions = [
 
     const EVENTS = @json($events);
     const REGIONS = @json($regions);
+    const REGISTER_SEND_URL = @json(route('registration.send-verification'));
+    const REGISTER_VERIFY_URL = @json(route('registration.verify-code'));
+    const CSRF_TOKEN = @json(csrf_token());
 
     let filterCategory = 'All';
     let filterMonth = 'All';
@@ -361,7 +365,16 @@ $regions = [
     let selectedEvent = null;
     let registrationData = {
       firstName: '',
-      lastName: ''
+      lastName: '',
+      email: '',
+      region: '',
+      schoolFrom: '',
+      schoolLevel: '',
+      verificationId: null,
+      registrationStatus: '',
+      passCode: '',
+      registrationId: null,
+      mailSent: false,
     };
     let otpTimer = null;
     let countdown = 59;
@@ -377,10 +390,38 @@ $regions = [
       if (otpTimer) clearInterval(otpTimer);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    async function postForm(url, formData) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': CSRF_TOKEN,
+        },
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const validationMessage = payload.errors
+          ? Object.values(payload.errors).flat().join(' ')
+          : '';
+        throw new Error(validationMessage || payload.message || 'Request failed.');
+      }
+
+      return payload;
+    }
+
     function makeOtpInputs() {
-      return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => ` < input maxlength = "1"
-      data - otp = "${i}"
-      required > `).join('')}</div>`;
+      return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => `<input maxlength="1" data-otp="${i}" required>`).join('')}</div>`;
     }
 
     function renderFormStep() {
@@ -421,6 +462,7 @@ $regions = [
                     <div class="desc-block">${selectedEvent.description}</div>
                     <div class="step-tag">STEP 1 OF 2: REGISTRATION</div>
                     <h3 style="color:#1a3263; margin: 16px 0; font-size: 28px;">Registration Form</h3>
+                    <div id="registerFormMessage" style="display:none; margin:0 0 12px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600;"></div>
                     <form id="registrationForm">
                         <div class="grid-2">
                             <div class="field"><label>First Name *</label><input name="firstName" required></div>
@@ -434,7 +476,7 @@ $regions = [
                             <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
                             <div class="upload-note">Your paper will be subject to admin review before your registration is fully confirmed.</div>
                             <label class="upload-drop">
-                                <input class="upload-file-input" type="file" accept=".pdf" ${showUpload ? 'required' : ''}>
+                            <input class="upload-file-input" type="file" name="paperFile" accept=".pdf" ${showUpload ? 'required' : ''}>
                                 <span class="upload-drop-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
                                         <path d="M12 16V6"></path>
@@ -447,31 +489,76 @@ $regions = [
                                 <span class="upload-drop-sub">Maximum file size: 10MB</span>
                             </label>
                         </div>
-                        <button class="submit" type="submit">Continue Registration</button>
+                        <button class="submit" type="submit" id="continueRegistrationBtn">Continue Registration</button>
                     </form>
                 </div>
             `;
-      document.getElementById('registrationForm').addEventListener('submit', function(e) {
+      document.getElementById('registrationForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
+        const message = document.getElementById('registerFormMessage');
+        const submitButton = document.getElementById('continueRegistrationBtn');
+
+        const payload = new FormData();
+        payload.append('event_id', String(selectedEvent.id));
+        payload.append('first_name', String(formData.get('firstName') || '').trim());
+        payload.append('last_name', String(formData.get('lastName') || '').trim());
+        payload.append('email', String(formData.get('email') || '').trim());
+        payload.append('region', String(formData.get('region') || '').trim());
+        payload.append('school_from', String(formData.get('schoolFrom') || '').trim());
+        payload.append('school_level', String(formData.get('schoolLevel') || '').trim());
+
+        const paperFile = formData.get('paperFile');
+        if (paperFile instanceof File && paperFile.size > 0) {
+          payload.append('paper_file', paperFile);
+        }
+
         registrationData = {
           firstName: String(formData.get('firstName') || '').trim(),
           lastName: String(formData.get('lastName') || '').trim(),
+          email: String(formData.get('email') || '').trim(),
+          region: String(formData.get('region') || '').trim(),
+          schoolFrom: String(formData.get('schoolFrom') || '').trim(),
+          schoolLevel: String(formData.get('schoolLevel') || '').trim(),
+          verificationId: null,
+          registrationStatus: '',
+          passCode: '',
+          registrationId: null,
+          mailSent: false,
         };
-        renderOtpStep();
+
+        message.style.display = 'none';
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending Verification...';
+
+        try {
+          const response = await postForm(REGISTER_SEND_URL, payload);
+          registrationData.verificationId = Number(response?.data?.verification_id || 0) || null;
+          renderOtpStep(response?.data?.email_masked || registrationData.email);
+        } catch (error) {
+          message.style.display = 'block';
+          message.style.border = '2px solid #f1b4ba';
+          message.style.background = '#fff3f4';
+          message.style.color = '#8b1e2b';
+          message.textContent = error instanceof Error ? error.message : 'Unable to continue registration.';
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Continue Registration';
+        }
       });
     }
 
-    function renderOtpStep() {
+    function renderOtpStep(maskedEmail) {
       countdown = 59;
       modalContent.innerHTML = `
                 <div class="modal-body" style="padding:48px; text-align:center;">
                     <div class="step-tag">STEP 2 OF 2: VERIFICATION</div>
                     <h3 style="font-size:34px; color:#1a3263; margin:20px 0 8px;">Verify Your Email</h3>
-                    <p style="color:#6b7280; max-width:520px; margin:0 auto 12px;">We've sent a 6-digit alphanumeric code to your email. Please enter it below to verify your identity.</p>
+            <p style="color:#6b7280; max-width:520px; margin:0 auto 8px;">We've sent a 6-digit alphanumeric code to <strong>${escapeHtml(maskedEmail || registrationData.email)}</strong>. Please enter it below to verify your identity.</p>
+            <div id="otpMessage" style="display:none; margin:10px auto 12px; max-width:520px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600;"></div>
                     <form id="otpForm">
                         ${makeOtpInputs()}
-                        <button class="submit" type="submit">Verify & Submit</button>
+              <button class="submit" type="submit" id="verifyOtpBtn">Verify & Submit</button>
                     </form>
                     <div style="margin-top:14px; color:#6b7280;" id="countdown">0:59</div>
                 </div>
@@ -495,16 +582,59 @@ $regions = [
         if (countdown <= 0) clearInterval(otpTimer);
       }, 1000);
 
-      document.getElementById('otpForm').addEventListener('submit', function(e) {
+      document.getElementById('otpForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        renderSuccessStep();
+        const message = document.getElementById('otpMessage');
+        const verifyButton = document.getElementById('verifyOtpBtn');
+        const code = otpInputs.map(input => input.value.trim()).join('').toUpperCase();
+
+        if (code.length !== 6) {
+          message.style.display = 'block';
+          message.style.border = '2px solid #f1b4ba';
+          message.style.background = '#fff3f4';
+          message.style.color = '#8b1e2b';
+          message.textContent = 'Please enter the 6-character verification code.';
+          return;
+        }
+
+        const payload = new FormData();
+        payload.append('verification_id', String(registrationData.verificationId || ''));
+        payload.append('code', code);
+
+        message.style.display = 'none';
+        verifyButton.disabled = true;
+        verifyButton.textContent = 'Verifying...';
+
+        try {
+          const response = await postForm(REGISTER_VERIFY_URL, payload);
+          const serverData = response?.data || {};
+
+          registrationData.registrationId = Number(serverData.registration_id || 0) || null;
+          registrationData.registrationStatus = String(serverData.registration_status || '');
+          registrationData.passCode = String(serverData.pass_code || '');
+          registrationData.mailSent = Boolean(serverData.mail_sent);
+
+          renderSuccessStep(serverData);
+        } catch (error) {
+          message.style.display = 'block';
+          message.style.border = '2px solid #f1b4ba';
+          message.style.background = '#fff3f4';
+          message.style.color = '#8b1e2b';
+          message.textContent = error instanceof Error ? error.message : 'Unable to verify code.';
+        } finally {
+          verifyButton.disabled = false;
+          verifyButton.textContent = 'Verify & Submit';
+        }
       });
     }
 
-    function renderSuccessStep() {
-      const isConference = selectedEvent.type === 'Conference Event';
-      const code = 'NUL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-      const fullName = `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name';
+    function renderSuccessStep(serverData) {
+      const isPending = String(serverData.registration_status || '').toLowerCase() === 'pending';
+      const fullName = String(serverData.full_name || `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name');
+      const displayLevel = String(serverData.school_level || registrationData.schoolLevel || 'Participant').toUpperCase();
+      const passCode = String(serverData.pass_code || registrationData.passCode || 'N/A');
+      const displayEventName = String(serverData.event_name || selectedEvent.title || 'Event');
+      const displayLocation = String(serverData.location || selectedEvent.location || 'TBA');
       modalCard.classList.add('success-mode');
       modalContent.innerHTML = `
                 <div class="registration-success">
@@ -514,21 +644,22 @@ $regions = [
                             <path d="M8.5 12.3 10.8 14.6 15.8 9.6"></path>
                         </svg>
                     </span>
-                        <h3>${isConference ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
+                          <h3>${isPending ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
                     <p class="success-copy">
-                        ${isConference
-                            ? 'Your registration and research paper are now pending review. Once approved by the admin, you will receive an email containing your Digital ID.'
-                            : 'Your Digital ID has been successfully sent to your email. Here is a preview of what you will receive:'}
+                          ${isPending
+                            ? 'Your registration is now pending review. A demo digital pass email has been sent for testing purposes.'
+                            : 'Your registration is complete. A demo digital pass email has been sent. Here is your preview:'}
                     </p>
+                        ${serverData.mail_sent === false ? '<p class="success-copy" style="margin-top:-2px; color:#8b1e2b;">Registration was saved, but email sending failed. Check your mail .env settings and try again.</p>' : ''}
 
                     <div class="success-grid">
                         <div class="pass-card">
                             <div class="pass-top">
                                 <div class="pass-kicker">NU LIPA EVENT PASS</div>
-                                <span class="pass-tag">SENIOR HIGH</span>
+                              <span class="pass-tag">${escapeHtml(displayLevel)}</span>
                             </div>
-                            <div class="pass-event">${selectedEvent.title}</div>
-                            <div class="pass-name">${fullName}</div>
+                            <div class="pass-event">${escapeHtml(displayEventName)}</div>
+                            <div class="pass-name">${escapeHtml(fullName)}</div>
                             <div class="pass-meta">
                                 <div class="pass-meta-row">
                                     <span class="pass-meta-icon" aria-hidden="true">
@@ -539,7 +670,7 @@ $regions = [
                                             <path d="M7 13h4"></path>
                                         </svg>
                                     </span>
-                                    <span>${selectedEvent.type}</span>
+                                        <span>${escapeHtml(selectedEvent.type || 'School Event')}</span>
                                 </div>
                                 <div class="pass-meta-row">
                                     <span class="pass-meta-icon" aria-hidden="true">
@@ -548,13 +679,13 @@ $regions = [
                                             <circle cx="12" cy="11" r="1.9"></circle>
                                         </svg>
                                     </span>
-                                    <span>${selectedEvent.location}</span>
+                                        <span>${escapeHtml(displayLocation)}</span>
                                 </div>
                             </div>
                             <div class="pass-divider"></div>
                             <div class="pass-footer">
                                 <label>Attendee ID</label>
-                                <span class="pass-code">${code}</span>
+                                      <span class="pass-code">${escapeHtml(passCode)}</span>
                             </div>
                             <span class="pass-shield" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -588,7 +719,7 @@ $regions = [
                                         <rect x="20" y="9" width="2" height="2" rx=".5"></rect>
                                     </svg>
                                 </div>
-                                <p class="qr-note">This QR code is strictly non-transferable and must be presented during event check-in.</p>
+                                    <p class="qr-note">Demo pass code: ${escapeHtml(passCode)}. This preview is for testing while scanner/API integration is pending.</p>
                             </div>
                         </div>
                     </div>
@@ -625,6 +756,19 @@ $regions = [
     function openRegister(eventId) {
       selectedEvent = EVENTS.find(e => e.id === Number(eventId));
       if (!selectedEvent) return;
+      registrationData = {
+        firstName: '',
+        lastName: '',
+        email: '',
+        region: '',
+        schoolFrom: '',
+        schoolLevel: '',
+        verificationId: null,
+        registrationStatus: '',
+        passCode: '',
+        registrationId: null,
+        mailSent: false,
+      };
       modalCard.classList.remove('eval-mode');
       eventModal.classList.add('open');
       document.body.classList.add('modal-open');
@@ -689,20 +833,13 @@ $regions = [
                         <div class="eval-body">
                             <p class="eval-copy">Please rate your experience at ${selectedEvent.title}.</p>
                             <div class="eval-stars" role="radiogroup" aria-label="Rate event">
-                                ${Array.from({ length: 5 }, (_, i) => ` <
-          button type = "button"
-        class = "rating-star"
-        data - rate = "${i + 1}"
-        aria - label = "${i + 1} star" >
-          <
-          svg viewBox = "0 0 24 24"
-        role = "img"
-        focusable = "false" >
-          <
-          polygon points = "12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4" > < /polygon> <
-          /svg> <
-          /button>
-        `).join('')}
+                                ${Array.from({ length: 5 }, (_, i) => `
+                                  <button type="button" class="rating-star" data-rate="${i + 1}" aria-label="${i + 1} star">
+                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                      <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                                    </svg>
+                                  </button>
+                                `).join('')}
                             </div>
                             <label class="eval-label">ADDITIONAL COMMENTS (OPTIONAL)</label>
                             <textarea class="eval-text" rows="4" placeholder="What did you like? What can we improve?"></textarea>

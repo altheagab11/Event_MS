@@ -768,7 +768,7 @@
         @php
         $imageClass = ['one', 'two', 'three'][$loop->index % 3];
         $isActive = \Illuminate\Support\Carbon::parse($event->event_date)->gte(now()->startOfDay());
-        $bannerUrl = $event->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($event->banner_image) : null;
+        $bannerUrl = $event->banner_url;
         @endphp
         <article class="event-card">
           <div class="event-image {{ $bannerUrl ? '' : $imageClass }}" @if($bannerUrl) style="background-image: linear-gradient(160deg, rgba(18, 37, 73, .2), rgba(13, 31, 65, .42)), url('{{ $bannerUrl }}');" @endif>

@@ -2,10 +2,19 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\QrAttendanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [EventController::class, 'landing']);
+
+Route::post('/register/send-verification', [RegistrationController::class, 'sendVerification'])
+  ->middleware('throttle:6,1')
+  ->name('registration.send-verification');
+
+Route::post('/register/verify-code', [RegistrationController::class, 'verifyCodeAndFinalize'])
+  ->middleware('throttle:12,1')
+  ->name('registration.verify-code');
 
 Route::middleware('guest')->group(function () {
   Route::get('/login', [LoginController::class, 'create'])->name('admin.login');

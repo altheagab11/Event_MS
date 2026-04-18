@@ -28,9 +28,8 @@ class EventController extends Controller
           'location' => $event->location ?: 'TBA',
           'description' => $event->description ?: 'No description available.',
           'status' => $eventDate->isPast() ? 'ended' : 'active',
-          'image' => $event->banner_image
-            ? asset('storage/' . $event->banner_image)
-            : 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60',
+          'image' => $event->banner_url
+            ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60',
         ];
       })
       ->values();
