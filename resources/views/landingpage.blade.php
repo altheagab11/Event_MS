@@ -1,445 +1,391 @@
 ﻿@php
 $months = [
-    ['value' => 0, 'label' => 'Jan'], ['value' => 1, 'label' => 'Feb'], ['value' => 2, 'label' => 'Mar'],
-    ['value' => 3, 'label' => 'Apr'], ['value' => 4, 'label' => 'May'], ['value' => 5, 'label' => 'Jun'],
-    ['value' => 6, 'label' => 'Jul'], ['value' => 7, 'label' => 'Aug'], ['value' => 8, 'label' => 'Sep'],
-    ['value' => 9, 'label' => 'Oct'], ['value' => 10, 'label' => 'Nov'], ['value' => 11, 'label' => 'Dec'],
-];
-
-$events = [
-    [
-        'id' => 1,
-        'title' => 'NU Lipa Foundation Day 2026',
-        'type' => 'School Event',
-        'date' => 'April 20, 2026',
-        'location' => 'Main Campus Grounds',
-        'description' => 'Join us as we celebrate another year of excellence and commitment to nation-building with booths, games, and performances. This event commemorates the founding of our beloved institution. Students from all colleges are invited to participate in various activities including academic exhibits, cultural presentations, and sports tournaments. The day will conclude with a grand concert featuring local bands and our very own student performers. Attendance is mandatory for all freshmen and sophomores. Please register early to secure your food stub and event kit.',
-        'status' => 'active',
-        'image' => 'https://images.unsplash.com/photo-1765474604988-4fc3fa14f46b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50cyUyMHNtaWxpbmclMjBjYW1wdXN8ZW58MXx8fHwxNzc1NTM4NjMzfDA&ixlib=rb-4.1.0&q=80&w=1080',
-    ],
-    [
-        'id' => 2,
-        'title' => 'Tech Innovations Summit',
-        'type' => 'Conference Event',
-        'date' => 'May 15, 2026',
-        'location' => 'Auditorium Hall B',
-        'description' => 'A national conference gathering students and professionals to discuss the latest trends in software and AI. Call for papers is open. This three-day summit will feature keynote speakers from leading tech companies, hands-on workshops on emerging technologies, and a research paper presentation track. We invite scholars, researchers, and students to submit their 5-page research papers on topics including Artificial Intelligence, Cyber Security, Data Science, and Internet of Things. Accepted papers will be published in the conference proceedings. All participants will receive a certificate of participation and a digital ID for venue access.',
-        'status' => 'active',
-        'image' => 'https://images.unsplash.com/photo-1582192904915-d89c7250b235?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb25mZXJlbmNlJTIwdGVjaCUyMHByZXNlbnRhdGlvbnxlbnwxfHx8fDE3NzU1Mzg2MzN8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    ],
-    [
-        'id' => 4,
-        'title' => 'University Intramurals 2026',
-        'type' => 'School Event',
-        'date' => 'June 5-8, 2026',
-        'location' => 'University Gymnasium & Field',
-        'description' => 'Show your college pride! The annual University Intramurals is back with exciting basketball, volleyball, e-sports, and cheering competitions. Form your teams and register now.',
-        'status' => 'active',
-        'image' => 'https://images.unsplash.com/photo-1721339040530-be9c4eff0360?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwc3BvcnRzJTIwYmFza2V0YmFsbCUyMGludHJhbXVyYWxzfGVufDF8fHx8MTc3NTU0MjgxOHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    ],
-    [
-        'id' => 5,
-        'title' => 'Sining at Kultura Festival',
-        'type' => 'School Event',
-        'date' => 'August 12, 2026',
-        'location' => 'Open Amphitheater',
-        'description' => 'A celebration of Filipino heritage through traditional dances, spoken word poetry, and visual arts exhibitions. Join us in preserving and promoting our rich culture.',
-        'status' => 'active',
-        'image' => 'https://images.unsplash.com/photo-1709086566111-dfa0699a6842?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmaWxpcGlubyUyMHN0dWRlbnRzJTIwY3VsdHVyYWwlMjBkYW5jaW5nfGVufDF8fHx8MTc3NTU0MjgxOHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    ],
-    [
-        'id' => 6,
-        'title' => 'Medical & Allied Health Research Symposium',
-        'type' => 'Conference Event',
-        'date' => 'September 22, 2026',
-        'location' => 'College of Allied Health Sciences Bldg',
-        'description' => 'Presenting breakthrough researches in the field of Nursing, Pharmacy, and Medical Technology. Open for professional and student researchers nationwide.',
-        'status' => 'active',
-        'image' => 'https://images.unsplash.com/photo-1773828755374-0ee802d9f44b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwaGVhbHRoJTIwc3ltcG9zaXVtJTIwcmVzZWFyY2h8ZW58MXx8fHwxNzc1NTQyODE5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    ],
-    [
-        'id' => 3,
-        'title' => 'Leadership Seminar Series',
-        'type' => 'School Event',
-        'date' => 'March 10, 2026',
-        'location' => 'Student Lounge',
-        'description' => 'Empowering the next generation of leaders. (Event concluded)',
-        'status' => 'ended',
-        'image' => 'https://images.unsplash.com/photo-1664273891579-22f28332f3c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwY2FtcHVzJTIwbW9kZXJufGVufDF8fHx8MTc3NTUzODYzM3ww&ixlib=rb-4.1.0&q=80&w=1080',
-    ],
+['value' => 0, 'label' => 'Jan'], ['value' => 1, 'label' => 'Feb'], ['value' => 2, 'label' => 'Mar'],
+['value' => 3, 'label' => 'Apr'], ['value' => 4, 'label' => 'May'], ['value' => 5, 'label' => 'Jun'],
+['value' => 6, 'label' => 'Jul'], ['value' => 7, 'label' => 'Aug'], ['value' => 8, 'label' => 'Sep'],
+['value' => 9, 'label' => 'Oct'], ['value' => 10, 'label' => 'Nov'], ['value' => 11, 'label' => 'Dec'],
 ];
 
 $announcements = [
-    [
-        'id' => 1,
-        'title' => 'Call for Papers: Tech Innovations Summit',
-        'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
-        'type' => 'important',
-        'eventId' => 2,
-        'buttonText' => 'Register & Submit Paper'
-    ],
-    [
-        'id' => 2,
-        'title' => 'Intramurals 2026 Team Registration',
-        'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
-        'type' => 'info',
-        'eventId' => 4,
-        'buttonText' => 'View Intramurals'
-    ],
-    [
-        'id' => 3,
-        'title' => 'Foundation Day Reminders',
-        'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
-        'type' => 'info',
-        'eventId' => 1,
-        'buttonText' => 'Register Now'
-    ],
+[
+'id' => 1,
+'title' => 'Call for Papers: Tech Innovations Summit',
+'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
+'type' => 'important',
+'eventId' => 2,
+'buttonText' => 'Register & Submit Paper'
+],
+[
+'id' => 2,
+'title' => 'Intramurals 2026 Team Registration',
+'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
+'type' => 'info',
+'eventId' => 4,
+'buttonText' => 'View Intramurals'
+],
+[
+'id' => 3,
+'title' => 'Foundation Day Reminders',
+'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
+'type' => 'info',
+'eventId' => 1,
+'buttonText' => 'Register Now'
+],
 ];
 
 $regions = [
-    'NCR (National Capital Region)', 'CAR (Cordillera Administrative Region)', 'Region I (Ilocos Region)', 'Region II (Cagayan Valley)',
-    'Region III (Central Luzon)', 'Region IV-A (CALABARZON)', 'MIMAROPA Region', 'Region V (Bicol Region)', 'Region VI (Western Visayas)',
-    'Region VII (Central Visayas)', 'Region VIII (Eastern Visayas)', 'Region IX (Zamboanga Peninsula)', 'Region X (Northern Mindanao)',
-    'Region XI (Davao Region)', 'Region XII (SOCCSKSARGEN)', 'Region XIII (Caraga)', 'BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)'
+'NCR (National Capital Region)', 'CAR (Cordillera Administrative Region)', 'Region I (Ilocos Region)', 'Region II (Cagayan Valley)',
+'Region III (Central Luzon)', 'Region IV-A (CALABARZON)', 'MIMAROPA Region', 'Region V (Bicol Region)', 'Region VI (Western Visayas)',
+'Region VII (Central Visayas)', 'Region VIII (Eastern Visayas)', 'Region IX (Zamboanga Peninsula)', 'Region X (Northern Mindanao)',
+'Region XI (Davao Region)', 'Region XII (SOCCSKSARGEN)', 'Region XIII (Caraga)', 'BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)'
 ];
 @endphp
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NU Lipa EMS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{{ asset('css/landingpage.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NU Lipa EMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('css/landingpage.css') }}">
 </head>
+
 <body class="landing-page">
-    <div class="landing-scroll">
+  <div class="landing-scroll">
     <div class="landing-scroll-content">
-    <header class="topbar">
+      <header class="topbar">
         <div class="container topbar-inner">
-            <div class="brand" aria-label="NU Lipa EMS">
-                <span class="brand-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                        <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                        <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                        <line x1="16" y1="3.5" x2="16" y2="7"></line>
-                    </svg>
-                </span>
-                <span class="brand-text">NU Lipa EMS</span>
-            </div>
-            <div class="top-actions">
-                <button class="pill pill-muted">Home / Events</button>
-                <a href="{{ route('admin.login') }}" class="pill pill-gold admin-btn" style="text-decoration:none;">
-                    <span class="pill-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" role="img" focusable="false">
-                            <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
-                            <path d="M9.5 12l2 2 3.5-3.5"></path>
-                        </svg>
-                    </span>
-                    <span>Admin Login</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <section class="hero">
-        <div class="container hero-inner">
-            <h1>Welcome to <span>NU Lipa Events</span></h1>
-            <p>The unified platform for typical school events and research conferences. Register, participate, and evaluate all in one place.</p>
-            <a href="#events" class="cta">
-                <span>View Upcoming Events</span>
-                <span class="cta-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <line x1="4" y1="12" x2="20" y2="12"></line>
-                        <polyline points="13,5 20,12 13,19"></polyline>
-                    </svg>
-                </span>
+          <div class="brand" aria-label="NU Lipa EMS">
+            <span class="brand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                <line x1="16" y1="3.5" x2="16" y2="7"></line>
+              </svg>
+            </span>
+            <span class="brand-text">NU Lipa EMS</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill pill-muted">Home / Events</button>
+            <a href="{{ route('admin.login') }}" class="pill pill-gold admin-btn" style="text-decoration:none;">
+              <span class="pill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
+                  <path d="M9.5 12l2 2 3.5-3.5"></path>
+                </svg>
+              </span>
+              <span>Admin Login</span>
             </a>
+          </div>
         </div>
-    </section>
+      </header>
 
-    <section class="announce">
+      <section class="hero">
+        <div class="container hero-inner">
+          <h1>Welcome to <span>NU Lipa Events</span></h1>
+          <p>The unified platform for typical school events and research conferences. Register, participate, and evaluate all in one place.</p>
+          <a href="#events" class="cta">
+            <span>View Upcoming Events</span>
+            <span class="cta-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <polyline points="13,5 20,12 13,19"></polyline>
+              </svg>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <section class="announce">
         <div class="container">
-            <h2 class="announce-title">
-                <span class="announce-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3l2 2H4l2-2v-3a7 7 0 0 1 4-6"></path>
-                        <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
-                    </svg>
+          <h2 class="announce-title">
+            <span class="announce-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3l2 2H4l2-2v-3a7 7 0 0 1 4-6"></path>
+                <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
+              </svg>
+            </span>
+            <span>Latest Announcements</span>
+          </h2>
+          <div class="announce-grid">
+            @foreach ($announcements as $a)
+            <div class="announce-card {{ $a['type'] === 'important' ? 'important' : '' }}">
+              <div>
+                <h3 style="color: {{ $a['type'] === 'important' ? '#ffc570' : '#fff' }}">{{ $a['title'] }}</h3>
+                <p>{{ $a['description'] }}</p>
+              </div>
+              <button class="announce-btn {{ str_contains($a['buttonText'], 'Register') ? 'gold' : 'ghost' }} open-register" data-event-id="{{ $a['eventId'] }}">{{ $a['buttonText'] }}</button>
+            </div>
+            @endforeach
+          </div>
+        </div>
+      </section>
+
+      <section id="events" class="events">
+        <div class="container">
+          <div class="events-head">
+            <h2>Discover Events</h2>
+            <p>Browse through school gatherings and major conferences.</p>
+          </div>
+
+          <div class="filters">
+            <div class="filter-group">
+              <button class="fbtn active" data-category="All">
+                <span class="filter-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                    <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                    <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                    <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                  </svg>
                 </span>
-                <span>Latest Announcements</span>
-            </h2>
-            <div class="announce-grid">
-                @foreach ($announcements as $a)
-                    <div class="announce-card {{ $a['type'] === 'important' ? 'important' : '' }}">
-                        <div>
-                            <h3 style="color: {{ $a['type'] === 'important' ? '#ffc570' : '#fff' }}">{{ $a['title'] }}</h3>
-                            <p>{{ $a['description'] }}</p>
-                        </div>
-                        <button class="announce-btn {{ str_contains($a['buttonText'], 'Register') ? 'gold' : 'ghost' }} open-register" data-event-id="{{ $a['eventId'] }}">{{ $a['buttonText'] }}</button>
-                    </div>
+                <span>All</span>
+              </button>
+              <button class="fbtn" data-category="School Event">
+                <span class="filter-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M3 9l9-4 9 4-9 4-9-4z"></path>
+                    <path d="M6.5 10.6V14c0 2.1 2.6 3.8 5.5 3.8s5.5-1.7 5.5-3.8v-3.4"></path>
+                  </svg>
+                </span>
+                <span>School</span>
+              </button>
+              <button class="fbtn" data-category="Conference Event">
+                <span class="filter-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <rect x="4" y="7" width="16" height="12" rx="2"></rect>
+                    <line x1="9" y1="7" x2="9" y2="19"></line>
+                    <path d="M10.8 7V5.8a1.8 1.8 0 0 1 1.8-1.8h.8a1.8 1.8 0 0 1 1.8 1.8V7"></path>
+                  </svg>
+                </span>
+                <span>Conference</span>
+              </button>
+            </div>
+            <button class="fmonth" id="toggleDateFilter">
+              <span class="month-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                  <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                  <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                  <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                </svg>
+              </span>
+              <span>Filter by Month</span>
+            </button>
+
+            <div class="date-pop" id="dateFilterPop">
+              <label for="yearInput">Year</label>
+              <input id="yearInput" type="number" placeholder="e.g. 2026">
+              <label>Month</label>
+              <div class="month-grid" id="monthBtns">
+                <button class="mbtn month-all active" data-month="All">All Months</button>
+                @foreach($months as $m)
+                <button class="mbtn" data-month="{{ $m['value'] }}">{{ $m['label'] }}</button>
                 @endforeach
+              </div>
+              <div class="dp-actions">
+                <button class="clear" id="clearDateFilter">Clear</button>
+                <button class="apply" id="applyDateFilter">Apply</button>
+              </div>
             </div>
-        </div>
-    </section>
+          </div>
 
-    <section id="events" class="events">
-        <div class="container">
-            <div class="events-head">
-                <h2>Discover Events</h2>
-                <p>Browse through school gatherings and major conferences.</p>
-            </div>
-
-            <div class="filters">
-                <div class="filter-group">
-                    <button class="fbtn active" data-category="All">
-                        <span class="filter-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                                <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                                <line x1="16" y1="3.5" x2="16" y2="7"></line>
-                            </svg>
-                        </span>
-                        <span>All</span>
-                    </button>
-                    <button class="fbtn" data-category="School Event">
-                        <span class="filter-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                <path d="M3 9l9-4 9 4-9 4-9-4z"></path>
-                                <path d="M6.5 10.6V14c0 2.1 2.6 3.8 5.5 3.8s5.5-1.7 5.5-3.8v-3.4"></path>
-                            </svg>
-                        </span>
-                        <span>School</span>
-                    </button>
-                    <button class="fbtn" data-category="Conference Event">
-                        <span class="filter-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                <rect x="4" y="7" width="16" height="12" rx="2"></rect>
-                                <line x1="9" y1="7" x2="9" y2="19"></line>
-                                <path d="M10.8 7V5.8a1.8 1.8 0 0 1 1.8-1.8h.8a1.8 1.8 0 0 1 1.8 1.8V7"></path>
-                            </svg>
-                        </span>
-                        <span>Conference</span>
-                    </button>
-                </div>
-                <button class="fmonth" id="toggleDateFilter">
-                    <span class="month-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" role="img" focusable="false">
-                            <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                            <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                            <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                            <line x1="16" y1="3.5" x2="16" y2="7"></line>
-                        </svg>
+          <div class="events-grid" id="eventsGrid">
+            @forelse ($events as $event)
+            <article class="event-card" data-id="{{ $event['id'] }}" data-type="{{ $event['type'] }}" data-month="{{ $event['month'] }}" data-year="{{ $event['year'] }}">
+              <div class="event-media">
+                <img src="{{ $event['image'] }}" alt="{{ $event['title'] }}">
+                <span class="badge {{ $event['type'] === 'Conference Event' ? 'conference' : '' }}">{{ $event['type'] }}</span>
+              </div>
+              <div class="event-body">
+                <h3 class="event-title">{{ $event['title'] }}</h3>
+                <p class="meta">
+                  <span class="meta-row">
+                    <span class="meta-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
+                        <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
+                        <line x1="8" y1="3.8" x2="8" y2="7"></line>
+                        <line x1="16" y1="3.8" x2="16" y2="7"></line>
+                      </svg>
                     </span>
-                    <span>Filter by Month</span>
-                </button>
-
-                <div class="date-pop" id="dateFilterPop">
-                    <label for="yearInput">Year</label>
-                    <input id="yearInput" type="number" placeholder="e.g. 2026">
-                    <label>Month</label>
-                    <div class="month-grid" id="monthBtns">
-                        <button class="mbtn month-all active" data-month="All">All Months</button>
-                        @foreach($months as $m)
-                            <button class="mbtn" data-month="{{ $m['value'] }}">{{ $m['label'] }}</button>
-                        @endforeach
-                    </div>
-                    <div class="dp-actions">
-                        <button class="clear" id="clearDateFilter">Clear</button>
-                        <button class="apply" id="applyDateFilter">Apply</button>
-                    </div>
+                    <span>{{ $event['date'] }}</span>
+                  </span>
+                  <span class="meta-row">
+                    <span class="meta-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
+                        <circle cx="12" cy="11" r="1.9"></circle>
+                      </svg>
+                    </span>
+                    <span>{{ $event['location'] }}</span>
+                  </span>
+                </p>
+                <p class="desc">{{ $event['description'] }}</p>
+                <div class="event-actions">
+                  @if ($event['status'] === 'active')
+                  <button class="event-btn open-register" data-event-id="{{ $event['id'] }}">Register Now</button>
+                  @else
+                  <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">
+                    <span class="eval-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                      </svg>
+                    </span>
+                    <span>Evaluate Event</span>
+                  </button>
+                  @endif
                 </div>
-            </div>
-
-            <div class="events-grid" id="eventsGrid">
-                @foreach ($events as $event)
-                    @php
-                        preg_match('/([a-zA-Z]+).*\s(\d{4})/', $event['date'], $match);
-                        $monthIndex = isset($match[1]) ? date('n', strtotime($match[1] . ' 1, 2000')) - 1 : -1;
-                        $year = $match[2] ?? '';
-                    @endphp
-                    <article class="event-card" data-id="{{ $event['id'] }}" data-type="{{ $event['type'] }}" data-month="{{ $monthIndex }}" data-year="{{ $year }}">
-                        <div class="event-media">
-                            <img src="{{ $event['image'] }}" alt="{{ $event['title'] }}">
-                            <span class="badge {{ $event['type'] === 'Conference Event' ? 'conference' : '' }}">{{ $event['type'] }}</span>
-                        </div>
-                        <div class="event-body">
-                            <h3 class="event-title">{{ $event['title'] }}</h3>
-                            <p class="meta">
-                                <span class="meta-row">
-                                    <span class="meta-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                            <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
-                                            <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
-                                            <line x1="8" y1="3.8" x2="8" y2="7"></line>
-                                            <line x1="16" y1="3.8" x2="16" y2="7"></line>
-                                        </svg>
-                                    </span>
-                                    <span>{{ $event['date'] }}</span>
-                                </span>
-                                <span class="meta-row">
-                                    <span class="meta-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                            <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
-                                            <circle cx="12" cy="11" r="1.9"></circle>
-                                        </svg>
-                                    </span>
-                                    <span>{{ $event['location'] }}</span>
-                                </span>
-                            </p>
-                            <p class="desc">{{ $event['description'] }}</p>
-                            <div class="event-actions">
-                                @if ($event['status'] === 'active')
-                                    <button class="event-btn open-register" data-event-id="{{ $event['id'] }}">Register Now</button>
-                                @else
-                                    <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">
-                                        <span class="eval-icon" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                                <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                                            </svg>
-                                        </span>
-                                        <span>Evaluate Event</span>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
+              </div>
+            </article>
+            @empty
+            <article class="event-card" style="grid-column: 1 / -1;">
+              <div class="event-body">
+                <h3 class="event-title">No events available</h3>
+                <p class="desc">Admin has not published any events yet.</p>
+              </div>
+            </article>
+            @endforelse
+          </div>
         </div>
-    </section>
+      </section>
 
-    <footer class="footer">
+      <footer class="footer">
         <div class="container footer-inner">
-            <div class="fbrand" aria-label="NU Lipa Event Management System">
-                <span class="fbrand-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                        <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                        <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                        <line x1="16" y1="3.5" x2="16" y2="7"></line>
-                    </svg>
-                </span>
-                <span class="fbrand-text">NU Lipa Event Management System</span>
-            </div>
-            <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
+          <div class="fbrand" aria-label="NU Lipa Event Management System">
+            <span class="fbrand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                <line x1="16" y1="3.5" x2="16" y2="7"></line>
+              </svg>
+            </span>
+            <span class="fbrand-text">NU Lipa Event Management System</span>
+          </div>
+          <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
         </div>
-    </footer>
+      </footer>
     </div>
+  </div>
+
+  <div class="page-blur" id="pageBlur" aria-hidden="true"></div>
+
+  <div class="modal" id="eventModal">
+    <div class="modal-card" id="modalCard">
+      <button type="button" class="close-modal" id="closeModal" aria-label="Close modal">×</button>
+      <div id="modalContent"></div>
     </div>
+  </div>
 
-    <div class="page-blur" id="pageBlur" aria-hidden="true"></div>
+  <script>
+    (function setupLandingScrollCompensation() {
+      const isWindows = navigator.userAgent.includes('Windows');
+      const landingScroll = document.querySelector('.landing-scroll');
+      const landingContent = document.querySelector('.landing-scroll-content');
 
-    <div class="modal" id="eventModal">
-        <div class="modal-card" id="modalCard">
-            <button type="button" class="close-modal" id="closeModal" aria-label="Close modal">×</button>
-            <div id="modalContent"></div>
-        </div>
-    </div>
+      if (!isWindows || !landingScroll || !landingContent) return;
 
-    <script>
-        (function setupLandingScrollCompensation() {
-            const isWindows = navigator.userAgent.includes('Windows');
-            const landingScroll = document.querySelector('.landing-scroll');
-            const landingContent = document.querySelector('.landing-scroll-content');
+      const applyCompensation = () => {
+        const scrollbarWidth = Math.max(landingScroll.offsetWidth - landingScroll.clientWidth, 0);
+        const shift = scrollbarWidth > 0 ? (scrollbarWidth / 2) : 0;
+        landingContent.style.setProperty('--landing-scroll-shift', `${shift}px`);
+      };
 
-            if (!isWindows || !landingScroll || !landingContent) return;
+      applyCompensation();
+      window.addEventListener('resize', applyCompensation);
+    })();
 
-            const applyCompensation = () => {
-                const scrollbarWidth = Math.max(landingScroll.offsetWidth - landingScroll.clientWidth, 0);
-                const shift = scrollbarWidth > 0 ? (scrollbarWidth / 2) : 0;
-                landingContent.style.setProperty('--landing-scroll-shift', `${shift}px`);
-            };
+    const EVENTS = @json($events);
+    const REGIONS = @json($regions);
 
-            applyCompensation();
-            window.addEventListener('resize', applyCompensation);
-        })();
+    let filterCategory = 'All';
+    let filterMonth = 'All';
+    let filterYear = '';
 
-        const EVENTS = @json($events);
-        const REGIONS = @json($regions);
+    const dateFilterPop = document.getElementById('dateFilterPop');
+    document.getElementById('toggleDateFilter').addEventListener('click', () => {
+      dateFilterPop.classList.toggle('open');
+    });
 
-        let filterCategory = 'All';
-        let filterMonth = 'All';
-        let filterYear = '';
+    document.querySelectorAll('.fbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterCategory = btn.dataset.category;
+        applyFilters();
+      });
+    });
 
-        const dateFilterPop = document.getElementById('dateFilterPop');
-        document.getElementById('toggleDateFilter').addEventListener('click', () => {
-            dateFilterPop.classList.toggle('open');
-        });
+    document.querySelectorAll('.mbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterMonth = btn.dataset.month;
+      });
+    });
 
-        document.querySelectorAll('.fbtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterCategory = btn.dataset.category;
-                applyFilters();
-            });
-        });
+    document.getElementById('clearDateFilter').addEventListener('click', () => {
+      filterMonth = 'All';
+      filterYear = '';
+      document.getElementById('yearInput').value = '';
+      document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.month-all').classList.add('active');
+      applyFilters();
+      dateFilterPop.classList.remove('open');
+    });
 
-        document.querySelectorAll('.mbtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterMonth = btn.dataset.month;
-            });
-        });
+    document.getElementById('applyDateFilter').addEventListener('click', () => {
+      filterYear = document.getElementById('yearInput').value.trim();
+      applyFilters();
+      dateFilterPop.classList.remove('open');
+    });
 
-        document.getElementById('clearDateFilter').addEventListener('click', () => {
-            filterMonth = 'All';
-            filterYear = '';
-            document.getElementById('yearInput').value = '';
-            document.querySelectorAll('.mbtn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.month-all').classList.add('active');
-            applyFilters();
-            dateFilterPop.classList.remove('open');
-        });
+    function applyFilters() {
+      document.querySelectorAll('.event-card').forEach(card => {
+        const matchesCategory = filterCategory === 'All' || card.dataset.type === filterCategory;
+        const matchesMonth = filterMonth === 'All' || card.dataset.month === String(filterMonth);
+        const matchesYear = !filterYear || card.dataset.year === filterYear;
+        card.style.display = (matchesCategory && matchesMonth && matchesYear) ? '' : 'none';
+      });
+    }
 
-        document.getElementById('applyDateFilter').addEventListener('click', () => {
-            filterYear = document.getElementById('yearInput').value.trim();
-            applyFilters();
-            dateFilterPop.classList.remove('open');
-        });
+    const eventModal = document.getElementById('eventModal');
+    const modalContent = document.getElementById('modalContent');
+    const modalCard = document.getElementById('modalCard');
+    const pageBlur = document.getElementById('pageBlur');
+    let selectedEvent = null;
+    let registrationData = {
+      firstName: '',
+      lastName: ''
+    };
+    let otpTimer = null;
+    let countdown = 59;
 
-        function applyFilters() {
-            document.querySelectorAll('.event-card').forEach(card => {
-                const matchesCategory = filterCategory === 'All' || card.dataset.type === filterCategory;
-                const matchesMonth = filterMonth === 'All' || card.dataset.month === String(filterMonth);
-                const matchesYear = !filterYear || card.dataset.year === filterYear;
-                card.style.display = (matchesCategory && matchesMonth && matchesYear) ? '' : 'none';
-            });
-        }
+    function closeModal() {
+      eventModal.classList.remove('open');
+      modalCard.classList.remove('eval-mode');
+      modalCard.classList.remove('success-mode');
+      document.body.classList.remove('modal-open');
+      pageBlur.classList.remove('open');
+      modalContent.innerHTML = '';
+      selectedEvent = null;
+      if (otpTimer) clearInterval(otpTimer);
+    }
 
-        const eventModal = document.getElementById('eventModal');
-        const modalContent = document.getElementById('modalContent');
-        const modalCard = document.getElementById('modalCard');
-        const pageBlur = document.getElementById('pageBlur');
-        let selectedEvent = null;
-        let registrationData = { firstName: '', lastName: '' };
-        let otpTimer = null;
-        let countdown = 59;
+    function makeOtpInputs() {
+      return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => ` < input maxlength = "1"
+      data - otp = "${i}"
+      required > `).join('')}</div>`;
+    }
 
-        function closeModal() {
-            eventModal.classList.remove('open');
-            modalCard.classList.remove('eval-mode');
-            modalCard.classList.remove('success-mode');
-            document.body.classList.remove('modal-open');
-            pageBlur.classList.remove('open');
-            modalContent.innerHTML = '';
-            selectedEvent = null;
-            if (otpTimer) clearInterval(otpTimer);
-        }
-
-        function makeOtpInputs() {
-            return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => `<input maxlength="1" data-otp="${i}" required>`).join('')}</div>`;
-        }
-
-        function renderFormStep() {
-            const showUpload = selectedEvent.type === 'Conference Event';
-            modalContent.innerHTML = `
+    function renderFormStep() {
+      const showUpload = selectedEvent.type === 'Conference Event';
+      modalContent.innerHTML = `
                 <div class="event-head">
                     <img src="${selectedEvent.image}" alt="${selectedEvent.title}">
                     <div class="event-overlay">
@@ -505,20 +451,20 @@ $regions = [
                     </form>
                 </div>
             `;
-            document.getElementById('registrationForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                registrationData = {
-                    firstName: String(formData.get('firstName') || '').trim(),
-                    lastName: String(formData.get('lastName') || '').trim(),
-                };
-                renderOtpStep();
-            });
-        }
+      document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        registrationData = {
+          firstName: String(formData.get('firstName') || '').trim(),
+          lastName: String(formData.get('lastName') || '').trim(),
+        };
+        renderOtpStep();
+      });
+    }
 
-        function renderOtpStep() {
-            countdown = 59;
-            modalContent.innerHTML = `
+    function renderOtpStep() {
+      countdown = 59;
+      modalContent.innerHTML = `
                 <div class="modal-body" style="padding:48px; text-align:center;">
                     <div class="step-tag">STEP 2 OF 2: VERIFICATION</div>
                     <h3 style="font-size:34px; color:#1a3263; margin:20px 0 8px;">Verify Your Email</h3>
@@ -531,36 +477,36 @@ $regions = [
                 </div>
             `;
 
-            const otpInputs = Array.from(document.querySelectorAll('[data-otp]'));
-            otpInputs.forEach((input, idx) => {
-                input.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.slice(-1).toUpperCase();
-                    if (e.target.value && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
-                });
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && !e.target.value && idx > 0) otpInputs[idx - 1].focus();
-                });
-            });
+      const otpInputs = Array.from(document.querySelectorAll('[data-otp]'));
+      otpInputs.forEach((input, idx) => {
+        input.addEventListener('input', (e) => {
+          e.target.value = e.target.value.slice(-1).toUpperCase();
+          if (e.target.value && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !e.target.value && idx > 0) otpInputs[idx - 1].focus();
+        });
+      });
 
-            if (otpTimer) clearInterval(otpTimer);
-            otpTimer = setInterval(() => {
-                countdown -= 1;
-                document.getElementById('countdown').textContent = `0:${String(Math.max(countdown, 0)).padStart(2, '0')}`;
-                if (countdown <= 0) clearInterval(otpTimer);
-            }, 1000);
+      if (otpTimer) clearInterval(otpTimer);
+      otpTimer = setInterval(() => {
+        countdown -= 1;
+        document.getElementById('countdown').textContent = `0:${String(Math.max(countdown, 0)).padStart(2, '0')}`;
+        if (countdown <= 0) clearInterval(otpTimer);
+      }, 1000);
 
-            document.getElementById('otpForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                renderSuccessStep();
-            });
-        }
+      document.getElementById('otpForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        renderSuccessStep();
+      });
+    }
 
-        function renderSuccessStep() {
-            const isConference = selectedEvent.type === 'Conference Event';
-            const code = 'NUL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const fullName = `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name';
-            modalCard.classList.add('success-mode');
-            modalContent.innerHTML = `
+    function renderSuccessStep() {
+      const isConference = selectedEvent.type === 'Conference Event';
+      const code = 'NUL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const fullName = `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name';
+      modalCard.classList.add('success-mode');
+      modalContent.innerHTML = `
                 <div class="registration-success">
                     <span class="success-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -673,33 +619,33 @@ $regions = [
                     <button type="button" class="success-done" id="doneBtn">Done</button>
                 </div>
             `;
-            document.getElementById('doneBtn').addEventListener('click', closeModal);
-        }
+      document.getElementById('doneBtn').addEventListener('click', closeModal);
+    }
 
-        function openRegister(eventId) {
-            selectedEvent = EVENTS.find(e => e.id === Number(eventId));
-            if (!selectedEvent) return;
-            modalCard.classList.remove('eval-mode');
-            eventModal.classList.add('open');
-            document.body.classList.add('modal-open');
-            pageBlur.classList.add('open');
-            renderFormStep();
-        }
+    function openRegister(eventId) {
+      selectedEvent = EVENTS.find(e => e.id === Number(eventId));
+      if (!selectedEvent) return;
+      modalCard.classList.remove('eval-mode');
+      eventModal.classList.add('open');
+      document.body.classList.add('modal-open');
+      pageBlur.classList.add('open');
+      renderFormStep();
+    }
 
-        function openEvaluate(eventId) {
-            selectedEvent = EVENTS.find(e => e.id === Number(eventId));
-            if (!selectedEvent) return;
-            modalCard.classList.add('eval-mode');
-            eventModal.classList.add('open');
-            document.body.classList.add('modal-open');
-            pageBlur.classList.add('open');
-            let rating = 0;
-            let hoveredRating = 0;
-            let evalSubmitted = false;
+    function openEvaluate(eventId) {
+      selectedEvent = EVENTS.find(e => e.id === Number(eventId));
+      if (!selectedEvent) return;
+      modalCard.classList.add('eval-mode');
+      eventModal.classList.add('open');
+      document.body.classList.add('modal-open');
+      pageBlur.classList.add('open');
+      let rating = 0;
+      let hoveredRating = 0;
+      let evalSubmitted = false;
 
-            function renderEvaluateState() {
-                if (evalSubmitted) {
-                    modalContent.innerHTML = `
+      function renderEvaluateState() {
+        if (evalSubmitted) {
+          modalContent.innerHTML = `
                         <div class="eval-modal">
                             <div class="eval-head">
                                 <h3>
@@ -724,11 +670,11 @@ $regions = [
                             </div>
                         </div>
                     `;
-                    document.getElementById('doneBtn').addEventListener('click', closeModal);
-                    return;
-                }
+          document.getElementById('doneBtn').addEventListener('click', closeModal);
+          return;
+        }
 
-                modalContent.innerHTML = `
+        modalContent.innerHTML = `
                     <div class="eval-modal">
                         <div class="eval-head">
                             <h3>
@@ -743,13 +689,20 @@ $regions = [
                         <div class="eval-body">
                             <p class="eval-copy">Please rate your experience at ${selectedEvent.title}.</p>
                             <div class="eval-stars" role="radiogroup" aria-label="Rate event">
-                                ${Array.from({ length: 5 }, (_, i) => `
-                                    <button type="button" class="rating-star" data-rate="${i + 1}" aria-label="${i + 1} star">
-                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                            <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                                        </svg>
-                                    </button>
-                                `).join('')}
+                                ${Array.from({ length: 5 }, (_, i) => ` <
+          button type = "button"
+        class = "rating-star"
+        data - rate = "${i + 1}"
+        aria - label = "${i + 1} star" >
+          <
+          svg viewBox = "0 0 24 24"
+        role = "img"
+        focusable = "false" >
+          <
+          polygon points = "12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4" > < /polygon> <
+          /svg> <
+          /button>
+        `).join('')}
                             </div>
                             <label class="eval-label">ADDITIONAL COMMENTS (OPTIONAL)</label>
                             <textarea class="eval-text" rows="4" placeholder="What did you like? What can we improve?"></textarea>
@@ -758,54 +711,54 @@ $regions = [
                     </div>
                 `;
 
-                const stars = Array.from(document.querySelectorAll('.rating-star'));
-                const submitBtn = document.getElementById('evalSubmitBtn');
+        const stars = Array.from(document.querySelectorAll('.rating-star'));
+        const submitBtn = document.getElementById('evalSubmitBtn');
 
-                function paintStars(activeValue) {
-                    stars.forEach((star, idx) => {
-                        star.classList.toggle('active', idx < activeValue);
-                    });
-                }
-
-                paintStars(hoveredRating || rating);
-
-                stars.forEach((star, idx) => {
-                    star.addEventListener('mouseenter', () => {
-                        hoveredRating = idx + 1;
-                        paintStars(hoveredRating);
-                    });
-                    star.addEventListener('mouseleave', () => {
-                        hoveredRating = 0;
-                        paintStars(rating);
-                    });
-                    star.addEventListener('click', () => {
-                        rating = idx + 1;
-                        paintStars(rating);
-                        submitBtn.disabled = rating === 0;
-                    });
-                });
-
-                submitBtn.addEventListener('click', () => {
-                    if (rating === 0) return;
-                    evalSubmitted = true;
-                    renderEvaluateState();
-                });
-            }
-
-            renderEvaluateState();
+        function paintStars(activeValue) {
+          stars.forEach((star, idx) => {
+            star.classList.toggle('active', idx < activeValue);
+          });
         }
 
-        document.querySelectorAll('.open-register').forEach(btn => {
-            btn.addEventListener('click', () => openRegister(btn.dataset.eventId));
-        });
-        document.querySelectorAll('.open-evaluate').forEach(btn => {
-            btn.addEventListener('click', () => openEvaluate(btn.dataset.eventId));
-        });
-        document.getElementById('closeModal').addEventListener('click', closeModal);
-        eventModal.addEventListener('click', (e) => {
-            if (e.target === eventModal) closeModal();
-        });
-    </script>
-</body>
-</html>
+        paintStars(hoveredRating || rating);
 
+        stars.forEach((star, idx) => {
+          star.addEventListener('mouseenter', () => {
+            hoveredRating = idx + 1;
+            paintStars(hoveredRating);
+          });
+          star.addEventListener('mouseleave', () => {
+            hoveredRating = 0;
+            paintStars(rating);
+          });
+          star.addEventListener('click', () => {
+            rating = idx + 1;
+            paintStars(rating);
+            submitBtn.disabled = rating === 0;
+          });
+        });
+
+        submitBtn.addEventListener('click', () => {
+          if (rating === 0) return;
+          evalSubmitted = true;
+          renderEvaluateState();
+        });
+      }
+
+      renderEvaluateState();
+    }
+
+    document.querySelectorAll('.open-register').forEach(btn => {
+      btn.addEventListener('click', () => openRegister(btn.dataset.eventId));
+    });
+    document.querySelectorAll('.open-evaluate').forEach(btn => {
+      btn.addEventListener('click', () => openEvaluate(btn.dataset.eventId));
+    });
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    eventModal.addEventListener('click', (e) => {
+      if (e.target === eventModal) closeModal();
+    });
+  </script>
+</body>
+
+</html>

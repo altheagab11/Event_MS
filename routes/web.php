@@ -1,12 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\QrAttendanceController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-  return view('landingpage');
-});
+Route::get('/', [EventController::class, 'landing']);
 
 Route::middleware('guest')->group(function () {
   Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
@@ -18,9 +17,8 @@ Route::middleware('auth')->group(function () {
     return view('admin.dashboard');
   })->name('admin.dashboard');
 
-  Route::get('/admin/events', function () {
-    return view('admin.events');
-  })->name('admin.events');
+  Route::get('/admin/events', [EventController::class, 'index'])->name('admin.events');
+  Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
 
   Route::get('/admin/participants', function () {
     return view('admin.participants');

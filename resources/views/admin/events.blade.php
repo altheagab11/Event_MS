@@ -3,6 +3,9 @@
 
 <head>
   <meta charset="utf-8">
+  @php
+  $hasErrors = isset($errors) && $errors->any();
+  @endphp
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Events Management | NU Lipa EMS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -407,12 +410,19 @@
       flex-direction: column;
       width: 920px;
       max-width: calc(100% - 56px);
-      max-height: calc(100vh - 80px);
+      max-height: calc(100vh - 48px);
       background: #fff;
       border-radius: 12px;
       overflow: hidden;
       /* clip header/footer, body will scroll */
       box-shadow: 0 10px 40px rgba(10, 20, 40, 0.3);
+    }
+
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     .modal-header {
@@ -452,12 +462,13 @@
     }
 
     .modal-body {
-      padding: 20px 22px 28px;
-      display: block;
-      gap: 18px;
+      padding: 20px 22px;
+      display: grid;
+      gap: 14px;
       overflow-y: auto;
       /* allow the body to take remaining space inside the modal and scroll */
       flex: 1 1 auto;
+      min-height: 0;
     }
 
     .card-panel {
@@ -472,6 +483,43 @@
       font-size: 18px;
       color: var(--blue-900);
       font-weight: 800;
+    }
+
+    .event-type-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .event-type-option {
+      text-align: left;
+      border: 2px solid #dbe4f1;
+      background: #fff;
+      color: #2b3f66;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .event-type-option strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .event-type-option small {
+      color: #7c8fae;
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .event-type-option.active {
+      border-color: #213a6e;
+      background: #f6f8ff;
+      box-shadow: inset 0 0 0 1px #213a6e;
     }
 
     .row {
@@ -505,8 +553,11 @@
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      padding: 16px 22px 26px;
+      padding: 14px 22px 18px;
       align-items: center;
+      border-top: 1px solid #e7edf5;
+      background: #fff;
+      flex-shrink: 0;
     }
 
     .btn-cancel {
@@ -527,6 +578,64 @@
       font-size: 16px;
       padding: 12px 20px;
       box-shadow: 0 4px 12px rgba(17, 42, 84, .12);
+    }
+
+    .field-note {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #7c8fae;
+    }
+
+    .upload-input-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 10px;
+      border: 1.5px solid #e6edf6;
+      background: #fbfdff;
+      padding: 8px 10px;
+      min-height: 48px;
+    }
+
+    .upload-file-input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    .upload-file-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 8px;
+      background: var(--gold);
+      color: #15386f;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 12px;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .upload-file-name {
+      min-width: 0;
+      color: #8b98b3;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 900px) {
+      .event-type-options {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -602,6 +711,12 @@
         </button>
       </header>
 
+      @if (session('status'))
+      <div style="margin-bottom:14px; border:2px solid #b7ebc6; background:#ebfff1; color:#1f6b39; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600;">
+        {{ session('status') }}
+      </div>
+      @endif
+
       <section class="filters" aria-label="Event filters">
         <label class="search-wrap">
           <svg viewBox="0 0 24 24">
@@ -649,95 +764,53 @@
       </section>
 
       <section class="grid" aria-label="Events list">
+        @forelse ($events as $event)
+        @php
+        $imageClass = ['one', 'two', 'three'][$loop->index % 3];
+        $isActive = \Illuminate\Support\Carbon::parse($event->event_date)->gte(now()->startOfDay());
+        $bannerUrl = $event->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($event->banner_image) : null;
+        @endphp
         <article class="event-card">
-          <div class="event-image one">
+          <div class="event-image {{ $bannerUrl ? '' : $imageClass }}" @if($bannerUrl) style="background-image: linear-gradient(160deg, rgba(18, 37, 73, .2), rgba(13, 31, 65, .42)), url('{{ $bannerUrl }}');" @endif>
             <span class="badge">School Event</span>
           </div>
           <div class="event-body">
-            <h3 class="event-title">NU Lipa Foundation Day 2026</h3>
+            <h3 class="event-title">{{ $event->event_name }}</h3>
             <div class="meta">
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="5" width="18" height="16" rx="2"></rect>
                 <line x1="8" y1="3" x2="8" y2="7"></line>
                 <line x1="16" y1="3" x2="16" y2="7"></line>
               </svg>
-              2026-04-20
+              {{ \Illuminate\Support\Carbon::parse($event->event_date)->format('Y-m-d') }}
             </div>
             <div class="meta">
               <svg viewBox="0 0 24 24">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              Main Campus Grounds
+              {{ $event->location ?: 'TBA' }}
             </div>
             <div class="event-footer">
-              <span class="status">Active</span>
-              <a href="#" class="manage">Manage</a>
+              <span class="status">{{ $isActive ? 'Active' : 'Ended' }}</span>
+              <span class="manage">Event #{{ $event->event_id }}</span>
             </div>
           </div>
         </article>
-
-        <article class="event-card">
-          <div class="event-image two">
-            <span class="badge conference">Conference Event</span>
-          </div>
+        @empty
+        <article class="event-card" style="grid-column: 1 / -1;">
           <div class="event-body">
-            <h3 class="event-title">Tech Innovations Summit</h3>
-            <div class="meta">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                <line x1="8" y1="3" x2="8" y2="7"></line>
-                <line x1="16" y1="3" x2="16" y2="7"></line>
-              </svg>
-              2026-05-15
-            </div>
-            <div class="meta">
-              <svg viewBox="0 0 24 24">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              Auditorium Hall B
-            </div>
-            <div class="event-footer">
-              <span class="status">Active</span>
-              <a href="#" class="manage">Manage</a>
-            </div>
+            <h3 class="event-title">No events yet</h3>
+            <div class="meta">Create your first event using the button above.</div>
           </div>
         </article>
-
-        <article class="event-card">
-          <div class="event-image three">
-            <span class="badge">School Event</span>
-          </div>
-          <div class="event-body">
-            <h3 class="event-title">IT Week 2026</h3>
-            <div class="meta">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                <line x1="8" y1="3" x2="8" y2="7"></line>
-                <line x1="16" y1="3" x2="16" y2="7"></line>
-              </svg>
-              2026-09-10
-            </div>
-            <div class="meta">
-              <svg viewBox="0 0 24 24">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              CCS Lab 1-4
-            </div>
-            <div class="event-footer">
-              <span class="status">Active</span>
-              <a href="#" class="manage">Manage</a>
-            </div>
-          </div>
-        </article>
+        @endforelse
       </section>
     </main>
   </div>
 
   <!-- Create Event Modal -->
-  <div id="event-modal-overlay" class="modal-overlay" aria-hidden="true">
+  <div id="event-modal-overlay" class="modal-overlay{{ $hasErrors ? ' open' : '' }}" aria-hidden="{{ $hasErrors ? 'false' : 'true' }}">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-header">
         <div>
@@ -747,51 +820,71 @@
         <button type="button" class="modal-close" aria-label="Close modal">✕</button>
       </div>
 
-      <div class="modal-body">
-        <div class="card-panel">
-          <h3>Basic Info</h3>
+      <form method="post" action="{{ route('admin.events.store') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-body">
+          @if ($hasErrors)
+          <div style="margin-bottom:14px; border:2px solid #f1b4ba; background:#fff3f4; color:#8b1e2b; border-radius:10px; padding:10px 12px; font-size:13px;">
+            @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+          </div>
+          @endif
 
-          <div style="display:flex; gap:12px; margin-bottom:12px;">
-            <button type="button" class="input" style="border:2px solid #213a6e; background:#f6f8ff; font-weight:800;">School Event<br><small style="font-weight:500; color:#7c8fae;">Regular campus activities</small></button>
-            <button type="button" class="input" style="background:#fff;"><span style="font-weight:700; color:#2b3f66;">Conference Event</span><br><small style="font-weight:500; color:#9aa7c3;">Requires PDF research paper</small></button>
+          <div class="card-panel">
+            <h3>Basic Info</h3>
+
+            <input type="hidden" name="event_type" id="event_type" value="{{ old('event_type', 'School Event') }}">
+            <div class="event-type-options" role="radiogroup" aria-label="Event type">
+              <button type="button" class="event-type-option{{ old('event_type', 'School Event') === 'School Event' ? ' active' : '' }}" data-option="School Event">
+                <strong>School Event</strong>
+                <small>Regular campus activities</small>
+              </button>
+              <button type="button" class="event-type-option{{ old('event_type') === 'Conference' ? ' active' : '' }}" data-option="Conference">
+                <strong>Conference</strong>
+                <small>Conference sessions and presentations</small>
+              </button>
+            </div>
+
+            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
+            <input class="input" type="text" name="event_name" value="{{ old('event_name') }}" placeholder="e.g. IT Week 2026" required>
           </div>
 
-          <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
-          <input class="input" type="text" placeholder="e.g. IT Week 2026">
-        </div>
-
-        <div class="card-panel">
-          <h3>Schedule &amp; Location</h3>
-          <div class="row">
-            <div class="col">
-              <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
-              <input class="input" type="text" placeholder="mm/dd/yyyy">
-            </div>
-            <div class="col">
-              <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
-              <input class="input" type="text" placeholder="e.g. Main Auditorium">
+          <div class="card-panel">
+            <h3>Schedule &amp; Location</h3>
+            <div class="row">
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
+                <input class="input" type="date" name="event_date" value="{{ old('event_date') }}" required>
+              </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
+                <input class="input" type="text" name="location" value="{{ old('location') }}" placeholder="e.g. Main Auditorium">
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="card-panel">
-          <h3>Content &amp; Media</h3>
-          <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Full Description</label>
-          <textarea class="input" placeholder="Write detailed information..."></textarea>
+          <div class="card-panel">
+            <h3>Description</h3>
+            <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Full Description</label>
+            <textarea class="input" name="description" placeholder="Write detailed information...">{{ old('description') }}</textarea>
 
-          <div style="margin-top:14px;">
-            <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Event Banner Image</label>
-            <div style="border:2px dashed #e6edf6; border-radius:10px; padding:26px; text-align:center; color:#7081a1;">Upload a picture or drag and drop<br><small style="display:block; margin-top:8px; color:#9fb0cc;">PNG, JPG, WEBP up to 5MB</small></div>
+            <label style="display:block; margin:14px 0 8px; font-weight:700; color:#233b6a;">Event Banner Image</label>
+            <div class="upload-input-wrap">
+              <input class="upload-file-input" id="banner_image" type="file" name="banner_image" accept="image/png,image/jpeg,image/jpg,image/webp">
+              <label for="banner_image" class="upload-file-trigger">Choose Image</label>
+              <span class="upload-file-name" id="banner_file_name" title="No file selected">No file selected</span>
+            </div>
+            <div class="field-note">Accepted formats: JPG, JPEG, PNG, WEBP. Max size: 5 MB.</div>
           </div>
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn-cancel">Cancel</button>
-          <button type="button" class="btn-publish">Publish Event</button>
+          <button type="submit" class="btn-publish">Publish Event</button>
         </div>
-      </div>
+      </form>
     </div>
-  </div>
   </div>
 
   <script>
@@ -800,6 +893,10 @@
       const overlay = document.getElementById('event-modal-overlay');
       const closeBtn = overlay ? overlay.querySelector('.modal-close') : null;
       const cancelBtn = overlay ? overlay.querySelector('.btn-cancel') : null;
+      const eventTypeInput = overlay ? overlay.querySelector('#event_type') : null;
+      const eventTypeButtons = overlay ? overlay.querySelectorAll('.event-type-option') : [];
+      const bannerInput = overlay ? overlay.querySelector('#banner_image') : null;
+      const bannerName = overlay ? overlay.querySelector('#banner_file_name') : null;
 
       function openModal() {
         if (!overlay) return;
@@ -819,6 +916,26 @@
       if (openBtn) openBtn.addEventListener('click', openModal);
       if (closeBtn) closeBtn.addEventListener('click', closeModal);
       if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+      if (eventTypeButtons.length > 0 && eventTypeInput) {
+        eventTypeButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            eventTypeButtons.forEach((node) => node.classList.remove('active'));
+            btn.classList.add('active');
+            eventTypeInput.value = btn.dataset.option || 'School Event';
+          });
+        });
+      }
+
+      if (bannerInput && bannerName) {
+        bannerInput.addEventListener('change', () => {
+          const selected = bannerInput.files && bannerInput.files.length > 0
+            ? bannerInput.files[0].name
+            : 'No file selected';
+          bannerName.textContent = selected;
+          bannerName.title = selected;
+        });
+      }
 
       // close when clicking outside the modal
       if (overlay) {
