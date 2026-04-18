@@ -929,9 +929,9 @@
 
       if (bannerInput && bannerName) {
         bannerInput.addEventListener('change', () => {
-          const selected = bannerInput.files && bannerInput.files.length > 0
-            ? bannerInput.files[0].name
-            : 'No file selected';
+          const selected = bannerInput.files && bannerInput.files.length > 0 ?
+            bannerInput.files[0].name :
+            'No file selected';
           bannerName.textContent = selected;
           bannerName.title = selected;
         });
