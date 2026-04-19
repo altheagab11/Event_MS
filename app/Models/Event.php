@@ -35,12 +35,18 @@ class Event extends Model
       return null;
     }
 
-    if (filter_var($this->banner_image, FILTER_VALIDATE_URL)) {
-      return $this->banner_image;
+    $bannerImage = (string) $this->banner_image;
+
+    if (filter_var($bannerImage, FILTER_VALIDATE_URL)) {
+      return $bannerImage;
     }
 
-    return Storage::disk('public')->exists($this->banner_image)
-      ? '/storage/' . ltrim($this->banner_image, '/')
+    $relativePath = ltrim($bannerImage, '/');
+    $relativePath = preg_replace('#^storage/#', '', $relativePath) ?? $relativePath;
+    $relativePath = preg_replace('#^public/#', '', $relativePath) ?? $relativePath;
+
+    return Storage::disk('public')->exists($relativePath)
+      ? asset('storage/' . ltrim($relativePath, '/'))
       : null;
   }
 
