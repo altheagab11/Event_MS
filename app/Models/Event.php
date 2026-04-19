@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -41,5 +42,10 @@ class Event extends Model
     return Storage::disk('public')->exists($this->banner_image)
       ? '/storage/' . ltrim($this->banner_image, '/')
       : null;
+  }
+
+  public function registrations(): HasMany
+  {
+    return $this->hasMany(Registration::class, 'event_id', 'event_id');
   }
 }

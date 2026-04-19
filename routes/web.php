@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AdminParticipantsController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\QrAttendanceController;
@@ -29,9 +30,8 @@ Route::middleware('auth')->group(function () {
   Route::get('/admin/events', [EventController::class, 'index'])->name('admin.events');
   Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
 
-  Route::get('/admin/participants', function () {
-    return view('admin.participants');
-  })->name('admin.participants');
+  Route::get('/admin/participants', [AdminParticipantsController::class, 'index'])
+    ->name('admin.participants');
 
   Route::get('/admin/evaluations', function () {
     return view('admin.evaluations');

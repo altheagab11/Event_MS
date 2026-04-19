@@ -407,42 +407,23 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <div class="name">Maria Santos</div>
-                  <div class="email">msantos@national-u.edu.ph</div>
-                </td>
-                <td><span class="event">NU Lipa Foundation Day 2026</span></td>
-                <td><span class="chip green">Checked-in</span></td>
-                <td><button class="details-btn" type="button">View Details</button></td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="name">John Doe</div>
-                  <div class="email">jdoe@student.edu.ph</div>
-                </td>
-                <td><span class="event">Tech Innovations Summit</span></td>
-                <td><span class="chip blue">Registered</span></td>
-                <td><button class="details-btn" type="button">View Details</button></td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="name">Anna Reyes</div>
-                  <div class="email">areyes@national.edu.ph</div>
-                </td>
-                <td><span class="event">NU Lipa Foundation Day 2026</span></td>
-                <td><span class="chip blue">Registered</span></td>
-                <td><button class="details-btn" type="button">View Details</button></td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="name">Mark Cruz</div>
-                  <div class="email">mcruz@up.edu.ph</div>
-                </td>
-                <td><span class="event">Tech Innovations Summit</span></td>
-                <td><span class="chip gold">Pending Paper</span></td>
-                <td><button class="details-btn" type="button">View Details</button></td>
-              </tr>
+              @forelse ($participants as $participant)
+                <tr>
+                  <td>
+                    <div class="name">{{ $participant['name'] }}</div>
+                    <div class="email">{{ $participant['email'] }}</div>
+                  </td>
+                  <td><span class="event">{{ $participant['event_name'] }}</span></td>
+                  <td><span class="chip {{ $participant['status_class'] }}">{{ $participant['status_label'] }}</span></td>
+                  <td><button class="details-btn" type="button">View Details</button></td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="4">
+                    <div class="email">No participant registrations found yet.</div>
+                  </td>
+                </tr>
+              @endforelse
             </tbody>
           </table>
         </div>
