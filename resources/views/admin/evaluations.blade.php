@@ -370,105 +370,39 @@
       <p class="page-subtitle">Review feedback and comments from event participants.</p>
 
       <section class="cards" aria-label="Evaluation cards">
-        <article class="review-card">
-          <div class="card-head">
-            <div class="identity">
-              <span class="avatar">M</span>
-              <div>
-                <p class="name">Maria Santos</p>
-                <p class="date">2026-04-21</p>
+        @forelse ($evaluations as $evaluation)
+          <article class="review-card {{ $loop->first ? 'focus' : '' }}">
+            <div class="card-head">
+              <div class="identity">
+                <span class="avatar">{{ $evaluation['avatar'] }}</span>
+                <div>
+                  <p class="name">{{ $evaluation['reviewer_name'] }}</p>
+                  <p class="date">{{ $evaluation['date'] }}</p>
+                </div>
               </div>
+              <span class="score">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
+                </svg>
+                {{ $evaluation['score'] }}
+              </span>
             </div>
-            <span class="score">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
-              </svg>
-              5
-            </span>
-          </div>
 
-          <p class="event-name">NU LIPA FOUNDATION DAY 2026</p>
-          <p class="quote">"Great event! Very organized and the activities were fun for everyone."</p>
+            <p class="event-name">{{ $evaluation['event_name'] }}</p>
+            <p class="quote">"{{ $evaluation['comment_preview'] }}"</p>
 
-          <div class="card-foot">
-            <a href="#" class="read-link">Read Full Review →</a>
-          </div>
-        </article>
-
-        <article class="review-card">
-          <div class="card-head">
-            <div class="identity">
-              <span class="avatar">J</span>
-              <div>
-                <p class="name">John Doe</p>
-                <p class="date">2026-05-16</p>
-              </div>
+            <div class="card-foot">
+              <a href="#" class="read-link" title="{{ $evaluation['comment_full'] !== '' ? $evaluation['comment_full'] : 'No comment provided.' }}">Read Full Review →</a>
             </div>
-            <span class="score">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
-              </svg>
-              4
-            </span>
-          </div>
-
-          <p class="event-name">TECH INNOVATIONS SUMMIT</p>
-          <p class="quote">"Good speakers, but the food was late. Overall, I learned a lot about the new tech trends."</p>
-
-          <div class="card-foot">
-            <a href="#" class="read-link">Read Full Review →</a>
-          </div>
-        </article>
-
-        <article class="review-card">
-          <div class="card-head">
-            <div class="identity">
-              <span class="avatar">A</span>
-              <div>
-                <p class="name">Anna Reyes</p>
-                <p class="date">2026-04-21</p>
-              </div>
+          </article>
+        @empty
+          <article class="review-card" style="grid-column: 1 / -1; min-height: 140px; display: grid; place-items: center; text-align: center;">
+            <div>
+              <p class="name" style="font-size: 24px; margin-bottom: 8px;">No Evaluations Yet</p>
+              <p class="quote" style="margin: 0; font-size: 14px;">Submitted participant evaluations will appear here.</p>
             </div>
-            <span class="score">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
-              </svg>
-              5
-            </span>
-          </div>
-
-          <p class="event-name">NU LIPA FOUNDATION DAY 2026</p>
-          <p class="quote">"Loved the activities. The foundation day was a huge success!"</p>
-
-          <div class="card-foot">
-            <a href="#" class="read-link">Read Full Review →</a>
-          </div>
-        </article>
-
-        <article class="review-card focus">
-          <div class="card-head">
-            <div class="identity">
-              <span class="avatar">M</span>
-              <div>
-                <p class="name warn">Mark Cruz</p>
-                <p class="date">2026-09-11</p>
-              </div>
-            </div>
-            <span class="score">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
-              </svg>
-              3
-            </span>
-          </div>
-
-          <p class="event-name">IT WEEK 2026</p>
-          <p class="quote">"It was okay. The venue was a bit crowded and hot."</p>
-
-          <div class="card-foot">
-            <a href="#" class="read-link">Read Full Review →</a>
-          </div>
-        </article>
+          </article>
+        @endforelse
       </section>
     </main>
   </div>

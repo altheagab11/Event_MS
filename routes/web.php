@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AdminEvaluationsController;
 use App\Http\Controllers\AdminParticipantsController;
+use App\Http\Controllers\EventEvaluationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\QrAttendanceController;
@@ -16,6 +18,10 @@ Route::post('/register/send-verification', [RegistrationController::class, 'send
 Route::post('/register/verify-code', [RegistrationController::class, 'verifyCodeAndFinalize'])
   ->middleware('throttle:12,1')
   ->name('registration.verify-code');
+
+Route::post('/events/{event}/evaluate', [EventEvaluationController::class, 'store'])
+  ->middleware('throttle:20,1')
+  ->name('events.evaluate');
 
 Route::middleware('guest')->group(function () {
   Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
@@ -33,9 +39,8 @@ Route::middleware('auth')->group(function () {
   Route::get('/admin/participants', [AdminParticipantsController::class, 'index'])
     ->name('admin.participants');
 
-  Route::get('/admin/evaluations', function () {
-    return view('admin.evaluations');
-  })->name('admin.evaluations');
+  Route::get('/admin/evaluations', [AdminEvaluationsController::class, 'index'])
+    ->name('admin.evaluations');
 
   Route::post('/admin/attendance/validate-qr', [QrAttendanceController::class, 'validateAndCheckIn'])
     ->name('admin.attendance.validate-qr');

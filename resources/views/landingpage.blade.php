@@ -305,6 +305,7 @@ $regions = [
     const REGIONS = @json($regions);
     const REGISTER_SEND_URL = @json(route('registration.send-verification'));
     const REGISTER_VERIFY_URL = @json(route('registration.verify-code'));
+    const EVALUATION_SUBMIT_BASE_URL = @json(url('/events'));
     const CSRF_TOKEN = @json(csrf_token());
 
     let filterCategory = 'All';
@@ -786,6 +787,8 @@ $regions = [
       let rating = 0;
       let hoveredRating = 0;
       let evalSubmitted = false;
+      let evalEmail = '';
+      let evalComment = '';
 
       function renderEvaluateState() {
         if (evalSubmitted) {
@@ -832,6 +835,8 @@ $regions = [
                         </div>
                         <div class="eval-body">
                             <p class="eval-copy">Please rate your experience at ${selectedEvent.title}.</p>
+                          <label class="eval-label">EMAIL ADDRESS *</label>
+                          <input class="eval-text" id="evalEmailInput" type="email" placeholder="Enter your registered email" value="${escapeHtml(evalEmail)}" required>
                             <div class="eval-stars" role="radiogroup" aria-label="Rate event">
                                 ${Array.from({ length: 5 }, (_, i) => `
                                   <button type="button" class="rating-star" data-rate="${i + 1}" aria-label="${i + 1} star">
@@ -842,7 +847,8 @@ $regions = [
                                 `).join('')}
                             </div>
                             <label class="eval-label">ADDITIONAL COMMENTS (OPTIONAL)</label>
-                            <textarea class="eval-text" rows="4" placeholder="What did you like? What can we improve?"></textarea>
+                              <textarea class="eval-text" id="evalCommentInput" rows="4" placeholder="What did you like? What can we improve?">${escapeHtml(evalComment)}</textarea>
+                              <div id="evalMessage" style="display:none; margin:10px 0 12px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:600;"></div>
                             <button type="button" class="eval-submit" id="evalSubmitBtn" ${rating === 0 ? 'disabled' : ''}>Submit Evaluation</button>
                         </div>
                     </div>
@@ -850,6 +856,9 @@ $regions = [
 
         const stars = Array.from(document.querySelectorAll('.rating-star'));
         const submitBtn = document.getElementById('evalSubmitBtn');
+        const emailInput = document.getElementById('evalEmailInput');
+        const commentInput = document.getElementById('evalCommentInput');
+        const evalMessage = document.getElementById('evalMessage');
 
         function paintStars(activeValue) {
           stars.forEach((star, idx) => {
@@ -877,8 +886,46 @@ $regions = [
 
         submitBtn.addEventListener('click', () => {
           if (rating === 0) return;
-          evalSubmitted = true;
-          renderEvaluateState();
+          const email = String(emailInput.value || '').trim();
+          const comment = String(commentInput.value || '').trim();
+
+          evalEmail = email;
+          evalComment = comment;
+
+          if (!email) {
+            evalMessage.style.display = 'block';
+            evalMessage.style.border = '2px solid #f1b4ba';
+            evalMessage.style.background = '#fff3f4';
+            evalMessage.style.color = '#8b1e2b';
+            evalMessage.textContent = 'Email is required to verify your participation.';
+            return;
+          }
+
+          const payload = new FormData();
+          payload.append('email', email);
+          payload.append('rating', String(rating));
+          payload.append('comment', comment);
+
+          evalMessage.style.display = 'none';
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          postForm(`${EVALUATION_SUBMIT_BASE_URL}/${selectedEvent.id}/evaluate`, payload)
+            .then(() => {
+              evalSubmitted = true;
+              renderEvaluateState();
+            })
+            .catch((error) => {
+              evalMessage.style.display = 'block';
+              evalMessage.style.border = '2px solid #f1b4ba';
+              evalMessage.style.background = '#fff3f4';
+              evalMessage.style.color = '#8b1e2b';
+              evalMessage.textContent = error instanceof Error ? error.message : 'Unable to submit evaluation.';
+            })
+            .finally(() => {
+              submitBtn.disabled = rating === 0;
+              submitBtn.textContent = 'Submit Evaluation';
+            });
         });
       }
 
