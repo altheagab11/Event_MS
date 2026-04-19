@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ResendRegistrationVerificationRequest;
 use App\Http\Requests\SendRegistrationVerificationRequest;
 use App\Http\Requests\VerifyRegistrationCodeRequest;
 use App\Mail\DigitalPassPreviewMail;
@@ -22,6 +23,84 @@ use Throwable;
 
 class RegistrationController extends Controller
 {
+  public function resendVerificationCode(ResendRegistrationVerificationRequest $request): JsonResponse
+  {
+    $verification = RegistrationVerificationCode::query()->findOrFail($request->integer('verification_id'));
+
+    if ($verification->status === 'verified') {
+      throw ValidationException::withMessages([
+        'verification_id' => 'Registration is already verified. No resend is needed.',
+      ]);
+    }
+
+    $event = Event::query()->findOrFail($verification->event_id);
+    $payload = (array) $verification->payload;
+    $fullName = trim(((string) ($payload['first_name'] ?? '')) . ' ' . ((string) ($payload['last_name'] ?? '')));
+    $email = Str::lower(trim((string) $verification->email));
+
+    $code = $this->generateVerificationCode();
+    $expiresAt = now()->addMinutes(10);
+
+    $this->assertRealMailerConfiguration();
+
+    Log::info('Registration verification resend attempt started.', [
+      'verification_id' => $verification->id,
+      'event_id' => $event->event_id,
+      'recipient_email' => $email,
+      'mailer' => (string) config('mail.default'),
+    ]);
+
+    try {
+      Mail::to($email)->send(new RegistrationVerificationCodeMail(
+        eventName: $event->event_name,
+        fullName: $fullName !== '' ? $fullName : 'Participant',
+        code: $code,
+        expiresAt: $expiresAt->format('M d, Y h:i A')
+      ));
+    } catch (Throwable $exception) {
+      Log::error('Registration verification resend failed.', [
+        'verification_id' => $verification->id,
+        'recipient_email' => $email,
+        'mailer' => (string) config('mail.default'),
+        'error' => $exception->getMessage(),
+      ]);
+
+      throw ValidationException::withMessages([
+        'email' => 'We could not resend the verification email right now. Please try again.',
+      ]);
+    }
+
+    RegistrationVerificationCode::query()
+      ->where('email', $email)
+      ->where('event_id', $verification->event_id)
+      ->where('status', 'pending')
+      ->where('id', '!=', $verification->id)
+      ->update(['status' => 'expired']);
+
+    $verification->forceFill([
+      'verification_code_hash' => Hash::make($code),
+      'status' => 'pending',
+      'attempts' => 0,
+      'expires_at' => $expiresAt,
+      'verified_at' => null,
+    ])->save();
+
+    Log::info('Registration verification resend successful.', [
+      'verification_id' => $verification->id,
+      'recipient_email' => $email,
+      'mailer' => (string) config('mail.default'),
+    ]);
+
+    return response()->json([
+      'message' => 'A new verification code was sent to your email.',
+      'data' => [
+        'verification_id' => $verification->id,
+        'expires_at' => $expiresAt->toIso8601String(),
+        'email_masked' => $this->maskEmail($email),
+      ],
+    ]);
+  }
+
   public function sendVerification(SendRegistrationVerificationRequest $request): JsonResponse
   {
     $event = Event::query()->findOrFail($request->integer('event_id'));
@@ -140,6 +219,18 @@ class RegistrationController extends Controller
     if ($verification->status !== 'pending') {
       throw ValidationException::withMessages([
         'code' => 'This verification session is no longer active. Please register again.',
+      ]);
+    }
+
+    $latestPendingId = RegistrationVerificationCode::query()
+      ->where('email', $verification->email)
+      ->where('event_id', $verification->event_id)
+      ->where('status', 'pending')
+      ->max('id');
+
+    if ($latestPendingId !== null && (int) $latestPendingId !== (int) $verification->id) {
+      throw ValidationException::withMessages([
+        'code' => 'A newer verification code was issued. Please use the latest code sent to your email.',
       ]);
     }
 

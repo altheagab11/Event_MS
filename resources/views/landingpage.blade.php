@@ -304,6 +304,7 @@ $regions = [
     const EVENTS = @json($events);
     const REGIONS = @json($regions);
     const REGISTER_SEND_URL = @json(route('registration.send-verification'));
+    const REGISTER_RESEND_URL = @json(route('registration.resend-code'));
     const REGISTER_VERIFY_URL = @json(route('registration.verify-code'));
     const EVALUATION_SUBMIT_BASE_URL = @json(url('/events'));
     const CSRF_TOKEN = @json(csrf_token());
@@ -550,7 +551,6 @@ $regions = [
     }
 
     function renderOtpStep(maskedEmail) {
-      countdown = 59;
       modalContent.innerHTML = `
                 <div class="modal-body" style="padding:48px; text-align:center;">
                     <div class="step-tag">STEP 2 OF 2: VERIFICATION</div>
@@ -561,11 +561,55 @@ $regions = [
                         ${makeOtpInputs()}
               <button class="submit" type="submit" id="verifyOtpBtn">Verify & Submit</button>
                     </form>
-                    <div style="margin-top:14px; color:#6b7280;" id="countdown">0:59</div>
+                    <div style="margin-top:14px; color:#6b7280;" id="countdown">Resend available in 0:59</div>
+                    <div style="margin-top:10px; color:#6b7280; font-size:13px;">
+                      Didn't receive the code?
+                      <button type="button" id="resendCodeBtn" style="border:0; background:transparent; color:#1d4d95; font-weight:700; cursor:pointer; text-decoration:underline;">Resend Code</button>
+                    </div>
                 </div>
             `;
 
       const otpInputs = Array.from(document.querySelectorAll('[data-otp]'));
+      const message = document.getElementById('otpMessage');
+      const countdownElement = document.getElementById('countdown');
+      const resendButton = document.getElementById('resendCodeBtn');
+
+      function showOtpMessage(kind, text) {
+        message.style.display = 'block';
+        message.style.border = kind === 'success' ? '2px solid #b7ebc6' : '2px solid #f1b4ba';
+        message.style.background = kind === 'success' ? '#ebfff1' : '#fff3f4';
+        message.style.color = kind === 'success' ? '#1f6b39' : '#8b1e2b';
+        message.textContent = text;
+      }
+
+      function updateCountdownUi() {
+        if (countdown > 0) {
+          countdownElement.textContent = `Resend available in 0:${String(countdown).padStart(2, '0')}`;
+          resendButton.disabled = true;
+          resendButton.style.opacity = '.65';
+          resendButton.style.cursor = 'not-allowed';
+        } else {
+          countdownElement.textContent = 'You can request a new code now.';
+          resendButton.disabled = false;
+          resendButton.style.opacity = '1';
+          resendButton.style.cursor = 'pointer';
+        }
+      }
+
+      function resetOtpTimer(seconds = 59) {
+        countdown = seconds;
+        updateCountdownUi();
+        if (otpTimer) clearInterval(otpTimer);
+        otpTimer = setInterval(() => {
+          countdown -= 1;
+          if (countdown <= 0) {
+            countdown = 0;
+            clearInterval(otpTimer);
+          }
+          updateCountdownUi();
+        }, 1000);
+      }
+
       otpInputs.forEach((input, idx) => {
         input.addEventListener('input', (e) => {
           e.target.value = e.target.value.slice(-1).toUpperCase();
@@ -576,25 +620,46 @@ $regions = [
         });
       });
 
-      if (otpTimer) clearInterval(otpTimer);
-      otpTimer = setInterval(() => {
-        countdown -= 1;
-        document.getElementById('countdown').textContent = `0:${String(Math.max(countdown, 0)).padStart(2, '0')}`;
-        if (countdown <= 0) clearInterval(otpTimer);
-      }, 1000);
+      resetOtpTimer(59);
+
+      resendButton.addEventListener('click', async function() {
+        const payload = new FormData();
+        payload.append('verification_id', String(registrationData.verificationId || ''));
+
+        resendButton.disabled = true;
+        resendButton.textContent = 'Resending...';
+
+        try {
+          const response = await postForm(REGISTER_RESEND_URL, payload);
+          registrationData.verificationId = Number(response?.data?.verification_id || registrationData.verificationId || 0) || registrationData.verificationId;
+
+          otpInputs.forEach(input => {
+            input.value = '';
+          });
+          if (otpInputs.length > 0) {
+            otpInputs[0].focus();
+          }
+
+          showOtpMessage('success', response?.message || 'A new verification code was sent to your email.');
+          resetOtpTimer(59);
+        } catch (error) {
+          showOtpMessage('error', error instanceof Error ? error.message : 'Unable to resend verification code.');
+          updateCountdownUi();
+        } finally {
+          resendButton.textContent = 'Resend Code';
+          if (countdown === 0) {
+            resendButton.disabled = false;
+          }
+        }
+      });
 
       document.getElementById('otpForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const message = document.getElementById('otpMessage');
         const verifyButton = document.getElementById('verifyOtpBtn');
         const code = otpInputs.map(input => input.value.trim()).join('').toUpperCase();
 
         if (code.length !== 6) {
-          message.style.display = 'block';
-          message.style.border = '2px solid #f1b4ba';
-          message.style.background = '#fff3f4';
-          message.style.color = '#8b1e2b';
-          message.textContent = 'Please enter the 6-character verification code.';
+          showOtpMessage('error', 'Please enter the 6-character verification code.');
           return;
         }
 
@@ -617,11 +682,7 @@ $regions = [
 
           renderSuccessStep(serverData);
         } catch (error) {
-          message.style.display = 'block';
-          message.style.border = '2px solid #f1b4ba';
-          message.style.background = '#fff3f4';
-          message.style.color = '#8b1e2b';
-          message.textContent = error instanceof Error ? error.message : 'Unable to verify code.';
+          showOtpMessage('error', error instanceof Error ? error.message : 'Unable to verify code.');
         } finally {
           verifyButton.disabled = false;
           verifyButton.textContent = 'Verify & Submit';
