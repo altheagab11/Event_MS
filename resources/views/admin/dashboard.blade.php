@@ -759,7 +759,7 @@
         <article class="card stat-card peach">
           <div>
             <div class="label">TOTAL PARTICIPANTS</div>
-            <div class="value">1,248</div>
+            <div class="value">{{ number_format($totalParticipants ?? 0) }}</div>
           </div>
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -774,7 +774,7 @@
         <article class="card stat-card gold">
           <div>
             <div class="label">PENDING PAPERS</div>
-            <div class="value">42</div>
+            <div class="value">{{ number_format($pendingPapers ?? 0) }}</div>
           </div>
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -789,7 +789,7 @@
         <article class="card stat-card blue">
           <div>
             <div class="label">ACTIVE EVENTS</div>
-            <div class="value">3</div>
+            <div class="value">{{ number_format($activeEvents ?? 0) }}</div>
           </div>
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -803,7 +803,7 @@
         <article class="card stat-card white">
           <div>
             <div class="label">TOTAL CHECKED-IN</div>
-            <div class="value">856</div>
+            <div class="value">{{ number_format($totalCheckedIn ?? 0) }}</div>
           </div>
           <div class="icon-box">
             <svg viewBox="0 0 24 24">

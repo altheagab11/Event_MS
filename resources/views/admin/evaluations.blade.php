@@ -134,7 +134,7 @@
     .page-subtitle {
       margin: 8px 0 18px;
       color: #677a9a;
-      font-size: 29px;
+      font-size: 15px;
       font-weight: 500;
     }
 
