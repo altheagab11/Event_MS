@@ -15,6 +15,10 @@ Route::post('/register/send-verification', [RegistrationController::class, 'send
   ->middleware('throttle:6,1')
   ->name('registration.send-verification');
 
+Route::post('/register/resend-code', [RegistrationController::class, 'resendVerificationCode'])
+  ->middleware('throttle:4,1')
+  ->name('registration.resend-code');
+
 Route::post('/register/verify-code', [RegistrationController::class, 'verifyCodeAndFinalize'])
   ->middleware('throttle:12,1')
   ->name('registration.verify-code');
