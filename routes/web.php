@@ -43,6 +43,15 @@ Route::middleware('auth')->group(function () {
   Route::get('/admin/participants', [AdminParticipantsController::class, 'index'])
     ->name('admin.participants');
 
+  Route::get('/admin/participants/{registration:registration_id}/paper-download', [AdminParticipantsController::class, 'downloadLatestPaper'])
+    ->name('admin.participants.paper.download');
+
+  Route::post('/admin/participants/{registration:registration_id}/reject', [AdminParticipantsController::class, 'rejectApplication'])
+    ->name('admin.participants.reject');
+
+  Route::post('/admin/participants/{registration:registration_id}/approve', [AdminParticipantsController::class, 'approveAndSendId'])
+    ->name('admin.participants.approve');
+
   Route::get('/admin/evaluations', [AdminEvaluationsController::class, 'index'])
     ->name('admin.evaluations');
 

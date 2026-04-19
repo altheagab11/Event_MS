@@ -21,7 +21,7 @@ class EventController extends Controller
         return [
           'id' => $event->event_id,
           'title' => $event->event_name,
-          'type' => 'School Event',
+          'type' => (string) $event->event_type === 'Conference' ? 'Conference Event' : 'School Event',
           'date' => $eventDate->format('F j, Y'),
           'month' => $eventDate->month - 1,
           'year' => $eventDate->format('Y'),

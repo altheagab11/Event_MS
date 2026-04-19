@@ -477,7 +477,7 @@ $regions = [
                         <div class="upload-wrap" style="display:${showUpload ? 'block' : 'none'}">
                             <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
                             <div class="upload-note">Your paper will be subject to admin review before your registration is fully confirmed.</div>
-                            <label class="upload-drop">
+                          <label class="upload-drop" id="paperUploadDrop">
                             <input class="upload-file-input" type="file" name="paperFile" accept=".pdf" ${showUpload ? 'required' : ''}>
                                 <span class="upload-drop-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -489,17 +489,86 @@ $regions = [
                                 </span>
                                 <span class="upload-drop-main">Click or drag PDF to upload</span>
                                 <span class="upload-drop-sub">Maximum file size: 10MB</span>
+                                <span class="upload-file-ready" id="paperUploadReady" hidden>PDF attached and ready for submission.</span>
+                                <span class="upload-file-meta" id="paperUploadMeta" hidden></span>
                             </label>
                         </div>
                         <button class="submit" type="submit" id="continueRegistrationBtn">Continue Registration</button>
                     </form>
                 </div>
             `;
-      document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+      const registrationForm = document.getElementById('registrationForm');
+      const submitButton = document.getElementById('continueRegistrationBtn');
+      const paperInput = registrationForm.querySelector('.upload-file-input');
+      const paperUploadDrop = document.getElementById('paperUploadDrop');
+      const paperUploadReady = document.getElementById('paperUploadReady');
+      const paperUploadMeta = document.getElementById('paperUploadMeta');
+      const uploadDropMain = registrationForm.querySelector('.upload-drop-main');
+
+      function formatBytes(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) {
+          return '0 B';
+        }
+        if (bytes < 1024) {
+          return `${bytes} B`;
+        }
+        const kb = bytes / 1024;
+        if (kb < 1024) {
+          return `${kb.toFixed(2)} KB`;
+        }
+        return `${(kb / 1024).toFixed(2)} MB`;
+      }
+
+      function resolveFileTypeLabel(file) {
+        if (file.type && file.type.trim() !== '') {
+          return file.type;
+        }
+
+        const parts = String(file.name || '').split('.');
+        const extension = parts.length > 1 ? String(parts.pop() || '').toUpperCase() : '';
+        return extension !== '' ? `${extension} file` : 'Unknown type';
+      }
+
+      function setUploadUi(file) {
+        if (!showUpload || !paperUploadDrop || !paperUploadReady || !paperUploadMeta || !uploadDropMain) {
+          return;
+        }
+
+        const isReady = file instanceof File && file.size > 0;
+
+        if (!isReady) {
+          paperUploadDrop.classList.remove('has-file');
+          uploadDropMain.textContent = 'Click or drag PDF to upload';
+          paperUploadReady.hidden = true;
+          paperUploadMeta.hidden = true;
+          paperUploadMeta.textContent = '';
+          submitButton.textContent = 'Continue Registration';
+          return;
+        }
+
+        paperUploadDrop.classList.add('has-file');
+        uploadDropMain.textContent = 'PDF attached';
+        paperUploadReady.hidden = false;
+        paperUploadMeta.hidden = false;
+
+        const fileName = String(file.name || 'unnamed.pdf');
+        const typeLabel = resolveFileTypeLabel(file);
+        const sizeLabel = formatBytes(Number(file.size || 0));
+        paperUploadMeta.textContent = `${fileName} | ${typeLabel} | ${sizeLabel}`;
+        submitButton.textContent = 'Continue Registration (PDF Ready)';
+      }
+
+      if (showUpload && paperInput) {
+        paperInput.addEventListener('change', () => {
+          const selectedFile = paperInput.files && paperInput.files.length > 0 ? paperInput.files[0] : null;
+          setUploadUi(selectedFile);
+        });
+      }
+
+      registrationForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const message = document.getElementById('registerFormMessage');
-        const submitButton = document.getElementById('continueRegistrationBtn');
 
         const payload = new FormData();
         payload.append('event_id', String(selectedEvent.id));
@@ -545,7 +614,12 @@ $regions = [
           message.textContent = error instanceof Error ? error.message : 'Unable to continue registration.';
         } finally {
           submitButton.disabled = false;
-          submitButton.textContent = 'Continue Registration';
+          if (showUpload && paperInput) {
+            const selectedFile = paperInput.files && paperInput.files.length > 0 ? paperInput.files[0] : null;
+            setUploadUi(selectedFile);
+          } else {
+            submitButton.textContent = 'Continue Registration';
+          }
         }
       });
     }

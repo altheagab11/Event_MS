@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SendRegistrationVerificationRequest extends FormRequest
 {
@@ -21,6 +23,12 @@ class SendRegistrationVerificationRequest extends FormRequest
    */
   public function rules(): array
   {
+    $eventId = (int) $this->input('event_id');
+    $isConference = Event::query()
+      ->where('event_id', $eventId)
+      ->where('event_type', 'Conference')
+      ->exists();
+
     return [
       'event_id' => ['required', 'integer', 'exists:events,event_id'],
       'first_name' => ['required', 'string', 'max:255'],
@@ -29,7 +37,7 @@ class SendRegistrationVerificationRequest extends FormRequest
       'region' => ['required', 'string', 'max:255'],
       'school_from' => ['required', 'string', 'max:255'],
       'school_level' => ['required', 'string', 'max:255'],
-      'paper_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+      'paper_file' => [Rule::requiredIf($isConference), 'nullable', 'file', 'mimes:pdf', 'max:10240'],
     ];
   }
 
@@ -48,6 +56,7 @@ class SendRegistrationVerificationRequest extends FormRequest
       'region.required' => 'Region is required.',
       'school_from.required' => 'School from is required.',
       'school_level.required' => 'School level is required.',
+      'paper_file.required' => 'A research paper PDF is required for conference registrations.',
       'paper_file.mimes' => 'The research paper must be a PDF file.',
       'paper_file.max' => 'The research paper must not exceed 10 MB.',
     ];

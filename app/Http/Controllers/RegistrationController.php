@@ -104,6 +104,7 @@ class RegistrationController extends Controller
   public function sendVerification(SendRegistrationVerificationRequest $request): JsonResponse
   {
     $event = Event::query()->findOrFail($request->integer('event_id'));
+    $isConferenceEvent = (string) $event->event_type === 'Conference';
 
     if (Carbon::parse($event->event_date)->isPast()) {
       throw ValidationException::withMessages([
@@ -135,8 +136,14 @@ class RegistrationController extends Controller
     }
 
     $paperTempPath = null;
-    if ($request->hasFile('paper_file')) {
-      $paperTempPath = $request->file('paper_file')->store('pending-papers', 'local');
+    if ($isConferenceEvent) {
+      if (! $request->hasFile('paper_file')) {
+        throw ValidationException::withMessages([
+          'paper_file' => 'A research paper PDF is required for conference registrations.',
+        ]);
+      }
+
+      $paperTempPath = $request->file('paper_file')->store('pending-papers', 'public');
     }
 
     RegistrationVerificationCode::query()
@@ -156,6 +163,7 @@ class RegistrationController extends Controller
         'first_name' => trim((string) $request->input('first_name')),
         'last_name' => trim((string) $request->input('last_name')),
         'email' => $email,
+        'event_type' => (string) $event->event_type,
         'region' => trim((string) $request->input('region')),
         'school_from' => trim((string) $request->input('school_from')),
         'school_level' => trim((string) $request->input('school_level')),
@@ -259,8 +267,15 @@ class RegistrationController extends Controller
 
     $payload = (array) $verification->payload;
     $event = Event::query()->findOrFail($verification->event_id);
+    $isConferenceEvent = (string) $event->event_type === 'Conference';
 
-    $result = DB::transaction(function () use ($verification, $payload, $event): array {
+    if ($isConferenceEvent && empty($verification->paper_temp_path)) {
+      throw ValidationException::withMessages([
+        'code' => 'Conference registration requires a research paper PDF upload.',
+      ]);
+    }
+
+    $result = DB::transaction(function () use ($verification, $payload, $event, $isConferenceEvent): array {
       $email = (string) ($payload['email'] ?? '');
 
       $user = User::query()->where('email', $email)->lockForUpdate()->first();
@@ -299,8 +314,7 @@ class RegistrationController extends Controller
         ]);
       }
 
-      $isConferenceLikeSubmission = ! empty($verification->paper_temp_path);
-      $registrationStatus = $isConferenceLikeSubmission ? 'pending' : 'approved';
+      $registrationStatus = $isConferenceEvent ? 'pending' : 'approved';
 
       if ($registrationRow === null) {
         $registrationId = DB::table('registrations')->insertGetId([
@@ -319,23 +333,27 @@ class RegistrationController extends Controller
           ]);
       }
 
-      if ($isConferenceLikeSubmission) {
+      if ($isConferenceEvent) {
         $finalPaperPath = $this->movePendingPaperToFinalPath(
           (string) $verification->paper_temp_path,
           $event->event_id,
           $user->id
         );
 
-        if ($finalPaperPath !== null) {
-          DB::table('papers')->insert([
-            'user_id' => $user->id,
-            'event_id' => $event->event_id,
-            'title' => $event->event_name . ' Submission - ' . $user->firstname . ' ' . $user->lastname,
-            'file_path' => $finalPaperPath,
-            'status' => 'submitted',
-            'created_at' => now(),
+        if ($finalPaperPath === null) {
+          throw ValidationException::withMessages([
+            'code' => 'Unable to finalize the uploaded research paper. Please register again.',
           ]);
         }
+
+        DB::table('papers')->insert([
+          'user_id' => $user->id,
+          'event_id' => $event->event_id,
+          'title' => $event->event_name . ' Submission - ' . $user->firstname . ' ' . $user->lastname,
+          'file_path' => $finalPaperPath,
+          'status' => 'submitted',
+          'created_at' => now(),
+        ]);
       }
 
       $existingDigitalId = DB::table('digital_ids')
@@ -420,14 +438,32 @@ class RegistrationController extends Controller
 
   private function movePendingPaperToFinalPath(string $pendingPath, int $eventId, int $userId): ?string
   {
-    $disk = Storage::disk('local');
-    if (! $disk->exists($pendingPath)) {
-      return null;
-    }
+    $publicDisk = Storage::disk('public');
+    $localDisk = Storage::disk('local');
 
     $filename = pathinfo($pendingPath, PATHINFO_BASENAME);
     $finalPath = 'papers/event-' . $eventId . '/user-' . $userId . '-' . $filename;
-    $disk->move($pendingPath, $finalPath);
+
+    if ($publicDisk->exists($pendingPath)) {
+      $publicDisk->move($pendingPath, $finalPath);
+      return $finalPath;
+    }
+
+    if (! $localDisk->exists($pendingPath)) {
+      return null;
+    }
+
+    $stream = $localDisk->readStream($pendingPath);
+    if ($stream === false) {
+      return null;
+    }
+
+    $publicDisk->put($finalPath, $stream);
+    if (is_resource($stream)) {
+      fclose($stream);
+    }
+
+    $localDisk->delete($pendingPath);
 
     return $finalPath;
   }

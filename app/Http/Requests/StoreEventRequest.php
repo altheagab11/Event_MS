@@ -23,6 +23,7 @@ class StoreEventRequest extends FormRequest
   {
     return [
       'event_name' => ['required', 'string', 'max:255'],
+      'event_type' => ['required', 'string', 'in:School Event,Conference'],
       'event_date' => ['required', 'date'],
       'location' => ['nullable', 'string', 'max:255'],
       'description' => ['nullable', 'string', 'max:5000'],
@@ -37,6 +38,8 @@ class StoreEventRequest extends FormRequest
   {
     return [
       'event_name.required' => 'Event title is required.',
+      'event_type.required' => 'Event type is required.',
+      'event_type.in' => 'Event type must be School Event or Conference.',
       'event_date.required' => 'Event date is required.',
       'event_date.date' => 'Please provide a valid event date.',
       'banner_image.image' => 'The event banner must be an image file.',
