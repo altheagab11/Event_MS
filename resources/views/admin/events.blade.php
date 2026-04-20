@@ -245,6 +245,13 @@
       color: #7081a1;
     }
 
+    .icon-btn.active {
+      border-color: #23457e;
+      color: #17396f;
+      background: #eef4ff;
+      box-shadow: inset 0 0 0 1px #23457e;
+    }
+
     .icon-btn svg {
       width: 16px;
       height: 16px;
@@ -314,6 +321,14 @@
       line-height: 1.3;
     }
 
+    .event-desc {
+      display: none;
+      margin: 8px 0 0;
+      color: #5f7397;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     .meta {
       display: flex;
       align-items: center;
@@ -376,6 +391,167 @@
       color: #17396f;
     }
 
+    .events-list-head {
+      display: none;
+    }
+
+    .event-list-row {
+      display: none;
+    }
+
+    .grid.list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .grid.list-view .events-list-head {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.9fr) 130px minmax(220px, 1.2fr) 100px 90px;
+      gap: 12px;
+      align-items: center;
+      padding: 2px 10px 6px;
+      color: #6f7f9f;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .grid.list-view .event-card {
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(15, 39, 80, .06);
+      overflow: hidden;
+    }
+
+    .grid.list-view .event-image,
+    .grid.list-view .event-body {
+      display: none;
+    }
+
+    .grid.list-view .event-list-row {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.9fr) 130px minmax(220px, 1.2fr) 100px 90px;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 10px;
+      min-height: 70px;
+    }
+
+    .grid.list-view .event-desc {
+      display: none;
+    }
+
+    .grid.list-view .event-footer {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .list-col {
+      min-width: 0;
+    }
+
+    .list-event-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .list-thumb {
+      width: 64px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #d9e2f1;
+      display: block;
+    }
+
+    .list-event-title {
+      margin: 0;
+      color: #17396f;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list-type {
+      display: flex;
+      align-items: center;
+    }
+
+    .list-type .badge {
+      position: static;
+      font-size: 10px;
+      padding: 4px 9px;
+      line-height: 1.1;
+    }
+
+    .list-date-location {
+      display: grid;
+      gap: 5px;
+    }
+
+    .list-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #5f7397;
+      font-size: 12px;
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .list-meta svg {
+      width: 13px;
+      height: 13px;
+      stroke: #7a8ead;
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .list-meta span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list-status {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .list-status .status {
+      font-size: 10px;
+      padding: 3px 7px;
+      line-height: 1.1;
+    }
+
+    .list-action {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .list-action .manage {
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1.5px solid #d6e0f2;
+      border-radius: 8px;
+      color: #204985;
+      background: #f6f9ff;
+      padding: 5px 10px;
+      line-height: 1;
+    }
+
     @media (max-width: 1180px) {
       .layout {
         grid-template-columns: 1fr;
@@ -413,6 +589,29 @@
 
       .grid {
         grid-template-columns: 1fr;
+      }
+
+      .grid.list-view .events-list-head {
+        display: none;
+      }
+
+      .grid.list-view .event-card {
+        border-radius: 12px;
+      }
+
+      .grid.list-view .event-list-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        align-items: start;
+        padding: 10px;
+      }
+
+      .list-event-title {
+        white-space: normal;
+      }
+
+      .list-action .manage {
+        padding: 6px 10px;
       }
     }
 
@@ -793,26 +992,26 @@
             <circle cx="11" cy="11" r="7"></circle>
             <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
           </svg>
-          <input type="text" placeholder="Search events...">
+          <input id="event-search-input" type="text" placeholder="Search events..." aria-label="Search events">
         </label>
 
-        <button class="icon-btn" type="button" title="Filter">
+        <button id="clear-filters-btn" class="icon-btn" type="button" title="Clear filters" aria-label="Clear filters">
           <svg viewBox="0 0 24 24">
             <polygon points="22 3 2 3 10 12 10 19 14 21 14 12 22 3"></polygon>
           </svg>
         </button>
 
-        <select class="filter-select" aria-label="Categories">
-          <option>All Categories</option>
+        <select id="event-category-filter" class="filter-select" aria-label="Categories">
+          <option value="">All Categories</option>
         </select>
-        <select class="filter-select" aria-label="Months">
-          <option>All Months</option>
+        <select id="event-month-filter" class="filter-select" aria-label="Months">
+          <option value="">All Months</option>
         </select>
         <div style="display:flex; gap:8px; align-items:center;">
-          <select class="filter-select" aria-label="Years" style="min-width:95px;">
-            <option>All Years</option>
+          <select id="event-year-filter" class="filter-select" aria-label="Years" style="min-width:95px;">
+            <option value="">All Years</option>
           </select>
-          <button class="icon-btn" type="button" title="Grid">
+          <button id="view-grid-btn" class="icon-btn active" type="button" title="Grid" aria-label="Grid view" aria-pressed="true">
             <svg viewBox="0 0 24 24">
               <rect x="4" y="4" width="6" height="6"></rect>
               <rect x="14" y="4" width="6" height="6"></rect>
@@ -820,7 +1019,7 @@
               <rect x="14" y="14" width="6" height="6"></rect>
             </svg>
           </button>
-          <button class="icon-btn" type="button" title="List">
+          <button id="view-list-btn" class="icon-btn" type="button" title="List" aria-label="List view" aria-pressed="false">
             <svg viewBox="0 0 24 24">
               <line x1="8" y1="6" x2="20" y2="6"></line>
               <line x1="8" y1="12" x2="20" y2="12"></line>
@@ -834,26 +1033,50 @@
       </section>
 
       <section class="grid" aria-label="Events list">
+        <div class="events-list-head" aria-hidden="true">
+          <span>Event Info</span>
+          <span>Type</span>
+          <span>Date &amp; Location</span>
+          <span>Status</span>
+          <span>Action</span>
+        </div>
         @forelse ($events as $event)
         @php
         $imageClass = ['one', 'two', 'three'][$loop->index % 3];
+        $eventDate = \Illuminate\Support\Carbon::parse($event->event_date);
+        $eventMonth = (int) $eventDate->format('n');
+        $eventYear = (int) $eventDate->format('Y');
         $isArchived = (string) $event->status === 'archived';
-        $isActive = ! $isArchived && \Illuminate\Support\Carbon::parse($event->event_date)->gte(now()->startOfDay());
+        $isActive = ! $isArchived && $eventDate->gte(now()->startOfDay());
         $statusLabel = $isArchived ? 'Archived' : ($isActive ? 'Active' : 'Ended');
         $statusClass = $isArchived ? 'archived' : ($isActive ? 'active' : 'ended');
         $bannerUrl = $event->banner_url;
+        $listThumbnailUrl = $bannerUrl
+        ?: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=640&q=60';
         $eventType = (string) $event->event_type === 'Conference' ? 'Conference' : 'School Event';
+        $descriptionText = trim((string) ($event->description ?? ''));
+        $shortDescription = $descriptionText !== ''
+        ? \Illuminate\Support\Str::limit($descriptionText, 230)
+        : 'No description available.';
         $eventPayload = [
         'event_id' => $event->event_id,
         'event_name' => $event->event_name,
         'event_type' => $event->event_type,
-        'event_date' => \Illuminate\Support\Carbon::parse($event->event_date)->format('Y-m-d'),
+        'event_date' => $eventDate->format('Y-m-d'),
         'location' => $event->location,
         'description' => $event->description,
         'banner_url' => $event->banner_url,
         ];
         @endphp
-        <article class="event-card">
+        <article
+          class="event-card"
+          data-event-item="1"
+          data-title="{{ $event->event_name }}"
+          data-type="{{ $eventType }}"
+          data-month="{{ $eventMonth }}"
+          data-year="{{ $eventYear }}"
+          data-location="{{ $event->location ?: 'TBA' }}"
+          data-description="{{ $descriptionText }}">
           <div class="event-image {{ $bannerUrl ? '' : $imageClass }}" @if($bannerUrl) style="background-image: linear-gradient(160deg, rgba(18, 37, 73, .2), rgba(13, 31, 65, .42)), url('{{ $bannerUrl }}');" @endif>
             <span class="badge {{ $eventType === 'Conference' ? 'conference' : '' }}">{{ $eventType }}</span>
           </div>
@@ -874,6 +1097,7 @@
               </svg>
               {{ $event->location ?: 'TBA' }}
             </div>
+            <p class="event-desc">{{ $shortDescription }}</p>
             <div class="event-footer">
               <span class="status {{ $statusClass }}">{{ $statusLabel }}</span>
               <button
@@ -884,15 +1108,63 @@
               </button>
             </div>
           </div>
+
+          <div class="event-list-row">
+            <div class="list-col list-event-info">
+              <img class="list-thumb" src="{{ $listThumbnailUrl }}" alt="{{ $event->event_name }}">
+              <h3 class="list-event-title">{{ $event->event_name }}</h3>
+            </div>
+
+            <div class="list-col list-type">
+              <span class="badge {{ $eventType === 'Conference' ? 'conference' : '' }}">{{ $eventType }}</span>
+            </div>
+
+            <div class="list-col list-date-location">
+              <div class="list-meta">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                  <line x1="8" y1="3" x2="8" y2="7"></line>
+                  <line x1="16" y1="3" x2="16" y2="7"></line>
+                </svg>
+                <span>{{ $eventDate->format('Y-m-d') }}</span>
+              </div>
+              <div class="list-meta">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>{{ $event->location ?: 'TBA' }}</span>
+              </div>
+            </div>
+
+            <div class="list-col list-status">
+              <span class="status {{ $statusClass }}">{{ $statusLabel }}</span>
+            </div>
+
+            <div class="list-col list-action">
+              <button
+                type="button"
+                class="manage manage-trigger"
+                data-event='@json($eventPayload)'>
+                Manage
+              </button>
+            </div>
+          </div>
         </article>
         @empty
-        <article class="event-card" style="grid-column: 1 / -1;">
+        <article class="event-card events-empty-state" style="grid-column: 1 / -1;">
           <div class="event-body">
             <h3 class="event-title">No events yet</h3>
             <div class="meta">Create your first event using the button above.</div>
           </div>
         </article>
         @endforelse
+        <article id="events-no-results" class="event-card events-empty-state" style="grid-column: 1 / -1; display:none;">
+          <div class="event-body">
+            <h3 class="event-title">No matching events</h3>
+            <div class="meta">Try changing your search or filter selections.</div>
+          </div>
+        </article>
       </section>
     </main>
   </div>
@@ -1100,6 +1372,34 @@
       const editBannerPreviewImage = editOverlay ? editOverlay.querySelector('#edit_banner_preview_image') : null;
       const editBannerEmpty = editOverlay ? editOverlay.querySelector('#edit_banner_empty') : null;
 
+      const eventsGrid = document.querySelector('.grid[aria-label="Events list"]');
+      const eventCards = eventsGrid ? Array.from(eventsGrid.querySelectorAll('.event-card[data-event-item="1"]')) : [];
+      const noResultsCard = document.getElementById('events-no-results');
+
+      const searchInput = document.getElementById('event-search-input');
+      const categoryFilter = document.getElementById('event-category-filter');
+      const monthFilter = document.getElementById('event-month-filter');
+      const yearFilter = document.getElementById('event-year-filter');
+      const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+      const viewGridBtn = document.getElementById('view-grid-btn');
+      const viewListBtn = document.getElementById('view-list-btn');
+
+      const monthLabels = {
+        1: 'January',
+        2: 'February',
+        3: 'March',
+        4: 'April',
+        5: 'May',
+        6: 'June',
+        7: 'July',
+        8: 'August',
+        9: 'September',
+        10: 'October',
+        11: 'November',
+        12: 'December',
+      };
+
       function openOverlay(overlay) {
         if (!overlay) return;
         overlay.classList.add('open');
@@ -1245,6 +1545,105 @@
         setEditBannerPreview(payload.banner_url || '');
       }
 
+      function normalize(value) {
+        return String(value || '').toLowerCase().trim();
+      }
+
+      function setViewMode(mode) {
+        if (!eventsGrid) return;
+
+        const isList = mode === 'list';
+        eventsGrid.classList.toggle('list-view', isList);
+
+        if (viewGridBtn) {
+          viewGridBtn.classList.toggle('active', !isList);
+          viewGridBtn.setAttribute('aria-pressed', !isList ? 'true' : 'false');
+        }
+
+        if (viewListBtn) {
+          viewListBtn.classList.toggle('active', isList);
+          viewListBtn.setAttribute('aria-pressed', isList ? 'true' : 'false');
+        }
+      }
+
+      function populateFilterOptions() {
+        if (!categoryFilter || !monthFilter || !yearFilter) return;
+
+        const categories = [...new Set(eventCards
+            .map((card) => String(card.dataset.type || '').trim())
+            .filter((value) => value !== ''))]
+          .sort((a, b) => a.localeCompare(b));
+
+        const months = [...new Set(eventCards
+            .map((card) => Number(card.dataset.month || 0))
+            .filter((value) => Number.isInteger(value) && value >= 1 && value <= 12))]
+          .sort((a, b) => a - b);
+
+        const years = [...new Set(eventCards
+            .map((card) => Number(card.dataset.year || 0))
+            .filter((value) => Number.isInteger(value) && value > 0))]
+          .sort((a, b) => b - a);
+
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+        categories.forEach((category) => {
+          const option = document.createElement('option');
+          option.value = category;
+          option.textContent = category;
+          categoryFilter.appendChild(option);
+        });
+
+        monthFilter.innerHTML = '<option value="">All Months</option>';
+        months.forEach((month) => {
+          const option = document.createElement('option');
+          option.value = String(month);
+          option.textContent = monthLabels[month] || String(month);
+          monthFilter.appendChild(option);
+        });
+
+        yearFilter.innerHTML = '<option value="">All Years</option>';
+        years.forEach((year) => {
+          const option = document.createElement('option');
+          option.value = String(year);
+          option.textContent = String(year);
+          yearFilter.appendChild(option);
+        });
+      }
+
+      function applyEventFilters() {
+        if (!eventsGrid) return;
+
+        const searchValue = normalize(searchInput ? searchInput.value : '');
+        const selectedCategory = categoryFilter ? String(categoryFilter.value || '') : '';
+        const selectedMonth = monthFilter ? String(monthFilter.value || '') : '';
+        const selectedYear = yearFilter ? String(yearFilter.value || '') : '';
+
+        let visibleCount = 0;
+
+        eventCards.forEach((card) => {
+          const matchesSearch = searchValue === '' ||
+            normalize(card.dataset.title).includes(searchValue) ||
+            normalize(card.dataset.location).includes(searchValue) ||
+            normalize(card.dataset.description).includes(searchValue) ||
+            normalize(card.dataset.type).includes(searchValue);
+
+          const matchesCategory = selectedCategory === '' || String(card.dataset.type || '') === selectedCategory;
+          const matchesMonth = selectedMonth === '' || String(card.dataset.month || '') === selectedMonth;
+          const matchesYear = selectedYear === '' || String(card.dataset.year || '') === selectedYear;
+
+          const isVisible = matchesSearch && matchesCategory && matchesMonth && matchesYear;
+          card.style.display = isVisible ? '' : 'none';
+
+          if (isVisible) {
+            visibleCount += 1;
+          }
+        });
+
+        if (noResultsCard) {
+          const showNoResults = eventCards.length > 0 && visibleCount === 0;
+          noResultsCard.style.display = showNoResults ? '' : 'none';
+        }
+      }
+
       if (createOpenBtn) {
         createOpenBtn.addEventListener('click', () => openOverlay(createOverlay));
       }
@@ -1277,10 +1676,47 @@
         });
       }
 
+      if (searchInput) {
+        searchInput.addEventListener('input', applyEventFilters);
+      }
+
+      if (categoryFilter) {
+        categoryFilter.addEventListener('change', applyEventFilters);
+      }
+
+      if (monthFilter) {
+        monthFilter.addEventListener('change', applyEventFilters);
+      }
+
+      if (yearFilter) {
+        yearFilter.addEventListener('change', applyEventFilters);
+      }
+
+      if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          if (categoryFilter) categoryFilter.value = '';
+          if (monthFilter) monthFilter.value = '';
+          if (yearFilter) yearFilter.value = '';
+          applyEventFilters();
+        });
+      }
+
+      if (viewGridBtn) {
+        viewGridBtn.addEventListener('click', () => setViewMode('grid'));
+      }
+
+      if (viewListBtn) {
+        viewListBtn.addEventListener('click', () => setViewMode('list'));
+      }
+
       setupEventTypeToggle(createEventTypeButtons, createEventTypeInput);
       setupEventTypeToggle(editTypeButtons, editTypeInput);
       setupBannerLabel(createBannerInput, createBannerName);
       setupBannerLabel(editBannerInput, editBannerName);
+      populateFilterOptions();
+      setViewMode('grid');
+      applyEventFilters();
       bindOverlayDismiss(createOverlay, {
         allowCancel: false,
         allowOutsideClick: false,
