@@ -101,30 +101,6 @@ $regions = [
         </div>
       </section>
 
-      <section class="announce">
-        <div class="container">
-          <h2 class="announce-title">
-            <span class="announce-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3l2 2H4l2-2v-3a7 7 0 0 1 4-6"></path>
-                <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
-              </svg>
-            </span>
-            <span>Latest Announcements</span>
-          </h2>
-          <div class="announce-grid">
-            @foreach ($announcements as $a)
-            <div class="announce-card {{ $a['type'] === 'important' ? 'important' : '' }}">
-              <div>
-                <h3 style="color: {{ $a['type'] === 'important' ? '#ffc570' : '#fff' }}">{{ $a['title'] }}</h3>
-                <p>{{ $a['description'] }}</p>
-              </div>
-              <button class="announce-btn {{ str_contains($a['buttonText'], 'Register') ? 'gold' : 'ghost' }} open-register" data-event-id="{{ $a['eventId'] }}">{{ $a['buttonText'] }}</button>
-            </div>
-            @endforeach
-          </div>
-        </div>
-      </section>
 
       <section id="events" class="events">
         <div class="container">
