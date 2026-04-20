@@ -14,7 +14,7 @@ class AdminDashboardController extends Controller
   public function index(Request $request)
   {
     $totalParticipants = Registration::query()
-      ->whereHas('user', fn ($q) => $q->where('role', 'participant'))
+      ->whereHas('user', fn($q) => $q->where('role', 'participant'))
       ->count();
 
     $pendingPapers = Paper::query()
@@ -22,6 +22,10 @@ class AdminDashboardController extends Controller
       ->count();
 
     $activeEvents = Event::query()
+      ->where(function ($query) {
+        $query->whereNull('status')
+          ->orWhere('status', '!=', 'archived');
+      })
       ->whereDate('event_date', '>=', now()->startOfDay())
       ->count();
 

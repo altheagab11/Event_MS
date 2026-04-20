@@ -21,6 +21,7 @@ class Event extends Model
     'location',
     'banner_image',
     'event_date',
+    'status',
   ];
 
   protected function casts(): array

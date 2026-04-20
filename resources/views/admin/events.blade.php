@@ -4,7 +4,15 @@
 <head>
   <meta charset="utf-8">
   @php
-  $hasErrors = isset($errors) && $errors->any();
+  $hasCreateErrors = isset($errors) && $errors->any();
+  $editErrorBag = $errors->getBag('editEvent');
+  $hasEditErrors = $editErrorBag->any();
+  $editingEventId = (int) old('editing_event_id', 0);
+  $editingEvent = $editingEventId > 0 ? $events->firstWhere('event_id', $editingEventId) : null;
+  $editingEventDate = $editingEvent && $editingEvent->event_date
+  ? \Illuminate\Support\Carbon::parse($editingEvent->event_date)->format('Y-m-d')
+  : '';
+  $editingBannerUrl = $editingEvent?->banner_url;
   @endphp
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Events Management | NU Lipa EMS</title>
@@ -341,11 +349,31 @@
       padding: 3px 6px;
     }
 
+    .status.ended {
+      color: #7e621c;
+      background: #fff5df;
+    }
+
+    .status.archived {
+      color: #8b1e2b;
+      background: #fff3f4;
+    }
+
     .manage {
-      color: #56739d;
+      border: 0;
+      background: transparent;
+      color: #2b4f8d;
       font-size: 12px;
       font-weight: 700;
-      text-decoration: none;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+      transition: color .2s ease;
+    }
+
+    .manage:hover {
+      color: #17396f;
     }
 
     @media (max-width: 1180px) {
@@ -580,6 +608,48 @@
       box-shadow: 0 4px 12px rgba(17, 42, 84, .12);
     }
 
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-archive {
+      border: 2px solid #f4c7cb;
+      background: #fff3f4;
+      color: #8b1e2b;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .current-banner-preview {
+      margin-top: 10px;
+      border: 1.5px solid #e6edf6;
+      border-radius: 10px;
+      background: #f9fbff;
+      padding: 8px;
+    }
+
+    .current-banner-preview img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+
+    .current-banner-empty {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #7c8fae;
+      border: 1.5px dashed #d9e3f1;
+      border-radius: 10px;
+      background: #f9fbff;
+      padding: 12px;
+    }
+
     .field-note {
       margin-top: 8px;
       font-size: 12px;
@@ -767,12 +837,25 @@
         @forelse ($events as $event)
         @php
         $imageClass = ['one', 'two', 'three'][$loop->index % 3];
-        $isActive = \Illuminate\Support\Carbon::parse($event->event_date)->gte(now()->startOfDay());
+        $isArchived = (string) $event->status === 'archived';
+        $isActive = ! $isArchived && \Illuminate\Support\Carbon::parse($event->event_date)->gte(now()->startOfDay());
+        $statusLabel = $isArchived ? 'Archived' : ($isActive ? 'Active' : 'Ended');
+        $statusClass = $isArchived ? 'archived' : ($isActive ? 'active' : 'ended');
         $bannerUrl = $event->banner_url;
+        $eventType = (string) $event->event_type === 'Conference' ? 'Conference' : 'School Event';
+        $eventPayload = [
+        'event_id' => $event->event_id,
+        'event_name' => $event->event_name,
+        'event_type' => $event->event_type,
+        'event_date' => \Illuminate\Support\Carbon::parse($event->event_date)->format('Y-m-d'),
+        'location' => $event->location,
+        'description' => $event->description,
+        'banner_url' => $event->banner_url,
+        ];
         @endphp
         <article class="event-card">
           <div class="event-image {{ $bannerUrl ? '' : $imageClass }}" @if($bannerUrl) style="background-image: linear-gradient(160deg, rgba(18, 37, 73, .2), rgba(13, 31, 65, .42)), url('{{ $bannerUrl }}');" @endif>
-            <span class="badge">School Event</span>
+            <span class="badge {{ $eventType === 'Conference' ? 'conference' : '' }}">{{ $eventType }}</span>
           </div>
           <div class="event-body">
             <h3 class="event-title">{{ $event->event_name }}</h3>
@@ -792,8 +875,13 @@
               {{ $event->location ?: 'TBA' }}
             </div>
             <div class="event-footer">
-              <span class="status">{{ $isActive ? 'Active' : 'Ended' }}</span>
-              <span class="manage">Event #{{ $event->event_id }}</span>
+              <span class="status {{ $statusClass }}">{{ $statusLabel }}</span>
+              <button
+                type="button"
+                class="manage manage-trigger"
+                data-event='@json($eventPayload)'>
+                Manage
+              </button>
             </div>
           </div>
         </article>
@@ -810,7 +898,7 @@
   </div>
 
   <!-- Create Event Modal -->
-  <div id="event-modal-overlay" class="modal-overlay{{ $hasErrors ? ' open' : '' }}" aria-hidden="{{ $hasErrors ? 'false' : 'true' }}">
+  <div id="event-modal-overlay" class="modal-overlay{{ $hasCreateErrors ? ' open' : '' }}" aria-hidden="{{ $hasCreateErrors ? 'false' : 'true' }}" data-auto-open="{{ $hasCreateErrors ? '1' : '0' }}">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-header">
         <div>
@@ -823,7 +911,7 @@
       <form method="post" action="{{ route('admin.events.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="modal-body">
-          @if ($hasErrors)
+          @if ($hasCreateErrors)
           <div style="margin-bottom:14px; border:2px solid #f1b4ba; background:#fff3f4; color:#8b1e2b; border-radius:10px; padding:10px 12px; font-size:13px;">
             @foreach ($errors->all() as $error)
             <div>{{ $error }}</div>
@@ -887,66 +975,339 @@
     </div>
   </div>
 
+  <!-- Edit Event Modal -->
+  <div id="edit-event-modal-overlay" class="modal-overlay{{ $hasEditErrors ? ' open' : '' }}" aria-hidden="{{ $hasEditErrors ? 'false' : 'true' }}" data-auto-open="{{ $hasEditErrors ? '1' : '0' }}">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="edit-modal-title">Edit Event</h2>
+          <p>Update event details, media, and publishing status.</p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="edit-event-form" method="post" action="{{ $editingEventId > 0 ? route('admin.events.update', ['event' => $editingEventId]) : '' }}" enctype="multipart/form-data">
+        @csrf
+        @method('put')
+        <input type="hidden" id="editing_event_id" name="editing_event_id" value="{{ old('editing_event_id', $editingEvent?->event_id) }}">
+
+        <div class="modal-body">
+          @if ($hasEditErrors)
+          <div style="margin-bottom:14px; border:2px solid #f1b4ba; background:#fff3f4; color:#8b1e2b; border-radius:10px; padding:10px 12px; font-size:13px;">
+            @foreach ($editErrorBag->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+          </div>
+          @endif
+
+          <div class="card-panel">
+            <h3>Basic Info</h3>
+
+            <input type="hidden" name="event_type" id="edit_event_type" value="{{ old('event_type', $editingEvent?->event_type ?? 'School Event') }}">
+            <div class="event-type-options" role="radiogroup" aria-label="Edit event type">
+              <button type="button" class="event-type-option edit-event-type-option{{ old('event_type', $editingEvent?->event_type ?? 'School Event') === 'School Event' ? ' active' : '' }}" data-option="School Event">
+                <strong>School Event</strong>
+                <small>Regular campus activities</small>
+              </button>
+              <button type="button" class="event-type-option edit-event-type-option{{ old('event_type', $editingEvent?->event_type) === 'Conference' ? ' active' : '' }}" data-option="Conference">
+                <strong>Conference</strong>
+                <small>Conference sessions and presentations</small>
+              </button>
+            </div>
+
+            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
+            <input class="input" id="edit_event_name" type="text" name="event_name" value="{{ old('event_name', $editingEvent?->event_name) }}" placeholder="e.g. IT Week 2026" required>
+          </div>
+
+          <div class="card-panel">
+            <h3>Schedule &amp; Location</h3>
+            <div class="row">
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
+                <input class="input" id="edit_event_date" type="date" name="event_date" value="{{ old('event_date', $editingEventDate) }}" required>
+              </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
+                <input class="input" id="edit_location" type="text" name="location" value="{{ old('location', $editingEvent?->location) }}" placeholder="e.g. Main Auditorium">
+              </div>
+            </div>
+          </div>
+
+          <div class="card-panel">
+            <h3>Content &amp; Media</h3>
+            <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Full Description</label>
+            <textarea class="input" id="edit_description" name="description" placeholder="Write detailed information...">{{ old('description', $editingEvent?->description) }}</textarea>
+
+            <label style="display:block; margin:14px 0 8px; font-weight:700; color:#233b6a;">Event Banner Image</label>
+            <div class="upload-input-wrap">
+              <input class="upload-file-input" id="edit_banner_image" type="file" name="banner_image" accept="image/png,image/jpeg,image/jpg,image/webp">
+              <label for="edit_banner_image" class="upload-file-trigger">Choose Image</label>
+              <span class="upload-file-name" id="edit_banner_file_name" title="No file selected">No file selected</span>
+            </div>
+            <div class="field-note">Accepted formats: PNG, JPG, WEBP. Max size: 5 MB.</div>
+
+            <div class="current-banner-preview" id="edit_banner_preview_wrap" @if (! $editingBannerUrl) style="display:none;" @endif>
+              <img id="edit_banner_preview_image" src="{{ $editingBannerUrl ?? '' }}" alt="Current event banner">
+            </div>
+            <div class="current-banner-empty" id="edit_banner_empty" @if ($editingBannerUrl) style="display:none;" @endif>
+              No banner image uploaded yet.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="footer-left">
+            <button type="submit" form="archive-event-form" class="btn-archive">Archive Event</button>
+            <button type="button" class="btn-cancel">Cancel</button>
+          </div>
+          <button type="submit" class="btn-publish">Save Changes</button>
+        </div>
+      </form>
+
+      <form id="archive-event-form" method="post" action="{{ $editingEventId > 0 ? route('admin.events.archive', ['event' => $editingEventId]) : '' }}" style="display:none;">
+        @csrf
+        @method('patch')
+      </form>
+    </div>
+  </div>
+
   <script>
     (function() {
-      const openBtn = document.querySelector('.create-btn');
-      const overlay = document.getElementById('event-modal-overlay');
-      const closeBtn = overlay ? overlay.querySelector('.modal-close') : null;
-      const cancelBtn = overlay ? overlay.querySelector('.btn-cancel') : null;
-      const eventTypeInput = overlay ? overlay.querySelector('#event_type') : null;
-      const eventTypeButtons = overlay ? overlay.querySelectorAll('.event-type-option') : [];
-      const bannerInput = overlay ? overlay.querySelector('#banner_image') : null;
-      const bannerName = overlay ? overlay.querySelector('#banner_file_name') : null;
+      const createOpenBtn = document.querySelector('.create-btn');
+      const manageButtons = document.querySelectorAll('.manage-trigger');
+      const createOverlay = document.getElementById('event-modal-overlay');
+      const editOverlay = document.getElementById('edit-event-modal-overlay');
+      const updateRouteTemplate = "{{ route('admin.events.update', ['event' => '__EVENT__']) }}";
+      const archiveRouteTemplate = "{{ route('admin.events.archive', ['event' => '__EVENT__']) }}";
 
-      function openModal() {
+      const createEventTypeInput = createOverlay ? createOverlay.querySelector('#event_type') : null;
+      const createEventTypeButtons = createOverlay ? createOverlay.querySelectorAll('.event-type-option') : [];
+      const createBannerInput = createOverlay ? createOverlay.querySelector('#banner_image') : null;
+      const createBannerName = createOverlay ? createOverlay.querySelector('#banner_file_name') : null;
+
+      const editForm = editOverlay ? editOverlay.querySelector('#edit-event-form') : null;
+      const editArchiveForm = editOverlay ? editOverlay.querySelector('#archive-event-form') : null;
+      const editIdInput = editOverlay ? editOverlay.querySelector('#editing_event_id') : null;
+      const editNameInput = editOverlay ? editOverlay.querySelector('#edit_event_name') : null;
+      const editTypeInput = editOverlay ? editOverlay.querySelector('#edit_event_type') : null;
+      const editDateInput = editOverlay ? editOverlay.querySelector('#edit_event_date') : null;
+      const editLocationInput = editOverlay ? editOverlay.querySelector('#edit_location') : null;
+      const editDescriptionInput = editOverlay ? editOverlay.querySelector('#edit_description') : null;
+      const editTypeButtons = editOverlay ? editOverlay.querySelectorAll('.edit-event-type-option') : [];
+      const editBannerInput = editOverlay ? editOverlay.querySelector('#edit_banner_image') : null;
+      const editBannerName = editOverlay ? editOverlay.querySelector('#edit_banner_file_name') : null;
+      const editBannerPreviewWrap = editOverlay ? editOverlay.querySelector('#edit_banner_preview_wrap') : null;
+      const editBannerPreviewImage = editOverlay ? editOverlay.querySelector('#edit_banner_preview_image') : null;
+      const editBannerEmpty = editOverlay ? editOverlay.querySelector('#edit_banner_empty') : null;
+
+      function openOverlay(overlay) {
         if (!overlay) return;
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
-        // focus first input for convenience
         const first = overlay.querySelector('input, textarea, button');
         if (first) first.focus();
       }
 
-      function closeModal() {
+      function closeOverlay(overlay) {
         if (!overlay) return;
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
       }
 
-      if (openBtn) openBtn.addEventListener('click', openModal);
-      if (closeBtn) closeBtn.addEventListener('click', closeModal);
-      if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+      function bindOverlayDismiss(overlay, options = {}) {
+        if (!overlay) return;
 
-      if (eventTypeButtons.length > 0 && eventTypeInput) {
-        eventTypeButtons.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            eventTypeButtons.forEach((node) => node.classList.remove('active'));
-            btn.classList.add('active');
-            eventTypeInput.value = btn.dataset.option || 'School Event';
+        const {
+          allowCancel = true,
+            allowOutsideClick = true,
+        } = options;
+
+        const closeButton = overlay.querySelector('.modal-close');
+        const cancelButtons = overlay.querySelectorAll('.btn-cancel');
+
+        if (closeButton) {
+          closeButton.addEventListener('click', () => closeOverlay(overlay));
+        }
+
+        if (allowCancel) {
+          cancelButtons.forEach((button) => {
+            button.addEventListener('click', () => closeOverlay(overlay));
+          });
+        }
+
+        if (allowOutsideClick) {
+          overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) {
+              closeOverlay(overlay);
+            }
+          });
+        }
+      }
+
+      function setupEventTypeToggle(buttons, input) {
+        if (!buttons || buttons.length === 0 || !input) return;
+
+        buttons.forEach((button) => {
+          button.addEventListener('click', () => {
+            buttons.forEach((node) => node.classList.remove('active'));
+            button.classList.add('active');
+            input.value = button.dataset.option || 'School Event';
           });
         });
       }
 
-      if (bannerInput && bannerName) {
-        bannerInput.addEventListener('change', () => {
-          const selected = bannerInput.files && bannerInput.files.length > 0 ?
-            bannerInput.files[0].name :
+      function setupBannerLabel(fileInput, fileNameNode) {
+        if (!fileInput || !fileNameNode) return;
+
+        fileInput.addEventListener('change', () => {
+          const selected = fileInput.files && fileInput.files.length > 0 ?
+            fileInput.files[0].name :
             'No file selected';
-          bannerName.textContent = selected;
-          bannerName.title = selected;
+          fileNameNode.textContent = selected;
+          fileNameNode.title = selected;
         });
       }
 
-      // close when clicking outside the modal
-      if (overlay) {
-        overlay.addEventListener('click', function(e) {
-          if (e.target === overlay) closeModal();
+      function setEditBannerPreview(url) {
+        const hasBanner = typeof url === 'string' && url.trim() !== '';
+
+        if (editBannerPreviewWrap) {
+          editBannerPreviewWrap.style.display = hasBanner ? '' : 'none';
+        }
+
+        if (editBannerPreviewImage) {
+          editBannerPreviewImage.src = hasBanner ? url : '';
+        }
+
+        if (editBannerEmpty) {
+          editBannerEmpty.style.display = hasBanner ? 'none' : '';
+        }
+      }
+
+      function setEditFormActions(eventId) {
+        const resolvedId = String(eventId || '').trim();
+        if (resolvedId === '') return;
+
+        if (editForm) {
+          editForm.action = updateRouteTemplate.replace('__EVENT__', resolvedId);
+        }
+
+        if (editArchiveForm) {
+          editArchiveForm.action = archiveRouteTemplate.replace('__EVENT__', resolvedId);
+        }
+      }
+
+      function setEditTypeSelection(typeValue) {
+        if (!editTypeInput || !editTypeButtons || editTypeButtons.length === 0) return;
+
+        const resolvedType = typeValue === 'Conference' ? 'Conference' : 'School Event';
+        editTypeInput.value = resolvedType;
+
+        editTypeButtons.forEach((button) => {
+          button.classList.toggle('active', button.dataset.option === resolvedType);
         });
       }
 
-      // close on Escape
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
+      function prefillEditForm(payload) {
+        if (!payload || typeof payload !== 'object') return;
+
+        if (editIdInput) {
+          editIdInput.value = payload.event_id || '';
+        }
+
+        if (editNameInput) {
+          editNameInput.value = payload.event_name || '';
+        }
+
+        if (editDateInput) {
+          editDateInput.value = payload.event_date || '';
+        }
+
+        if (editLocationInput) {
+          editLocationInput.value = payload.location || '';
+        }
+
+        if (editDescriptionInput) {
+          editDescriptionInput.value = payload.description || '';
+        }
+
+        if (editBannerInput) {
+          editBannerInput.value = '';
+        }
+
+        if (editBannerName) {
+          editBannerName.textContent = 'No file selected';
+          editBannerName.title = 'No file selected';
+        }
+
+        setEditTypeSelection(payload.event_type || 'School Event');
+        setEditFormActions(payload.event_id || '');
+        setEditBannerPreview(payload.banner_url || '');
+      }
+
+      if (createOpenBtn) {
+        createOpenBtn.addEventListener('click', () => openOverlay(createOverlay));
+      }
+
+      manageButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          let payload = null;
+
+          try {
+            payload = JSON.parse(button.dataset.event || '{}');
+          } catch (_error) {
+            payload = null;
+          }
+
+          if (!payload || !payload.event_id) {
+            return;
+          }
+
+          prefillEditForm(payload);
+          openOverlay(editOverlay);
+        });
+      });
+
+      if (editArchiveForm) {
+        editArchiveForm.addEventListener('submit', (event) => {
+          const confirmed = window.confirm('Are you sure you want to archive this event? It will no longer be visible on the landing page.');
+          if (!confirmed) {
+            event.preventDefault();
+          }
+        });
+      }
+
+      setupEventTypeToggle(createEventTypeButtons, createEventTypeInput);
+      setupEventTypeToggle(editTypeButtons, editTypeInput);
+      setupBannerLabel(createBannerInput, createBannerName);
+      setupBannerLabel(editBannerInput, editBannerName);
+      bindOverlayDismiss(createOverlay, {
+        allowCancel: false,
+        allowOutsideClick: false,
+      });
+      bindOverlayDismiss(editOverlay, {
+        allowCancel: false,
+        allowOutsideClick: false,
+      });
+
+      if (createOverlay && createOverlay.dataset.autoOpen === '1') {
+        openOverlay(createOverlay);
+      }
+
+      if (editOverlay && editOverlay.dataset.autoOpen === '1') {
+        openOverlay(editOverlay);
+      }
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+
+        if (editOverlay && editOverlay.classList.contains('open')) {
+          return;
+        }
+
+        if (createOverlay && createOverlay.classList.contains('open')) {
+          return;
+        }
       });
     })();
   </script>
