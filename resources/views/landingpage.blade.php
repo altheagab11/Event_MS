@@ -389,9 +389,9 @@ $regions = [
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const validationMessage = payload.errors
-          ? Object.values(payload.errors).flat().join(' ')
-          : '';
+        const validationMessage = payload.errors ?
+          Object.values(payload.errors).flat().join(' ') :
+          '';
         throw new Error(validationMessage || payload.message || 'Request failed.');
       }
 
@@ -399,7 +399,9 @@ $regions = [
     }
 
     function makeOtpInputs() {
-      return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => `<input maxlength="1" data-otp="${i}" required>`).join('')}</div>`;
+      return `<div class="otp-row">${Array.from({ length: 6 }, (_, i) => ` < input maxlength = "1"
+      data - otp = "${i}"
+      required > `).join('')}</div>`;
     }
 
     function renderFormStep() {
@@ -949,13 +951,20 @@ $regions = [
                           <label class="eval-label">EMAIL ADDRESS *</label>
                           <input class="eval-text" id="evalEmailInput" type="email" placeholder="Enter your registered email" value="${escapeHtml(evalEmail)}" required>
                             <div class="eval-stars" role="radiogroup" aria-label="Rate event">
-                                ${Array.from({ length: 5 }, (_, i) => `
-                                  <button type="button" class="rating-star" data-rate="${i + 1}" aria-label="${i + 1} star">
-                                    <svg viewBox="0 0 24 24" role="img" focusable="false">
-                                      <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                                    </svg>
-                                  </button>
-                                `).join('')}
+                                ${Array.from({ length: 5 }, (_, i) => ` <
+          button type = "button"
+        class = "rating-star"
+        data - rate = "${i + 1}"
+        aria - label = "${i + 1} star" >
+          <
+          svg viewBox = "0 0 24 24"
+        role = "img"
+        focusable = "false" >
+          <
+          polygon points = "12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4" > < /polygon> <
+          /svg> <
+          /button>
+        `).join('')}
                             </div>
                             <label class="eval-label">ADDITIONAL COMMENTS (OPTIONAL)</label>
                               <textarea class="eval-text" id="evalCommentInput" rows="4" placeholder="What did you like? What can we improve?">${escapeHtml(evalComment)}</textarea>
@@ -1051,7 +1060,9 @@ $regions = [
     });
     document.getElementById('closeModal').addEventListener('click', closeModal);
     eventModal.addEventListener('click', (e) => {
-      if (e.target === eventModal) closeModal();
+      if (e.target === eventModal) {
+        e.preventDefault();
+      }
     });
   </script>
 </body>
