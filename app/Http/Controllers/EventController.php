@@ -33,6 +33,7 @@ class EventController extends Controller
           'month' => $eventDate->month - 1,
           'year' => $eventDate->format('Y'),
           'location' => $event->location ?: 'TBA',
+          'attendance_format' => $event->attendance_format ?: 'Not Specified',
           'description' => $event->description ?: 'No description available.',
           'status' => $eventDate->isPast() ? 'ended' : 'active',
           'image' => $event->banner_url

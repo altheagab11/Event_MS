@@ -201,6 +201,18 @@ $regions = [
                     </span>
                     <span>{{ $event['location'] }}</span>
                   </span>
+                  <span class="meta-row">
+                    <span class="meta-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect>
+                        <line x1="3.5" y1="10" x2="20.5" y2="10"></line>
+                        <line x1="8" y1="14" x2="10" y2="14"></line>
+                        <line x1="12" y1="14" x2="14" y2="14"></line>
+                        <line x1="16" y1="14" x2="18" y2="14"></line>
+                      </svg>
+                    </span>
+                    <span>{{ $event['attendance_format'] }}</span>
+                  </span>
                 </p>
                 <p class="desc">{{ $event['description'] }}</p>
                 <div class="event-actions">
@@ -961,8 +973,8 @@ $regions = [
         role = "img"
         focusable = "false" >
           <
-          polygon points = "12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4" > < /polygon> <
-          /svg> <
+          polygon points = "12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4" > < /polygon> < /
+        svg > <
           /button>
         `).join('')}
                             </div>
