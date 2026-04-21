@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
   Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
   Route::put('/admin/events/{event:event_id}', [EventController::class, 'update'])->name('admin.events.update');
   Route::patch('/admin/events/{event:event_id}/archive', [EventController::class, 'archive'])->name('admin.events.archive');
+  Route::post('/admin/events/{event:event_id}/send-evaluation-reminder', [EventController::class, 'sendEvaluationReminder'])->name('admin.events.send-evaluation-reminder');
 
   Route::get('/admin/participants', [AdminParticipantsController::class, 'index'])
     ->name('admin.participants');

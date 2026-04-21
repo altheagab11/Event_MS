@@ -358,6 +358,12 @@
       align-items: center;
     }
 
+    .event-card-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .status {
       font-size: 11px;
       font-weight: 700;
@@ -392,6 +398,77 @@
 
     .manage:hover {
       color: #17396f;
+    }
+
+    .manual-reminder-form {
+      margin: 0;
+    }
+
+    .manual-reminder-btn {
+      border: 1.5px solid #d6e0f2;
+      background: #f6f9ff;
+      color: #204985;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .manual-reminder-btn svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .manual-reminder-btn:hover {
+      background: #eef4ff;
+      color: #17396f;
+      border-color: #c7d6ef;
+    }
+
+    .manual-reminder-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      background: #eef2f8;
+      color: #7487a6;
+      border-color: #d2dceb;
+    }
+
+    .reminder-indicator {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      white-space: nowrap;
+    }
+
+    .reminder-indicator.sent {
+      color: #1f6b39;
+      background: #eaf8ef;
+      border: 1px solid #b7ebc6;
+    }
+
+    .reminder-indicator.partial {
+      color: #7e621c;
+      background: #fff5df;
+      border: 1px solid #efd797;
+    }
+
+    .reminder-indicator.not-sent {
+      color: #516a92;
+      background: #f6f9ff;
+      border: 1px solid #d6e0f2;
     }
 
     .events-list-head {
@@ -541,6 +618,7 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      gap: 8px;
     }
 
     .list-action .manage {
@@ -553,6 +631,10 @@
       background: #f6f9ff;
       padding: 5px 10px;
       line-height: 1;
+    }
+
+    .list-action .manual-reminder-btn {
+      text-decoration: none;
     }
 
     @media (max-width: 1180px) {
@@ -984,7 +1066,7 @@
       </header>
 
       @if (session('status'))
-      <div style="margin-bottom:14px; border:2px solid #b7ebc6; background:#ebfff1; color:#1f6b39; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600;">
+      <div style="margin-bottom:14px; border:2px solid {{ session('status_type') === 'warning' ? '#f2d39f' : '#b7ebc6' }}; background:{{ session('status_type') === 'warning' ? '#fff8e9' : '#ebfff1' }}; color:{{ session('status_type') === 'warning' ? '#7e621c' : '#1f6b39' }}; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600;">
         {{ session('status') }}
       </div>
       @endif
@@ -1050,7 +1132,11 @@
         $eventMonth = (int) $eventDate->format('n');
         $eventYear = (int) $eventDate->format('Y');
         $isArchived = (string) $event->status === 'archived';
-        $isActive = ! $isArchived && $eventDate->gte(now()->startOfDay());
+        $eventEndDate = $event->end_date
+        ? \Illuminate\Support\Carbon::parse($event->end_date)
+        : $eventDate;
+        $isActive = ! $isArchived && $eventEndDate->copy()->endOfDay()->isFuture();
+        $canSendManualReminder = ! $isArchived && ! $isActive;
         $statusLabel = $isArchived ? 'Archived' : ($isActive ? 'Active' : 'Ended');
         $statusClass = $isArchived ? 'archived' : ($isActive ? 'active' : 'ended');
         $bannerUrl = $event->banner_url;
@@ -1061,6 +1147,18 @@
         $shortDescription = $descriptionText !== ''
         ? \Illuminate\Support\Str::limit($descriptionText, 230)
         : 'No description available.';
+        $reminderSummary = ($eventReminderSummary ?? [])[$event->event_id] ?? null;
+        $reminderSentCount = (int) ($reminderSummary['sent_count'] ?? 0);
+        $reminderTotalRecipients = (int) ($reminderSummary['total_recipients'] ?? 0);
+        $reminderFullySent = (bool) ($reminderSummary['fully_sent'] ?? false);
+        $reminderAnySent = (bool) ($reminderSummary['any_sent'] ?? false);
+        $reminderLastSentAt = (string) ($reminderSummary['last_sent_at'] ?? '');
+        $reminderIndicatorLabel = $reminderFullySent
+        ? 'Reminder Sent'
+        : ($reminderAnySent ? 'Partially Sent' : 'Not Sent');
+        $reminderIndicatorClass = $reminderFullySent
+        ? 'sent'
+        : ($reminderAnySent ? 'partial' : 'not-sent');
         $eventPayload = [
         'event_id' => $event->event_id,
         'event_name' => $event->event_name,
@@ -1111,12 +1209,31 @@
             <p class="event-desc">{{ $shortDescription }}</p>
             <div class="event-footer">
               <span class="status {{ $statusClass }}">{{ $statusLabel }}</span>
-              <button
-                type="button"
-                class="manage manage-trigger"
-                data-event='@json($eventPayload)'>
-                Manage
-              </button>
+              <div class="event-card-actions">
+                @if ($canSendManualReminder)
+                @if ($hasReminderTracking ?? false)
+                <span class="reminder-indicator {{ $reminderIndicatorClass }}" title="{{ $reminderTotalRecipients > 0 ? ($reminderSentCount . ' of ' . $reminderTotalRecipients . ' recipients') : 'No eligible recipients' }}{{ $reminderLastSentAt !== '' ? (' | Last sent: ' . $reminderLastSentAt) : '' }}">
+                  {{ $reminderIndicatorLabel }}
+                </span>
+                @endif
+                <form class="manual-reminder-form" method="post" action="{{ route('admin.events.send-evaluation-reminder', ['event' => $event->event_id]) }}" onsubmit="return window.confirm('Send evaluation reminder emails for {{ addslashes($event->event_name) }} now?');">
+                  @csrf
+                  <button type="submit" class="manual-reminder-btn" title="{{ $reminderFullySent ? 'Evaluation reminders already sent' : 'Send evaluation reminders' }}" {{ ($hasReminderTracking ?? false) && $reminderFullySent ? 'disabled' : '' }}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M22 2 11 13"></path>
+                      <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
+                    </svg>
+                    {{ $reminderFullySent ? 'Sent' : 'Remind' }}
+                  </button>
+                </form>
+                @endif
+                <button
+                  type="button"
+                  class="manage manage-trigger"
+                  data-event='@json($eventPayload)'>
+                  Manage
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1153,6 +1270,23 @@
             </div>
 
             <div class="list-col list-action">
+              @if ($canSendManualReminder)
+              @if ($hasReminderTracking ?? false)
+              <span class="reminder-indicator {{ $reminderIndicatorClass }}" title="{{ $reminderTotalRecipients > 0 ? ($reminderSentCount . ' of ' . $reminderTotalRecipients . ' recipients') : 'No eligible recipients' }}{{ $reminderLastSentAt !== '' ? (' | Last sent: ' . $reminderLastSentAt) : '' }}">
+                {{ $reminderIndicatorLabel }}
+              </span>
+              @endif
+              <form class="manual-reminder-form" method="post" action="{{ route('admin.events.send-evaluation-reminder', ['event' => $event->event_id]) }}" onsubmit="return window.confirm('Send evaluation reminder emails for {{ addslashes($event->event_name) }} now?');">
+                @csrf
+                <button type="submit" class="manual-reminder-btn" title="{{ $reminderFullySent ? 'Evaluation reminders already sent' : 'Send evaluation reminders' }}" {{ ($hasReminderTracking ?? false) && $reminderFullySent ? 'disabled' : '' }}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M22 2 11 13"></path>
+                    <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
+                  </svg>
+                  {{ $reminderFullySent ? 'Sent' : 'Remind' }}
+                </button>
+              </form>
+              @endif
               <button
                 type="button"
                 class="manage manage-trigger"

@@ -19,12 +19,15 @@ class Registration extends Model
     'event_id',
     'registration_date',
     'status',
+    'evaluation_reminder_sent_at',
+    'evaluation_reminder_status',
   ];
 
   protected function casts(): array
   {
     return [
       'registration_date' => 'datetime',
+      'evaluation_reminder_sent_at' => 'datetime',
     ];
   }
 
