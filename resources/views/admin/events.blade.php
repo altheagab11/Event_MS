@@ -1206,17 +1206,38 @@
               </button>
             </div>
 
-            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
+            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Name</label>
             <input class="input" type="text" name="event_name" value="{{ old('event_name') }}" placeholder="e.g. IT Week 2026" required>
+
+            <div class="row" style="margin-top:12px;">
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Hosted By / Department</label>
+                <input class="input" type="text" name="hosted_by" value="{{ old('hosted_by') }}" placeholder="e.g. College of Computer Studies" required>
+              </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Attendance Format</label>
+                <select class="select" name="attendance_format" required>
+                  <option value="Online" {{ old('attendance_format', 'Online') === 'Online' ? 'selected' : '' }}>Online</option>
+                  <option value="Face-to-Face" {{ old('attendance_format') === 'Face-to-Face' ? 'selected' : '' }}>Face-to-Face</option>
+                  <option value="Hybrid" {{ old('attendance_format') === 'Hybrid' ? 'selected' : '' }}>Hybrid</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div class="card-panel">
             <h3>Schedule &amp; Location</h3>
             <div class="row">
               <div class="col">
-                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
-                <input class="input" type="date" name="event_date" value="{{ old('event_date') }}" required>
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Start Date</label>
+                <input class="input" type="date" name="start_date" value="{{ old('start_date') }}" required>
               </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">End Date</label>
+                <input class="input" type="date" name="end_date" value="{{ old('end_date') }}" required>
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px;">
               <div class="col">
                 <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
                 <input class="input" type="text" name="location" value="{{ old('location') }}" placeholder="e.g. Main Auditorium">

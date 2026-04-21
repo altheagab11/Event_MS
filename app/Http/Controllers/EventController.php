@@ -60,6 +60,7 @@ class EventController extends Controller
   public function store(StoreEventRequest $request)
   {
     $payload = $request->safe()->except('banner_image');
+    $payload['event_date'] = $payload['start_date'];
 
     if ($request->hasFile('banner_image')) {
       $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');

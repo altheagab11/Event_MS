@@ -16,11 +16,15 @@ class Event extends Model
 
   protected $fillable = [
     'event_name',
+    'hosted_by',
     'event_type',
+    'attendance_format',
     'description',
     'location',
     'banner_image',
     'event_date',
+    'start_date',
+    'end_date',
     'status',
   ];
 
@@ -28,6 +32,8 @@ class Event extends Model
   {
     return [
       'event_date' => 'date',
+      'start_date' => 'date',
+      'end_date' => 'date',
     ];
   }
 
