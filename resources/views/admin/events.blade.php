@@ -9,8 +9,11 @@
   $hasEditErrors = $editErrorBag->any();
   $editingEventId = (int) old('editing_event_id', 0);
   $editingEvent = $editingEventId > 0 ? $events->firstWhere('event_id', $editingEventId) : null;
-  $editingEventDate = $editingEvent && $editingEvent->event_date
-  ? \Illuminate\Support\Carbon::parse($editingEvent->event_date)->format('Y-m-d')
+  $editingEventStartDate = $editingEvent && ($editingEvent->start_date ?? $editingEvent->event_date)
+  ? \Illuminate\Support\Carbon::parse($editingEvent->start_date ?? $editingEvent->event_date)->format('Y-m-d')
+  : '';
+  $editingEventEndDate = $editingEvent && ($editingEvent->end_date ?? $editingEvent->event_date)
+  ? \Illuminate\Support\Carbon::parse($editingEvent->end_date ?? $editingEvent->event_date)->format('Y-m-d')
   : '';
   $editingBannerUrl = $editingEvent?->banner_url;
   @endphp
@@ -1061,7 +1064,15 @@
         $eventPayload = [
         'event_id' => $event->event_id,
         'event_name' => $event->event_name,
+        'hosted_by' => $event->hosted_by,
+        'attendance_format' => $event->attendance_format,
         'event_type' => $event->event_type,
+        'start_date' => $event->start_date
+        ? \Illuminate\Support\Carbon::parse($event->start_date)->format('Y-m-d')
+        : $eventDate->format('Y-m-d'),
+        'end_date' => $event->end_date
+        ? \Illuminate\Support\Carbon::parse($event->end_date)->format('Y-m-d')
+        : $eventDate->format('Y-m-d'),
         'event_date' => $eventDate->format('Y-m-d'),
         'location' => $event->location,
         'description' => $event->description,
@@ -1308,17 +1319,38 @@
               </button>
             </div>
 
-            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Title</label>
+            <label style="display:block; font-weight:700; color:#233b6a; margin-bottom:8px;">Event Name</label>
             <input class="input" id="edit_event_name" type="text" name="event_name" value="{{ old('event_name', $editingEvent?->event_name) }}" placeholder="e.g. IT Week 2026" required>
+
+            <div class="row" style="margin-top:12px;">
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Hosted By / Department</label>
+                <input class="input" id="edit_hosted_by" type="text" name="hosted_by" value="{{ old('hosted_by', $editingEvent?->hosted_by) }}" placeholder="e.g. College of Computer Studies" required>
+              </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Attendance Format</label>
+                <select class="select" id="edit_attendance_format" name="attendance_format" required>
+                  <option value="Online" {{ old('attendance_format', $editingEvent?->attendance_format ?? 'Online') === 'Online' ? 'selected' : '' }}>Online</option>
+                  <option value="Face-to-Face" {{ old('attendance_format', $editingEvent?->attendance_format) === 'Face-to-Face' ? 'selected' : '' }}>Face-to-Face</option>
+                  <option value="Hybrid" {{ old('attendance_format', $editingEvent?->attendance_format) === 'Hybrid' ? 'selected' : '' }}>Hybrid</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div class="card-panel">
             <h3>Schedule &amp; Location</h3>
             <div class="row">
               <div class="col">
-                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Date</label>
-                <input class="input" id="edit_event_date" type="date" name="event_date" value="{{ old('event_date', $editingEventDate) }}" required>
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Start Date</label>
+                <input class="input" id="edit_start_date" type="date" name="start_date" value="{{ old('start_date', $editingEventStartDate) }}" required>
               </div>
+              <div class="col">
+                <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">End Date</label>
+                <input class="input" id="edit_end_date" type="date" name="end_date" value="{{ old('end_date', $editingEventEndDate) }}" required>
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px;">
               <div class="col">
                 <label style="display:block; margin-bottom:8px; font-weight:700; color:#233b6a;">Location / Venue</label>
                 <input class="input" id="edit_location" type="text" name="location" value="{{ old('location', $editingEvent?->location) }}" placeholder="e.g. Main Auditorium">
@@ -1382,8 +1414,11 @@
       const editArchiveForm = editOverlay ? editOverlay.querySelector('#archive-event-form') : null;
       const editIdInput = editOverlay ? editOverlay.querySelector('#editing_event_id') : null;
       const editNameInput = editOverlay ? editOverlay.querySelector('#edit_event_name') : null;
+      const editHostedByInput = editOverlay ? editOverlay.querySelector('#edit_hosted_by') : null;
+      const editAttendanceFormatInput = editOverlay ? editOverlay.querySelector('#edit_attendance_format') : null;
       const editTypeInput = editOverlay ? editOverlay.querySelector('#edit_event_type') : null;
-      const editDateInput = editOverlay ? editOverlay.querySelector('#edit_event_date') : null;
+      const editStartDateInput = editOverlay ? editOverlay.querySelector('#edit_start_date') : null;
+      const editEndDateInput = editOverlay ? editOverlay.querySelector('#edit_end_date') : null;
       const editLocationInput = editOverlay ? editOverlay.querySelector('#edit_location') : null;
       const editDescriptionInput = editOverlay ? editOverlay.querySelector('#edit_description') : null;
       const editTypeButtons = editOverlay ? editOverlay.querySelectorAll('.edit-event-type-option') : [];
@@ -1540,8 +1575,22 @@
           editNameInput.value = payload.event_name || '';
         }
 
-        if (editDateInput) {
-          editDateInput.value = payload.event_date || '';
+        if (editHostedByInput) {
+          editHostedByInput.value = payload.hosted_by || '';
+        }
+
+        if (editAttendanceFormatInput) {
+          const allowedFormats = ['Online', 'Face-to-Face', 'Hybrid'];
+          const resolvedFormat = allowedFormats.includes(payload.attendance_format) ? payload.attendance_format : 'Online';
+          editAttendanceFormatInput.value = resolvedFormat;
+        }
+
+        if (editStartDateInput) {
+          editStartDateInput.value = payload.start_date || payload.event_date || '';
+        }
+
+        if (editEndDateInput) {
+          editEndDateInput.value = payload.end_date || payload.event_date || '';
         }
 
         if (editLocationInput) {

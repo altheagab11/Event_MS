@@ -76,6 +76,7 @@ class EventController extends Controller
   public function update(UpdateEventRequest $request, Event $event): RedirectResponse
   {
     $payload = $request->safe()->except(['banner_image', 'editing_event_id']);
+    $payload['event_date'] = $payload['start_date'];
 
     if ($request->hasFile('banner_image')) {
       $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');
