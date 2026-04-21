@@ -291,6 +291,22 @@ $regions = [
 
     const EVENTS = @json($events);
     const REGIONS = @json($regions);
+    const SCHOOL_UNIVERSITIES = [
+      'National University Lipa',
+      'Batangas State University',
+      'De La Salle Lipa',
+      'University of Santo Tomas',
+      'Polytechnic University of the Philippines',
+      'Other',
+    ];
+    const USER_TYPES = [
+      'Student',
+      'Faculty',
+    ];
+    const ROLES = [
+      'Exhibitor',
+      'Participant',
+    ];
     const REGISTER_SEND_URL = @json(route('registration.send-verification'));
     const REGISTER_RESEND_URL = @json(route('registration.resend-code'));
     const REGISTER_VERIFY_URL = @json(route('registration.verify-code'));
@@ -389,6 +405,11 @@ $regions = [
         .replaceAll("'", '&#039;');
     }
 
+    function getAttendanceFormat(eventData) {
+      const value = String(eventData?.attendance_format ?? '').trim();
+      return value !== '' ? value : 'Not Specified';
+    }
+
     async function postForm(url, formData) {
       const response = await fetch(url, {
         method: 'POST',
@@ -418,6 +439,7 @@ $regions = [
 
     function renderFormStep() {
       const showUpload = selectedEvent.type === 'Conference Event';
+      const attendanceFormat = escapeHtml(getAttendanceFormat(selectedEvent));
       modalContent.innerHTML = `
                 <div class="event-head">
                     <img src="${selectedEvent.image}" alt="${selectedEvent.title}">
@@ -450,6 +472,18 @@ $regions = [
                             </span>
                             <span>${selectedEvent.location}</span>
                         </div>
+                        <div class="chip-item">
+                          <span class="chip-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                              <rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect>
+                              <line x1="3.5" y1="10" x2="20.5" y2="10"></line>
+                              <line x1="8" y1="14" x2="10" y2="14"></line>
+                              <line x1="12" y1="14" x2="14" y2="14"></line>
+                              <line x1="16" y1="14" x2="18" y2="14"></line>
+                            </svg>
+                          </span>
+                          <span>Attendance: ${attendanceFormat}</span>
+                        </div>
                     </div>
                     <div class="desc-block">${selectedEvent.description}</div>
                     <div class="step-tag">STEP 1 OF 2: REGISTRATION</div>
@@ -460,9 +494,9 @@ $regions = [
                             <div class="field"><label>First Name *</label><input name="firstName" required></div>
                             <div class="field"><label>Last Name *</label><input name="lastName" required></div>
                             <div class="field"><label>Email Address *</label><input type="email" name="email" required></div>
-                            <div class="field"><label>Region in the Philippines *</label><select name="region" required><option value="">Select Region</option>${REGIONS.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
-                            <div class="field"><label>School From *</label><input name="schoolFrom" required></div>
-                            <div class="field"><label>School Level *</label><select name="schoolLevel" required><option value="">Select Level</option><option>Senior High School</option><option>Undergraduate</option><option>Graduate</option><option>Professional</option></select></div>
+                            <div class="field"><label>School / University *</label><input name="schoolUniversity" placeholder="Enter school / university" required></div>
+                            <div class="field"><label>User Type *</label><select name="userType" required>${USER_TYPES.map(u => `<option value="${u}">${u}</option>`).join('')}</select></div>
+                            <div class="field"><label>Role *</label><select name="role" required>${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
                         </div>
                         <div class="upload-wrap" style="display:${showUpload ? 'block' : 'none'}">
                             <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
@@ -565,9 +599,9 @@ $regions = [
         payload.append('first_name', String(formData.get('firstName') || '').trim());
         payload.append('last_name', String(formData.get('lastName') || '').trim());
         payload.append('email', String(formData.get('email') || '').trim());
-        payload.append('region', String(formData.get('region') || '').trim());
-        payload.append('school_from', String(formData.get('schoolFrom') || '').trim());
-        payload.append('school_level', String(formData.get('schoolLevel') || '').trim());
+        payload.append('region', String(formData.get('schoolUniversity') || '').trim());
+        payload.append('school_from', String(formData.get('userType') || '').trim());
+        payload.append('school_level', String(formData.get('role') || '').trim());
 
         const paperFile = formData.get('paperFile');
         if (paperFile instanceof File && paperFile.size > 0) {
@@ -578,9 +612,9 @@ $regions = [
           firstName: String(formData.get('firstName') || '').trim(),
           lastName: String(formData.get('lastName') || '').trim(),
           email: String(formData.get('email') || '').trim(),
-          region: String(formData.get('region') || '').trim(),
-          schoolFrom: String(formData.get('schoolFrom') || '').trim(),
-          schoolLevel: String(formData.get('schoolLevel') || '').trim(),
+          region: String(formData.get('schoolUniversity') || '').trim(),
+          schoolFrom: String(formData.get('userType') || '').trim(),
+          schoolLevel: String(formData.get('role') || '').trim(),
           verificationId: null,
           registrationStatus: '',
           passCode: '',
