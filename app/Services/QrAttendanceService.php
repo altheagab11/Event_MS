@@ -31,7 +31,7 @@ class QrAttendanceService
       $registration = DB::table('registrations')
         ->where('user_id', $digitalId->user_id)
         ->where('event_id', $digitalId->event_id)
-        ->whereIn('status', ['approved', 'pending'])
+        ->where('status', 'approved')
         ->orderByDesc('registration_id')
         ->lockForUpdate()
         ->first();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\DigitalPassPreviewMail;
+use App\Mail\RegistrationRejectedMail;
 use App\Models\Paper;
 use App\Models\Registration;
 use App\Models\RegistrationVerificationCode;
@@ -129,7 +130,14 @@ class AdminParticipantsController extends Controller
 
   public function rejectApplication(Registration $registration): RedirectResponse
   {
-    $registration->loadMissing(['event:event_id,event_type']);
+    if ((string) $registration->status !== 'pending') {
+      return redirect()
+        ->route('admin.participants')
+        ->with('status_type', 'warning')
+        ->with('status_message', 'Only pending registrations can be reviewed.');
+    }
+
+    $registration->loadMissing(['event:event_id,event_type,event_name', 'user:id,firstname,lastname,email']);
     $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
 
     DB::transaction(function () use ($registration, $isConference): void {
@@ -153,14 +161,44 @@ class AdminParticipantsController extends Controller
       }
     });
 
+    $fullName = trim((string) ($registration->user->firstname ?? '') . ' ' . (string) ($registration->user->lastname ?? ''));
+    $recipientEmail = (string) ($registration->user->email ?? '');
+
+    if ($recipientEmail !== '') {
+      try {
+        Mail::to($recipientEmail)->send(new RegistrationRejectedMail(
+          fullName: $fullName !== '' ? $fullName : 'Participant',
+          eventName: (string) ($registration->event->event_name ?? 'the selected event')
+        ));
+      } catch (Throwable $exception) {
+        Log::error('Registration rejection email failed.', [
+          'registration_id' => $registration->registration_id,
+          'email' => $recipientEmail,
+          'error' => $exception->getMessage(),
+        ]);
+
+        return redirect()
+          ->route('admin.participants')
+          ->with('status_type', 'warning')
+          ->with('status_message', 'Application rejected, but rejection email could not be sent.');
+      }
+    }
+
     return redirect()
       ->route('admin.participants')
       ->with('status_type', 'success')
-      ->with('status_message', 'Application rejected successfully.');
+      ->with('status_message', 'Application rejected and participant notified.');
   }
 
   public function approveAndSendId(Registration $registration): RedirectResponse
   {
+    if ((string) $registration->status !== 'pending') {
+      return redirect()
+        ->route('admin.participants')
+        ->with('status_type', 'warning')
+        ->with('status_message', 'Only pending registrations can be reviewed.');
+    }
+
     $registration->loadMissing([
       'user:id,firstname,lastname,email',
       'event:event_id,event_name,event_type,event_date,location',
@@ -364,7 +402,7 @@ class AdminParticipantsController extends Controller
     }
 
     if ($registrationStatus === 'approved') {
-      return ['Registered', 'blue'];
+      return ['Registered', 'green'];
     }
 
     if ($registrationStatus === 'pending') {
@@ -372,7 +410,7 @@ class AdminParticipantsController extends Controller
     }
 
     if ($registrationStatus === 'rejected') {
-      return ['Rejected', 'gold'];
+      return ['Rejected', 'red'];
     }
 
     if ($registrationStatus === 'cancelled') {

@@ -790,7 +790,9 @@ $regions = [
       const isPending = String(serverData.registration_status || '').toLowerCase() === 'pending';
       const fullName = String(serverData.full_name || `${registrationData.firstName} ${registrationData.lastName}`.trim() || 'Student Name');
       const displayLevel = String(serverData.school_level || registrationData.schoolLevel || 'Participant').toUpperCase();
-      const passCode = String(serverData.pass_code || registrationData.passCode || 'N/A');
+      const passCode = isPending
+        ? 'PENDING APPROVAL'
+        : String(serverData.pass_code || registrationData.passCode || 'N/A');
       const displayEventName = String(serverData.event_name || selectedEvent.title || 'Event');
       const displayLocation = String(serverData.location || selectedEvent.location || 'TBA');
       modalCard.classList.add('success-mode');
@@ -805,12 +807,12 @@ $regions = [
                           <h3>${isPending ? 'Registration Submitted!' : 'Verification Successful!'}</h3>
                     <p class="success-copy">
                           ${isPending
-                            ? 'Your registration is now pending review. A demo digital pass email has been sent for testing purposes.'
+                            ? 'Your registration is now pending admin approval. Your Digital ID will be sent by email once approved.'
                             : 'Your registration is complete. A demo digital pass email has been sent. Here is your preview:'}
                     </p>
-                        ${serverData.mail_sent === false ? '<p class="success-copy" style="margin-top:-2px; color:#8b1e2b;">Registration was saved, but email sending failed. Check your mail .env settings and try again.</p>' : ''}
+                        ${!isPending && serverData.mail_sent === false ? '<p class="success-copy" style="margin-top:-2px; color:#8b1e2b;">Registration was saved, but email sending failed. Check your mail .env settings and try again.</p>' : ''}
 
-                    <div class="success-grid">
+                    <div class="success-grid" style="${isPending ? 'display:none;' : ''}">
                         <div class="pass-card">
                             <div class="pass-top">
                                 <div class="pass-kicker">NU LIPA EVENT PASS</div>
@@ -877,12 +879,12 @@ $regions = [
                                         <rect x="20" y="9" width="2" height="2" rx=".5"></rect>
                                     </svg>
                                 </div>
-                                    <p class="qr-note">Demo pass code: ${escapeHtml(passCode)}. This preview is for testing while scanner/API integration is pending.</p>
+                                    <p class="qr-note">${isPending ? 'Digital ID details will be generated and emailed after admin approval.' : `Demo pass code: ${escapeHtml(passCode)}. This preview is for testing while scanner/API integration is pending.`}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="success-actions">
+                            <div class="success-actions" style="${isPending ? 'display:none;' : ''}">
                         <button type="button" class="success-action-btn">
                             <span class="success-action-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" role="img" focusable="false">

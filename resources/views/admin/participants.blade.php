@@ -253,6 +253,11 @@
       background: #fff1bd;
     }
 
+    .chip.red {
+      color: #b4232a;
+      background: #ffe7e9;
+    }
+
     .details-btn {
       border: 0;
       background: #f4f6fa;
@@ -950,7 +955,7 @@
 
         <section class="review-actions" id="reviewActions" style="display:none;" aria-label="Application review actions">
           <h3 class="review-actions-title">Application Review</h3>
-          <p class="review-actions-note">Use these actions after reviewing the submitted conference paper.</p>
+          <p class="review-actions-note">Use these actions to approve or reject this pending registration.</p>
           <div class="review-actions-row">
             <form id="rejectApplicationForm" method="POST" action="#">
               @csrf
@@ -1067,7 +1072,7 @@
         }
 
         const registrationStatus = String(participant.registration_status || '').trim().toLowerCase();
-        const canReview = isConference && registrationStatus === 'pending' && Boolean(paper.has_file);
+        const canReview = registrationStatus === 'pending' && (!isConference || Boolean(paper.has_file));
 
         reviewActions.style.display = canReview ? '' : 'none';
         if (canReview) {

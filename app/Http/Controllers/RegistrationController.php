@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ResendRegistrationVerificationRequest;
 use App\Http\Requests\SendRegistrationVerificationRequest;
 use App\Http\Requests\VerifyRegistrationCodeRequest;
-use App\Mail\DigitalPassPreviewMail;
 use App\Mail\RegistrationVerificationCodeMail;
 use App\Models\Event;
 use App\Models\RegistrationVerificationCode;
@@ -314,7 +313,7 @@ class RegistrationController extends Controller
         ]);
       }
 
-      $registrationStatus = $isConferenceEvent ? 'pending' : 'approved';
+      $registrationStatus = 'pending';
 
       if ($registrationRow === null) {
         $registrationId = DB::table('registrations')->insertGetId([
@@ -356,23 +355,6 @@ class RegistrationController extends Controller
         ]);
       }
 
-      $existingDigitalId = DB::table('digital_ids')
-        ->where('user_id', $user->id)
-        ->where('event_id', $event->event_id)
-        ->first();
-
-      if ($existingDigitalId === null) {
-        $passCode = $this->generateUniquePassCode();
-        DB::table('digital_ids')->insert([
-          'user_id' => $user->id,
-          'event_id' => $event->event_id,
-          'qr_code' => $passCode,
-          'issued_at' => now(),
-        ]);
-      } else {
-        $passCode = (string) $existingDigitalId->qr_code;
-      }
-
       $verification->forceFill([
         'status' => 'verified',
         'verified_at' => now(),
@@ -389,36 +371,18 @@ class RegistrationController extends Controller
         'school_level' => (string) ($payload['school_level'] ?? 'Participant'),
         'region' => (string) ($payload['region'] ?? ''),
         'school_from' => (string) ($payload['school_from'] ?? ''),
-        'pass_code' => $passCode,
       ];
     });
 
-    $mailSent = true;
-    try {
-      Mail::to($result['email'])->send(new DigitalPassPreviewMail($result));
-    } catch (Throwable $exception) {
-      $mailSent = false;
-    }
-
     return response()->json([
-      'message' => 'Registration verified and finalized successfully.',
-      'data' => $result + ['mail_sent' => $mailSent],
+      'message' => 'Registration submitted successfully and is pending admin approval.',
+      'data' => $result,
     ]);
   }
 
   private function generateVerificationCode(): string
   {
     return strtoupper(Str::random(6));
-  }
-
-  private function generateUniquePassCode(): string
-  {
-    do {
-      $code = 'NUL-' . strtoupper(Str::random(10));
-      $exists = DB::table('digital_ids')->where('qr_code', $code)->exists();
-    } while ($exists);
-
-    return $code;
   }
 
   private function maskEmail(string $email): string
