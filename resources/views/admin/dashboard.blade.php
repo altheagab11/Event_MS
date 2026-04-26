@@ -1,997 +1,359 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard | NU Lipa EMS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --blue-900: #183d7e;
-      --blue-800: #224381;
-      --blue-700: #2f5b8f;
-      --gold: #f5c36c;
-      --gold-soft: #f2d3a8;
-      --ink: #12356b;
-      --bg: #f2f3f8;
-      --card: #ffffff;
-      --line: #23457e;
-      --text: #1a3462;
-      --muted: #6f7f9f;
-      --radius: 14px;
-      --shadow: 7px 7px 0 0 #1f3f79;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .layout {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 210px 1fr;
-    }
-
-    .sidebar {
-      border-right: 1px solid #e3e5ef;
-      background: #f6f7fb;
-      padding: 22px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .brand {
-      font-weight: 800;
-      color: var(--ink);
-      font-size: 28px;
-      line-height: 1;
-      letter-spacing: .4px;
-    }
-
-    .brand small {
-      margin-top: 6px;
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      background: #112f67;
-      color: #fff;
-      border-radius: 4px;
-      padding: 4px 8px;
-      line-height: 1;
-    }
-
-    .menu-title {
-      margin: 28px 4px 10px;
-      color: #9ca6be;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .8px;
-    }
-
-    .menu {
-      display: grid;
-      gap: 8px;
-    }
-
-    .menu a {
-      text-decoration: none;
-      color: #354f80;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 2px solid transparent;
-    }
-
-    .menu a svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .menu a.active {
-      background: var(--gold);
-      border-color: var(--line);
-      color: #16386d;
-      box-shadow: 3px 3px 0 0 #233f74;
-    }
-
-    .logout {
-      margin-top: 16px;
-      text-decoration: none;
-      color: #ea3640;
-      border: 2px solid #f0b2b5;
-      border-radius: 13px;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 10px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .content {
-      padding: 20px 22px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      gap: 12px;
-    }
-
-    h1,
-    .page-title {
-      margin: 0;
-      color: var(--ink);
-      font-size: 42px;
-      line-height: 1.04;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-
-    .subtitle {
-      margin-top: 6px;
-      color: #7281a0;
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .scan-btn {
-      border: 3px solid var(--line);
-      border-radius: 16px;
-      background: var(--gold);
-      color: var(--ink);
-      font-weight: 800;
-      letter-spacing: .5px;
-      font-size: 14px;
-      padding: 12px 18px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 4px 4px 0 0 #213d76;
-    }
-
-    .scan-btn svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 4px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px 18px;
-    }
-
-    .stat-card {
-      min-height: 114px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .stat-card.peach {
-      background: #f1d7b2;
-    }
-
-    .stat-card.gold {
-      background: var(--gold);
-    }
-
-    .stat-card.blue {
-      background: #5d7d9a;
-      color: #fff;
-    }
-
-    .stat-card.white {
-      background: #fff;
-    }
-
-    .label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .7px;
-    }
-
-    .value {
-      margin-top: 8px;
-      font-size: 39px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .icon-box {
-      width: 50px;
-      height: 50px;
-      border: 3px solid var(--line);
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: #f6ca82;
-    }
-
-    .stat-card.blue .icon-box {
-      border-color: #23457e;
-      background: #1d3d78;
-    }
-
-    .stat-card.white .icon-box {
-      background: #6a84a0;
-    }
-
-    .icon-box svg {
-      width: 21px;
-      height: 21px;
-      stroke: #16386d;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .stat-card.white .icon-box svg,
-    .stat-card.blue .icon-box svg {
-      stroke: #fff;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.06fr 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: .3px;
-      color: var(--ink);
-    }
-
-    .demographic {
-      display: grid;
-      gap: 20px;
-      margin-top: 10px;
-    }
-
-    .demographic-row {
-      display: grid;
-      gap: 10px;
-    }
-
-    .demographic-head {
-      display: flex;
-      justify-content: space-between;
-      color: var(--ink);
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .track {
-      background: #f6ecd8;
-      border: 3px solid #23457e;
-      border-radius: 999px;
-      height: 18px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .fill {
-      height: 100%;
-      background: #1f4284;
-    }
-
-    .fill.gold {
-      background: #f0b95f;
-    }
-
-    .fill.gray {
-      background: #6b87a4;
-    }
-
-    .chart-card {
-      background: #f5c36c;
-    }
-
-    .chart-wrap {
-      display: grid;
-      place-items: center;
-      padding-top: 12px;
-    }
-
-    .ring {
-      width: 210px;
-      height: 210px;
-      border-radius: 50%;
-      background: conic-gradient(#1f4284 75%, #efdec4 0);
-      position: relative;
-      display: grid;
-      place-items: center;
-      margin-bottom: 18px;
-    }
-
-    .ring::before {
-      content: "";
-      position: absolute;
-      width: 142px;
-      height: 142px;
-      border-radius: 50%;
-      background: #f5c36c;
-      border: 8px solid #1f4284;
-    }
-
-    .ring-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      color: #17396f;
-    }
-
-    .ring-content .num {
-      font-size: 47px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .ring-content .txt {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .8px;
-    }
-
-    .legend {
-      display: flex;
-      gap: 18px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      border: 3px solid #23457e;
-      border-radius: 12px;
-      padding: 7px 12px;
-      background: #fdf7ed;
-      font-size: 16px;
-      font-weight: 700;
-      color: #17396f;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #1f4284;
-      border: 2px solid #2b4064;
-    }
-
-    .dot.light {
-      background: #d4dfef;
-      border-color: #8f9cb2;
-    }
-
-    .welcome {
-      background: #1f3f7a;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      min-height: 200px;
-    }
-
-    .welcome h3 {
-      margin: 0;
-      font-size: 38px;
-      line-height: 1.1;
-      color: #f6c46c;
-      font-weight: 800;
-    }
-
-    .welcome p {
-      margin: 16px 0 0;
-      max-width: 70%;
-      font-size: 26px;
-      line-height: 1.55;
-      font-weight: 600;
-      border-left: 5px solid #f6c46c;
-      padding-left: 16px;
-      color: #fff;
-    }
-
-    .blocks {
-      position: absolute;
-      right: 38px;
-      top: 34px;
-      display: grid;
-      grid-template-columns: repeat(2, 58px);
-      gap: 14px;
-      opacity: .8;
-    }
-
-    .blocks span {
-      width: 58px;
-      height: 58px;
-      border-radius: 14px;
-      background: #2f5088;
-      border: 6px solid #466499;
-      display: block;
-    }
-
-    @media (max-width: 1300px) {
-
-      h1,
-      .page-title {
-        font-size: 32px;
-      }
-
-      .section-title {
-        font-size: 28px;
-      }
-
-      .subtitle {
-        font-size: 16px;
-      }
-
-      .value {
-        font-size: 34px;
-      }
-
-      .demographic-head {
-        font-size: 16px;
-      }
-
-      .welcome h3 {
-        font-size: 34px;
-      }
-
-      .welcome p {
-        font-size: 22px;
-      }
-    }
-
-    @media (max-width: 1060px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        flex-direction: row;
-        align-items: center;
-        gap: 14px;
-        border-right: 0;
-        border-bottom: 1px solid #e3e5ef;
-        padding: 14px;
-      }
-
-      .sidebar .top,
-      .sidebar .bottom {
-        display: contents;
-      }
-
-      .menu-title,
-      .logout {
-        display: none;
-      }
-
-      .menu {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .stats,
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .welcome p {
-        max-width: 100%;
-      }
-
-      .blocks {
-        display: none;
-      }
-    }
-
-    /* QR modal styles */
-    .qr-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(9, 18, 34, 0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 1300;
-    }
-
-    .qr-overlay.open {
-      display: flex;
-    }
-
-    .qr-modal {
-      width: 480px;
-      max-width: calc(100% - 48px);
-      max-height: calc(100vh - 80px);
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 12px 40px rgba(10, 20, 40, 0.35);
-    }
-
-    .qr-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      border-bottom: 1px solid #eef3f8;
-    }
-
-    .qr-header h3 {
-      margin: 0;
-      font-size: 20px;
-      color: var(--blue-900);
-      font-weight: 800;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .qr-close {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 2px solid #e6eef6;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      cursor: pointer;
-      font-weight: 800;
-      color: #23457e;
-    }
-
-    .qr-body {
-      padding: 18px 20px 22px;
-      overflow-y: auto;
-      flex: 1 1 auto;
-      text-align: center;
-      color: #5e738f;
-    }
-
-    .camera-box {
-      width: 220px;
-      height: 220px;
-      margin: 18px auto 12px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, #071226 0%, #0f233a 100%);
-      border: 6px solid rgba(35, 69, 126, 0.12);
-      box-shadow: 0 6px 14px rgba(17, 36, 64, 0.18) inset;
-      position: relative;
-      display: grid;
-      place-items: center;
-    }
-
-    .camera-inner {
-      width: 150px;
-      height: 150px;
-      border: 2px dashed rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      box-sizing: border-box;
-      position: relative;
-    }
-
-    .scan-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      height: 4px;
-      background: linear-gradient(90deg, rgba(0, 200, 120, 0) 0%, rgba(0, 200, 120, 0.9) 50%, rgba(0, 200, 120, 0) 100%);
-      transform: translateY(-50%);
-      box-shadow: 0 0 18px rgba(0, 200, 120, 0.35);
-      animation: scan 2s linear infinite;
-    }
-
-    @keyframes scan {
-      0% {
-        transform: translateY(-60%)
-      }
-
-      50% {
-        transform: translateY(0)
-      }
-
-      100% {
-        transform: translateY(60%)
-      }
-    }
-
-    .qr-footer {
-      padding: 14px 18px 18px;
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 18px;
-      border-radius: 999px;
-      background: #f4f6fa;
-      color: #163a70;
-      font-weight: 700;
-    }
-
-    .btn-sim {
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: 2px solid transparent;
-      background: #fff;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .btn-valid {
-      border-color: #bfeeda;
-      background: #f6fffb;
-      color: #0a8a3f;
-    }
-
-    .btn-invalid {
-      border-color: #f7c8c8;
-      background: #fff7f7;
-      color: #d64545;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="top">
-        <div class="brand">NU Lipa EMS<br><small>Admin</small></div>
-
-        <p class="menu-title">ADMIN MENU</p>
-
-        <nav class="menu" aria-label="Admin menu">
-          <a href="{{ route('admin.dashboard') }}" class="active">
-            <svg viewBox="0 0 24 24">
-              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-            </svg>
-            Dashboard
-          </a>
-          <a href="{{ route('admin.events') }}">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-              <line x1="8" y1="3" x2="8" y2="7"></line>
-              <line x1="16" y1="3" x2="16" y2="7"></line>
-            </svg>
-            Events
-          </a>
-          <a href="{{ route('admin.participants') }}">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path>
-            </svg>
-            Participants
-          </a>
-          <a href="{{ route('admin.evaluations') }}">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 4h16v12H7l-3 4z"></path>
-            </svg>
-            Evaluations
-          </a>
-        </nav>
-      </div>
-
-      <div class="bottom">
-        <form action="{{ route('logout') }}" method="post">
-          @csrf
-          <button type="submit" class="logout" style="background: transparent; font-family: inherit; cursor: pointer;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            LOGOUT
-          </button>
-        </form>
-      </div>
-    </aside>
-
-    <main class="content">
-      <div class="topbar">
-        <div>
-          <h1 class="page-title">Dashboard Overview</h1>
-          <p class="subtitle">Summary and statistics for all events.</p>
-        </div>
-
-        <button class="scan-btn" type="button">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 8V5a1 1 0 0 1 1-1h3"></path>
-            <path d="M20 8V5a1 1 0 0 0-1-1h-3"></path>
-            <path d="M4 16v3a1 1 0 0 0 1 1h3"></path>
-            <path d="M20 16v3a1 1 0 0 1-1 1h-3"></path>
-            <circle cx="12" cy="12" r="2.5"></circle>
-          </svg>
-          OPEN QR SCANNER
-        </button>
-      </div>
-
-      <section class="stats">
-        <article class="card stat-card peach">
-          <div>
-            <div class="label">TOTAL PARTICIPANTS</div>
-            <div class="value">{{ number_format($totalParticipants ?? 0) }}</div>
-          </div>
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24">
-              <circle cx="8" cy="8" r="3"></circle>
-              <circle cx="16" cy="9" r="2.5"></circle>
-              <path d="M3 20c1-3 3.5-4.5 6-4.5S14 17 15 20"></path>
-              <path d="M13 20c.6-2 2.3-3 4-3 1.6 0 3.1.9 4 3"></path>
-            </svg>
-          </div>
-        </article>
-
-        <article class="card stat-card gold">
-          <div>
-            <div class="label">PENDING PAPERS</div>
-            <div class="value">{{ number_format($pendingPapers ?? 0) }}</div>
-          </div>
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24">
-              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 3 14 8 19 8"></polyline>
-              <line x1="9" y1="13" x2="15" y2="13"></line>
-              <line x1="9" y1="17" x2="13" y2="17"></line>
-            </svg>
-          </div>
-        </article>
-
-        <article class="card stat-card blue">
-          <div>
-            <div class="label">ACTIVE EVENTS</div>
-            <div class="value">{{ number_format($activeEvents ?? 0) }}</div>
-          </div>
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-              <line x1="8" y1="3" x2="8" y2="7"></line>
-              <line x1="16" y1="3" x2="16" y2="7"></line>
-            </svg>
-          </div>
-        </article>
-
-        <article class="card stat-card white">
-          <div>
-            <div class="label">TOTAL CHECKED-IN</div>
-            <div class="value">{{ number_format($totalCheckedIn ?? 0) }}</div>
-          </div>
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9"></circle>
-              <path d="M8 12l2.5 2.5L16 9"></path>
-            </svg>
-          </div>
-        </article>
-      </section>
-
-      <section class="grid">
-        <article class="card">
-          <h2 class="section-title">PARTICIPANT DEMOGRAPHICS</h2>
-          <div class="demographic">
-            <div class="demographic-row">
-              <div class="demographic-head"><span>Undergraduate</span><span>65%</span></div>
-              <div class="track">
-                <div class="fill" style="width: 65%"></div>
-              </div>
+@extends('layouts.app')
+
+@section('content')
+@php
+    $totalParticipants = $totalParticipants ?? 0;
+    $pendingPapers = $pendingPapers ?? 0;
+    $activeEvents = $activeEvents ?? 0;
+    $totalCheckedIn = $totalCheckedIn ?? 0;
+@endphp
+<div class="min-h-screen bg-[#F6F8FB] font-sans text-[#111827]">
+    <div class="flex">
+
+        {{-- SIDEBAR --}}
+        <aside class="fixed left-0 top-0 z-40 h-screen w-[270px] border-r border-[#E5EAF1] bg-[#FBFAF7]">
+            {{-- Logo --}}
+            <div class="flex h-[78px] items-center border-b border-[#E5EAF1] px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#111827] text-white">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h1 class="text-[13px] font-black tracking-[0.18em] text-[#0F172A]">EVENT</h1>
+                        <p class="text-[10px] font-bold tracking-[0.16em] text-[#C8A25A]">MANAGEMENT SYSTEM</p>
+                    </div>
+                </div>
             </div>
-            <div class="demographic-row">
-              <div class="demographic-head"><span>Senior High</span><span>20%</span></div>
-              <div class="track">
-                <div class="fill gold" style="width: 20%"></div>
-              </div>
+
+            {{-- Admin Card --}}
+            <div class="px-6 pt-10">
+                <div class="flex items-center gap-3 rounded-2xl border border-[#DDE6F2] bg-[#F4F8FC] p-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111827] text-sm font-black text-white">
+                        A
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-[#111827]">Administrator</h2>
+                        <p class="text-xs text-[#7B8AA0]">admin@system.edu.ph</p>
+                    </div>
+                </div>
             </div>
-            <div class="demographic-row">
-              <div class="demographic-head"><span>Graduate</span><span>10%</span></div>
-              <div class="track">
-                <div class="fill gray" style="width: 10%"></div>
-              </div>
+
+            {{-- Navigation --}}
+            <nav class="mt-6 px-4">
+                <p class="px-2 text-[11px] font-black uppercase tracking-widest text-[#D6DEE9]">
+                    Main Navigation
+                </p>
+
+                <div class="mt-4 space-y-2">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="flex items-center {{ request()->routeIs('admin.dashboard') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
+                            </svg>
+                            Dashboard
+                        </span>
+                        @if (request()->routeIs('admin.dashboard'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.events') }}"
+                       class="flex items-center {{ request()->routeIs('admin.events*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.events*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                            </svg>
+                            Events
+                        </span>
+                        @if (request()->routeIs('admin.events*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.participants') }}"
+                       class="flex items-center {{ request()->routeIs('admin.participants*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.participants*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
+                            </svg>
+                            Participants
+                        </span>
+                        @if (request()->routeIs('admin.participants*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.evaluations') }}"
+                       class="flex items-center {{ request()->routeIs('admin.evaluations*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.evaluations*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
+                            </svg>
+                            Evaluations
+                        </span>
+                        @if (request()->routeIs('admin.evaluations*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+                </div>
+            </nav>
+
+            {{-- Bottom Links --}}
+            <div class="absolute bottom-0 left-0 w-full border-t border-[#E5EAF1] px-6 py-6">
+                <a href="#" class="mb-5 flex items-center gap-3 text-sm font-bold text-[#7A8BA3]">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.065 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.065 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.065-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Settings
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-3 text-sm font-bold text-[#FF4D4F]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H9m4 8H5a2 2 0 01-2-2V6a2 2 0 012-2h8"/>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
             </div>
-            <div class="demographic-row">
-              <div class="demographic-head"><span>Professional/Faculty</span><span>5%</span></div>
-              <div class="track">
-                <div class="fill" style="width: 5%; background:#e8eef8"></div>
-              </div>
-            </div>
-          </div>
-        </article>
+        </aside>
 
-        <article class="card chart-card">
-          <h2 class="section-title" style="text-align: center;">EVENT TYPES DISTRIBUTION</h2>
-          <div class="chart-wrap">
-            <div class="ring" aria-hidden="true">
-              <div class="ring-content">
-                <div class="num">12</div>
-                <div class="txt">TOTAL</div>
-              </div>
-            </div>
-            <div class="legend">
-              <span class="chip"><span class="dot"></span> School (75%)</span>
-              <span class="chip"><span class="dot light"></span> Conference (25%)</span>
-            </div>
-          </div>
-        </article>
-      </section>
+        {{-- MAIN CONTENT --}}
+        <main class="ml-[270px] min-h-screen w-full">
 
-      <section class="card welcome">
-        <h3>WELCOME BACK, ADMIN!</h3>
-        <p>
-          Use the sidebar to navigate through events and participants. Make sure to review
-          the pending research papers for the upcoming Tech Innovations Summit.
-        </p>
-        <div class="blocks" aria-hidden="true">
-          <span></span><span></span><span></span><span></span>
-        </div>
-      </section>
-    </main>
-  </div>
+            {{-- Topbar --}}
+            <header class="flex h-[78px] items-center justify-between border-b border-[#E5EAF1] bg-white px-9">
+                <h2 class="text-sm font-black uppercase tracking-widest text-[#111827]">
+                    Overview
+                </h2>
 
-  <!-- QR Scanner Modal -->
-  <div id="qr-overlay" class="qr-overlay" aria-hidden="true">
-    <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-title">
-      <div class="qr-header">
-        <h3 id="qr-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#23457e" stroke-width="2">
-            <rect x="3" y="3" width="6" height="6" rx="1"></rect>
-            <rect x="15" y="3" width="6" height="6" rx="1"></rect>
-            <rect x="3" y="15" width="6" height="6" rx="1"></rect>
-          </svg> QR Check-in</h3>
-        <button type="button" class="qr-close" aria-label="Close">✕</button>
-      </div>
+                <div class="flex items-center gap-4">
+                    <button class="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#53657F]">
+                        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D2A64B]"></span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0"/>
+                        </svg>
+                    </button>
 
-      <div class="qr-body">
-        <p style="margin:0 0 12px; color:#6f839e;">Position the participant's QR code within the frame to scan.</p>
+                    <div class="flex items-center gap-2 rounded-2xl border border-[#DDE6F2] bg-white px-3 py-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#111827] text-xs font-black text-white">
+                            A
+                        </div>
+                        <span class="text-sm font-bold">Admin</span>
+                    </div>
+                </div>
+            </header>
 
-        <div class="camera-box" aria-hidden="true">
-          <div class="camera-inner">
-            <div class="scan-line" aria-hidden="true"></div>
-          </div>
-        </div>
+            <section class="px-9 py-10">
 
-        <div style="margin-bottom:10px;">
-          <span class="pill">Scanning...</span>
-        </div>
-      </div>
+                {{-- Page Header --}}
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <div class="h-7 w-1 rounded-full bg-[#D2A64B]"></div>
+                            <h1 class="text-[28px] font-black tracking-tight text-[#111827]">
+                                DASHBOARD OVERVIEW
+                            </h1>
+                        </div>
+                        <p class="mt-2 text-sm text-[#53657F]">
+                            Real-time summary of all events and participant activity.
+                        </p>
+                    </div>
 
-      <div class="qr-footer">
-        <button type="button" class="btn-sim btn-valid">Simulate Valid</button>
-        <button type="button" class="btn-sim btn-invalid">Simulate Invalid</button>
-      </div>
+                    <button class="flex items-center gap-3 rounded-2xl bg-[#111827] px-7 py-4 text-sm font-black uppercase tracking-wide text-white shadow-sm">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
+                        </svg>
+                        QR Scanner
+                    </button>
+                </div>
+
+                {{-- Stat Cards --}}
+                <div class="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-7">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] text-[#111827]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#D2A64B]">↗</span>
+                        </div>
+
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#6B7280]">
+                            Total Participants
+                        </p>
+                        <h3 class="mt-2 text-3xl font-black">{{ number_format($totalParticipants) }}</h3>
+                        <p class="mt-1 text-xs text-[#7B8AA0]">+12% this month</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#E7DCC6] bg-[#FFFBF5] p-7">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#111827]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 4h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#D2A64B]">↗</span>
+                        </div>
+
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#6B7280]">
+                            Pending Papers
+                        </p>
+                        <h3 class="mt-2 text-3xl font-black">{{ number_format($pendingPapers) }}</h3>
+                        <p class="mt-1 text-xs text-[#7B8AA0]">4 need urgent review</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#111827] bg-[#172233] p-7 text-white">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/40 text-white">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#D2A64B]">↗</span>
+                        </div>
+
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-white/70">
+                            Active Events
+                        </p>
+                        <h3 class="mt-2 text-3xl font-black">{{ number_format($activeEvents) }}</h3>
+                        <p class="mt-1 text-xs text-white/60">School & Conference</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#CDEFD9] bg-[#F0FFF5] p-7">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#111827]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#D2A64B]">↗</span>
+                        </div>
+
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#6B7280]">
+                            Total Checked-In
+                        </p>
+                        <h3 class="mt-2 text-3xl font-black">{{ number_format($totalCheckedIn) }}</h3>
+                        <p class="mt-1 text-xs text-[#7B8AA0]">68.6% attendance rate</p>
+                    </div>
+                </div>
+
+                {{-- Charts Section --}}
+                <div class="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_540px]">
+
+                    {{-- Demographics --}}
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-7">
+                        <div class="mb-8 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-[#D2A64B]">▥</span>
+                                <h2 class="text-xl font-black uppercase tracking-wide">
+                                    Participant Demographics
+                                </h2>
+                            </div>
+
+                            <span class="rounded-xl border border-[#DDE6F2] bg-[#F4F8FC] px-4 py-2 text-sm font-bold text-[#53657F]">
+                                2026
+                            </span>
+                        </div>
+
+                        @php
+                            $demographics = [
+                                ['label' => 'Undergraduate', 'value' => 65, 'color' => 'bg-[#111827]'],
+                                ['label' => 'Senior High', 'value' => 20, 'color' => 'bg-[#D2B06A]'],
+                                ['label' => 'Graduate', 'value' => 10, 'color' => 'bg-[#64748B]'],
+                                ['label' => 'Professional', 'value' => 5, 'color' => 'bg-[#CBD5E1]'],
+                            ];
+                        @endphp
+
+                        <div class="space-y-6">
+                            @foreach ($demographics as $item)
+                                <div>
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <p class="text-sm font-extrabold">{{ $item['label'] }}</p>
+                                        <p class="text-sm font-black text-[#C8A25A]">{{ $item['value'] }}%</p>
+                                    </div>
+
+                                    <div class="h-3 overflow-hidden rounded-full bg-[#EEF2F7]">
+                                        <div class="h-full rounded-full {{ $item['color'] }}" style="width: {{ $item['value'] }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Event Types --}}
+                    <div class="rounded-2xl border border-[#E7DCC6] bg-[#FFFBF5] p-7">
+                        <div class="mb-8 flex items-center gap-3">
+                            <span class="text-[#D2A64B]">⌁</span>
+                            <h2 class="text-xl font-black uppercase tracking-wide">
+                                Event Types
+                            </h2>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <div class="relative h-40 w-40 rounded-full"
+                                style="background: conic-gradient(#111827 0deg 270deg, #D2B06A 270deg 360deg);">
+                                <div class="absolute inset-7 flex flex-col items-center justify-center rounded-full bg-[#FFFBF5]">
+                                    <span class="text-2xl font-black">12</span>
+                                    <span class="text-[10px] font-black uppercase text-[#53657F]">Total</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-7 space-y-3">
+                            <div class="flex items-center justify-between rounded-2xl border border-[#DDE6F2] bg-white px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="h-3 w-3 rounded-full bg-[#111827]"></span>
+                                    <p class="text-sm font-extrabold">School Events</p>
+                                </div>
+                                <p class="text-sm font-black text-[#C8A25A]">75%</p>
+                            </div>
+
+                            <div class="flex items-center justify-between rounded-2xl border border-[#DDE6F2] bg-white px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="h-3 w-3 rounded-full bg-[#D2B06A]"></span>
+                                    <p class="text-sm font-extrabold">Conference</p>
+                                </div>
+                                <p class="text-sm font-black text-[#C8A25A]">25%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Welcome Banner --}}
+                <div class="relative mt-8 overflow-hidden rounded-2xl bg-[#172233] p-8 text-white">
+                    <div class="flex items-center gap-6">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#D2B06A] text-white">
+                            <svg class="h-9 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15l-3.5 2 1-4L6 10h4l2-4 2 4h4l-3.5 3 1 4L12 15z"/>
+                            </svg>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-black uppercase tracking-wide">
+                                Welcome Back, Administrator!
+                            </h2>
+                            <p class="mt-2 max-w-3xl text-sm text-white/70">
+                                Use the sidebar to navigate through events and participants. Review the pending research papers for the upcoming Tech Innovations Summit.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="pointer-events-none absolute -bottom-10 right-10 text-[170px] font-black text-white/5">
+                        2026
+                    </div>
+                </div>
+
+            </section>
+        </main>
     </div>
-    <script>
-      (function() {
-        const openBtn = document.querySelector('.scan-btn');
-        const overlay = document.getElementById('qr-overlay');
-        const closeBtn = overlay ? overlay.querySelector('.qr-close') : null;
-        const validBtn = overlay ? overlay.querySelector('.btn-valid') : null;
-        const invalidBtn = overlay ? overlay.querySelector('.btn-invalid') : null;
-
-        function openModal() {
-          if (!overlay) return;
-          overlay.classList.add('open');
-          overlay.setAttribute('aria-hidden', 'false');
-        }
-
-        function closeModal() {
-          if (!overlay) return;
-          overlay.classList.remove('open');
-          overlay.setAttribute('aria-hidden', 'true');
-        }
-
-        if (openBtn) openBtn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-        // close when clicking outside the modal
-        if (overlay) {
-          overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeModal();
-          });
-        }
-
-        // Escape to close
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') closeModal();
-        });
-
-        const validateQrUrl = "{{ route('admin.attendance.validate-qr') }}";
-        const csrfToken = '{{ csrf_token() }}';
-
-        async function submitQrValidation(qrCode) {
-          const cleanQrCode = String(qrCode || '').trim();
-
-          if (!cleanQrCode) {
-            alert('Invalid');
-            return;
-          }
-
-          try {
-            const response = await fetch(validateQrUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'text/plain',
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: JSON.stringify({
-                qr_code: cleanQrCode
-              })
-            });
-
-            const statusText = (await response.text()).trim();
-            const allowedStatuses = ['Valid', 'Already used', 'Invalid'];
-            const status = allowedStatuses.includes(statusText) ? statusText : 'Invalid';
-
-            alert(status);
-
-            if (status === 'Valid' || status === 'Already used') {
-              closeModal();
-            }
-          } catch (error) {
-            alert('Invalid');
-          }
-        }
-
-        if (validBtn) validBtn.addEventListener('click', function() {
-          const scannedQr = window.prompt('Enter scanned QR code');
-          if (scannedQr === null) return;
-          submitQrValidation(scannedQr);
-        });
-
-        if (invalidBtn) invalidBtn.addEventListener('click', function() {
-          submitQrValidation('__invalid_qr_value__');
-        });
-      })();
-    </script>
-  </div>
-</body>
-
-</html>
+</div>
+@endsection

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
@@ -17,10 +19,6 @@ class LoginController extends Controller
    */
   public function create()
   {
-    if (Auth::check()) {
-      return redirect()->route('admin.dashboard');
-    }
-
     return view('admin-login');
   }
 
@@ -29,12 +27,36 @@ class LoginController extends Controller
    */
   public function store(LoginRequest $request): RedirectResponse
   {
-    $credentials = $request->only('email', 'password');
+    $email = strtolower(trim((string) $request->input('email')));
+    $password = (string) $request->input('password');
+    $credentials = [
+      'email' => $email,
+      'password' => $password,
+      'role' => 'admin',
+    ];
 
     if (! Auth::attempt($credentials)) {
-      throw ValidationException::withMessages([
-        'email' => 'The provided credentials are invalid.',
-      ]);
+      $adminUser = User::query()
+        ->where('email', $email)
+        ->where('role', 'admin')
+        ->first();
+
+      $hasPlainTextPassword = $adminUser !== null
+        && password_get_info((string) $adminUser->password)['algo'] === null;
+      $matchesLegacyPassword = $hasPlainTextPassword
+        && hash_equals((string) $adminUser->password, $password);
+
+      if (! $matchesLegacyPassword) {
+        throw ValidationException::withMessages([
+          'email' => 'The provided credentials are invalid.',
+        ]);
+      }
+
+      Auth::login($adminUser);
+
+      $adminUser->forceFill([
+        'password' => Hash::make($password),
+      ])->save();
     }
 
     $request->session()->regenerate();

@@ -28,8 +28,10 @@ Route::post('/events/{event}/evaluate', [EventEvaluationController::class, 'stor
   ->middleware('throttle:20,1')
   ->name('events.evaluate');
 
+Route::get('/admin-login', [LoginController::class, 'create'])->name('admin.login.page');
+Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
+
 Route::middleware('guest')->group(function () {
-  Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
   Route::post('/login', [LoginController::class, 'store'])->name('admin.login.store');
 });
 

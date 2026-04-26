@@ -1,1135 +1,655 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Participants | NU Lipa EMS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --blue-900: #183d7e;
-      --gold: #f5c36c;
-      --ink: #12356b;
-      --bg: #f2f3f8;
-      --line: #23457e;
-      --text: #1a3462;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .layout {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 210px 1fr;
-    }
-
-    .sidebar {
-      border-right: 1px solid #e3e5ef;
-      background: #f6f7fb;
-      padding: 22px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .brand {
-      font-weight: 800;
-      color: var(--ink);
-      font-size: 28px;
-      line-height: 1;
-      letter-spacing: .4px;
-    }
-
-    .brand small {
-      margin-top: 6px;
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      background: #112f67;
-      color: #fff;
-      border-radius: 4px;
-      padding: 4px 8px;
-      line-height: 1;
-    }
-
-    .menu-title {
-      margin: 28px 4px 10px;
-      color: #9ca6be;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .8px;
-    }
-
-    .menu {
-      display: grid;
-      gap: 8px;
-    }
-
-    .menu a {
-      text-decoration: none;
-      color: #354f80;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 2px solid transparent;
-    }
-
-    .menu a svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .menu a.active {
-      background: var(--gold);
-      border-color: var(--line);
-      color: #16386d;
-      box-shadow: 3px 3px 0 0 #233f74;
-    }
-
-    .logout {
-      margin-top: 16px;
-      text-decoration: none;
-      color: #ea3640;
-      border: 2px solid #f0b2b5;
-      border-radius: 13px;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 10px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .content {
-      padding: 24px 24px 20px;
-    }
-
-    .page-title {
-      margin: 0;
-      color: var(--ink);
-      font-size: 42px;
-      line-height: 1.04;
-      font-weight: 800;
-    }
-
-    .page-subtitle {
-      margin: 8px 0 18px;
-      color: #677a9a;
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .table-card {
-      background: #fff;
-      border: 2px solid #e1e5ed;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(15, 39, 80, .05);
-    }
-
-    .table-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 14px;
-      border-bottom: 1px solid #edf0f5;
-    }
-
-    .toolbar-title {
-      margin: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: #15396f;
-      font-weight: 700;
-    }
-
-    .toolbar-title svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .toolbar-select {
-      min-width: 140px;
-      border: 1px solid #e0e5ee;
-      background: #f8fafc;
-      border-radius: 10px;
-      height: 32px;
-      padding: 0 10px;
-      font-family: inherit;
-      font-size: 12px;
-      color: #3f537a;
-      font-weight: 600;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead th {
-      text-align: left;
-      padding: 12px 14px;
-      font-size: 12px;
-      color: #546a8f;
-      background: #f5f7fb;
-      font-weight: 700;
-    }
-
-    thead th:last-child,
-    tbody td:last-child {
-      text-align: right;
-    }
-
-    tbody td {
-      padding: 12px 14px;
-      border-top: 1px solid #edf1f6;
-      vertical-align: middle;
-    }
-
-    .name {
-      font-size: 13px;
-      color: #17396f;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .email {
-      font-size: 11px;
-      color: #7a8ca8;
-    }
-
-    .event {
-      font-size: 13px;
-      color: #1c3f73;
-      font-weight: 600;
-    }
-
-    .chip {
-      display: inline-block;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .chip.green {
-      color: #1a9950;
-      background: #e2f6e9;
-    }
-
-    .chip.blue {
-      color: #2d69e5;
-      background: #e9f0ff;
-    }
-
-    .chip.gold {
-      color: #a67500;
-      background: #fff1bd;
-    }
-
-    .chip.red {
-      color: #b4232a;
-      background: #ffe7e9;
-    }
-
-    .details-btn {
-      border: 0;
-      background: #f4f6fa;
-      color: #4e709f;
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .flash-message {
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      margin: 0 0 14px;
-    }
-
-    .flash-message.success {
-      border: 1px solid #b8e3c9;
-      background: #edfff3;
-      color: #1d6c3e;
-    }
-
-    .flash-message.warning {
-      border: 1px solid #f1d49a;
-      background: #fff7e8;
-      color: #8d5d00;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 30, 57, .48);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 40;
-      padding: 18px;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .participant-modal {
-      width: min(780px, 100%);
-      background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
-      border: 1px solid #d8e2f1;
-      border-radius: 22px;
-      box-shadow: 0 22px 52px rgba(16, 37, 72, .24);
-      overflow: hidden;
-    }
-
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 18px 20px 16px;
-      background: linear-gradient(135deg, #163f7d 0%, #1f4f95 58%, #2f67b3 100%);
-      color: #fff;
-      border-bottom: 1px solid rgba(255, 255, 255, .16);
-    }
-
-    .modal-head-main {
-      display: grid;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .modal-title {
-      margin: 0;
-      font-size: 22px;
-      color: #fff;
-      font-weight: 800;
-      letter-spacing: .2px;
-      line-height: 1.15;
-    }
-
-    .modal-event-title {
-      margin: 0;
-      font-size: 14px;
-      color: rgba(255, 255, 255, .95);
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .modal-participant-name {
-      margin: 0;
-      font-size: 14px;
-      color: rgba(255, 255, 255, .98);
-      font-weight: 700;
-      line-height: 1.3;
-      word-break: break-word;
-    }
-
-    .modal-status-pill {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      border-radius: 999px;
-      padding: 5px 10px;
-      font-size: 11px;
-      letter-spacing: .4px;
-      text-transform: uppercase;
-      font-weight: 800;
-      background: rgba(255, 255, 255, .18);
-      border: 1px solid rgba(255, 255, 255, .25);
-      color: #fff;
-    }
-
-    .modal-close {
-      border: 1px solid rgba(255, 255, 255, .35);
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, .16);
-      color: #fff;
-      font-size: 22px;
-      line-height: 1;
-      cursor: pointer;
-      flex: 0 0 auto;
-    }
-
-    .modal-close:hover {
-      background: rgba(255, 255, 255, .24);
-    }
-
-    .modal-body {
-      padding: 18px 20px 20px;
-      display: grid;
-      gap: 16px;
-      background: transparent;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      border: 1px solid #deebfb;
-      border-radius: 16px;
-      background: #ffffff;
-      padding: 14px;
-      box-shadow: inset 0 0 0 1px #eef4ff;
-    }
-
-    .detail-item {
-      border: 1px solid #e7eef9;
-      border-radius: 12px;
-      background: #f9fbff;
-      padding: 11px 12px;
-    }
-
-    .detail-item.full {
-      grid-column: 1 / -1;
-    }
-
-    .detail-label {
-      margin: 0 0 4px;
-      font-size: 10px;
-      letter-spacing: .7px;
-      text-transform: uppercase;
-      color: #7f93b2;
-      font-weight: 800;
-    }
-
-    .detail-value {
-      margin: 0;
-      font-size: 14px;
-      color: #1a3d74;
-      font-weight: 700;
-      word-break: break-word;
-      line-height: 1.35;
-    }
-
-    .paper-section {
-      border: 1px solid #d7e4f8;
-      border-radius: 16px;
-      background: linear-gradient(180deg, #f9fbff 0%, #f1f6ff 100%);
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .paper-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .paper-title-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #e8f0ff;
-      color: #1f4f95;
-      flex: 0 0 auto;
-    }
-
-    .paper-title-icon svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .paper-title {
-      margin: 0;
-      font-size: 14px;
-      color: #183d7e;
-      font-weight: 800;
-    }
-
-    .paper-subtitle {
-      margin: 2px 0 0;
-      font-size: 12px;
-      color: #6f84a6;
-      font-weight: 600;
-    }
-
-    .paper-file-card {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      justify-content: space-between;
-      border: 1px solid #d9e7fb;
-      border-radius: 12px;
-      background: #fff;
-      padding: 10px;
-    }
-
-    .paper-file-main {
-      display: grid;
-      gap: 8px;
-      min-width: 0;
-      flex: 1 1 auto;
-    }
-
-    .paper-file-name {
-      margin: 0;
-      font-size: 13px;
-      font-weight: 800;
-      color: #1b3f75;
-      word-break: break-word;
-      line-height: 1.35;
-    }
-
-    .paper-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 0;
-    }
-
-    .paper-chip {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #2f4f82;
-      background: #eef3fc;
-      border: 1px solid #d9e4f4;
-    }
-
-    .paper-details-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .paper-row {
-      display: grid;
-      gap: 2px;
-      font-size: 12px;
-      padding: 8px;
-      border: 1px solid #e8eef8;
-      border-radius: 10px;
-      background: #fafcff;
-    }
-
-    .paper-row span:first-child {
-      color: #6f84a6;
-      font-weight: 700;
-      font-size: 10px;
-      letter-spacing: .45px;
-      text-transform: uppercase;
-    }
-
-    .paper-row span:last-child {
-      color: #173b72;
-      font-weight: 700;
-      word-break: break-word;
-    }
-
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #1e4f95;
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 12px;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-      border: 1px solid #184587;
-      align-self: center;
-    }
-
-    .download-btn:hover {
-      background: #1a4482;
-    }
-
-    .paper-empty {
-      border: 1px dashed #cddcef;
-      border-radius: 12px;
-      background: #fff;
-      color: #6d83a5;
-      padding: 14px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .review-actions {
-      border: 1px solid #dce8fb;
-      border-radius: 16px;
-      background: #ffffff;
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-      box-shadow: inset 0 0 0 1px #eef4ff;
-    }
-
-    .review-actions-title {
-      margin: 0;
-      font-size: 13px;
-      color: #173c74;
-      font-weight: 800;
-    }
-
-    .review-actions-note {
-      margin: 0;
-      font-size: 12px;
-      color: #6e84a6;
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
-    .review-actions-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .review-actions-row form {
-      margin: 0;
-    }
-
-    .review-btn {
-      width: 100%;
-      border-radius: 11px;
-      padding: 11px 14px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: inherit;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-
-    .review-btn.reject {
-      background: #fff;
-      color: #b3263c;
-      border: 1px solid #e5a0ac;
-      box-shadow: inset 0 0 0 1px #f6d3d9;
-    }
-
-    .review-btn.approve {
-      background: #1e4f95;
-      color: #fff;
-      border: 1px solid #174486;
-      box-shadow: 0 5px 14px rgba(23, 68, 134, .2);
-    }
-
-    .review-btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-    }
-
-    .review-btn:disabled {
-      opacity: .65;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 1060px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        flex-direction: row;
-        align-items: center;
-        gap: 14px;
-        border-right: 0;
-        border-bottom: 1px solid #e3e5ef;
-        padding: 14px;
-      }
-
-      .sidebar .top,
-      .sidebar .bottom {
-        display: contents;
-      }
-
-      .menu-title,
-      .logout {
-        display: none;
-      }
-
-      .menu {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .page-title {
-        font-size: 28px;
-      }
-
-      .page-subtitle {
-        font-size: 14px;
-      }
-
-      .table-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .toolbar-select {
-        width: 100%;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-      }
-
-      table {
-        min-width: 780px;
-      }
-
-      .participant-modal {
-        border-radius: 18px;
-      }
-
-      .modal-head {
-        padding: 16px;
-      }
-
-      .modal-title {
-        font-size: 20px;
-      }
-
-      .modal-body {
-        padding: 14px;
-      }
-
-      .detail-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .paper-file-card {
-        flex-direction: column;
-      }
-
-      .paper-details-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .download-btn {
-        width: 100%;
-      }
-
-      .review-actions-row {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="top">
-        <div class="brand">NU Lipa EMS<br><small>Admin</small></div>
-        <p class="menu-title">ADMIN MENU</p>
-
-        <nav class="menu" aria-label="Admin menu">
-          <a href="{{ route('admin.dashboard') }}">
-            <svg viewBox="0 0 24 24">
-              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-            </svg>
-            Dashboard
-          </a>
-          <a href="{{ route('admin.events') }}">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-              <line x1="8" y1="3" x2="8" y2="7"></line>
-              <line x1="16" y1="3" x2="16" y2="7"></line>
-            </svg>
-            Events
-          </a>
-          <a href="{{ route('admin.participants') }}" class="active">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path>
-            </svg>
-            Participants
-          </a>
-          <a href="{{ route('admin.evaluations') }}">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 4h16v12H7l-3 4z"></path>
-            </svg>
-            Evaluations
-          </a>
-        </nav>
-      </div>
-
-      <div class="bottom">
-        <form action="{{ route('logout') }}" method="post">
-          @csrf
-          <button type="submit" class="logout" style="background: transparent; font-family: inherit; cursor: pointer;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            LOGOUT
-          </button>
-        </form>
-      </div>
-    </aside>
-
-    <main class="content">
-      <h1 class="page-title">Participants List</h1>
-      <p class="page-subtitle">View registered attendees, approve papers, and monitor check-ins.</p>
-
-      @if (session('status_message'))
-        <div class="flash-message {{ session('status_type') === 'warning' ? 'warning' : 'success' }}" role="status">
-          {{ session('status_message') }}
-        </div>
-      @endif
-
-      <section class="table-card" aria-label="Participants table">
-        <div class="table-toolbar">
-          <h2 class="toolbar-title">
-            <svg viewBox="0 0 24 24">
-              <circle cx="9" cy="8" r="3"></circle>
-              <path d="M2.5 19c1.1-2.7 3.4-4 6.5-4"></path>
-              <circle cx="17" cy="9" r="2.5"></circle>
-              <path d="M14.5 18.5c.8-1.8 2.2-2.8 4.2-2.8"></path>
-            </svg>
-            All Registrations
-          </h2>
-          <select class="toolbar-select" aria-label="Filter by event">
-            <option>All Events</option>
-          </select>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Participant Name</th>
-                <th>Registered Event</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @forelse ($participants as $participant)
-                <tr>
-                  <td>
-                    <div class="name">{{ $participant['name'] }}</div>
-                    <div class="email">{{ $participant['email'] }}</div>
-                  </td>
-                  <td><span class="event">{{ $participant['event_name'] }}</span></td>
-                  <td><span class="chip {{ $participant['status_class'] }}">{{ $participant['status_label'] }}</span></td>
-                  <td><button class="details-btn" type="button" data-registration-id="{{ $participant['registration_id'] }}">View Details</button></td>
-                </tr>
-              @empty
-                <tr>
-                  <td colspan="4">
-                    <div class="email">No participant registrations found yet.</div>
-                  </td>
-                </tr>
-              @endforelse
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="modal-backdrop" id="participantDetailsModal" aria-hidden="true">
-    <div class="participant-modal" role="dialog" aria-modal="true" aria-labelledby="participantDetailsTitle">
-      <div class="modal-head">
-        <div class="modal-head-main">
-          <h2 class="modal-title" id="participantDetailsTitle">Participant Details</h2>
-          <p class="modal-participant-name" id="detailHeaderParticipant">-</p>
-          <p class="modal-event-title" id="detailEventTitle">-</p>
-          <span class="modal-status-pill" id="detailRegistrationStatus">-</span>
-        </div>
-        <button type="button" class="modal-close" id="participantDetailsClose" aria-label="Close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="detail-grid">
-          <div class="detail-item">
-            <p class="detail-label">Full Name</p>
-            <p class="detail-value" id="detailFullName">-</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Email Address</p>
-            <p class="detail-value" id="detailEmail">-</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">School / Affiliation</p>
-            <p class="detail-value" id="detailSchool">-</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Level / Region</p>
-            <p class="detail-value" id="detailLevelRegion">-</p>
-          </div>
-          <div class="detail-item full">
-            <p class="detail-label">Registration Status</p>
-            <p class="detail-value" id="detailRegistrationStatusValue">-</p>
-          </div>
-        </div>
-
-        <section class="paper-section" id="paperSection" aria-label="Research paper submission">
-          <div class="paper-title-wrap">
-            <span class="paper-title-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"></path>
-                <path d="M14 2v5h5"></path>
-                <path d="M9 13h6"></path>
-                <path d="M9 17h4"></path>
-              </svg>
-            </span>
-            <div>
-              <h3 class="paper-title">Research Paper Submission</h3>
-              <p class="paper-subtitle">Conference application file under review</p>
+@extends('layouts.app')
+
+@section('content')
+@php
+    $eventFilterList = $participants->pluck('event_name')->unique()->filter()->sort()->values();
+    $statusBadgeClasses = [
+        'green' => 'border-[#86EFAC] bg-[#ECFDF5] text-[#047857]',
+        'gold' => 'border-[#FCD34D] bg-[#FFFBEB] text-[#D97706]',
+        'red' => 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]',
+    ];
+@endphp
+<div class="min-h-screen bg-[#F6F8FB] font-sans text-[#111827]">
+    <div class="flex">
+
+        {{-- SIDEBAR (match dashboard) --}}
+        <aside class="fixed left-0 top-0 z-40 h-screen w-[270px] border-r border-[#E5EAF1] bg-[#FBFAF7]">
+            <div class="flex h-[78px] items-center border-b border-[#E5EAF1] px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#111827] text-white">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-[13px] font-black tracking-[0.18em] text-[#0F172A]">EVENT</h1>
+                        <p class="text-[10px] font-bold tracking-[0.16em] text-[#C8A25A]">MANAGEMENT SYSTEM</p>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div id="paperPresent" style="display:none;">
-            <div class="paper-file-card">
-              <div class="paper-file-main">
-                <p class="paper-file-name" id="detailPaperName">-</p>
-                <div class="paper-meta">
-                  <span class="paper-chip" id="detailPaperType">-</span>
-                  <span class="paper-chip" id="detailPaperSize">-</span>
-                  <span class="paper-chip" id="detailPaperStatus">-</span>
+            <div class="px-6 pt-10">
+                <div class="flex items-center gap-3 rounded-2xl border border-[#DDE6F2] bg-[#F4F8FC] p-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111827] text-sm font-black text-white">
+                        A
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-[#111827]">Administrator</h2>
+                        <p class="text-xs text-[#7B8AA0]">admin@system.edu.ph</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="mt-6 px-4">
+                <p class="px-2 text-[11px] font-black uppercase tracking-widest text-[#D6DEE9]">
+                    Main Navigation
+                </p>
+
+                <div class="mt-4 space-y-2">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="flex items-center {{ request()->routeIs('admin.dashboard') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
+                            </svg>
+                            Dashboard
+                        </span>
+                        @if (request()->routeIs('admin.dashboard'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.events') }}"
+                       class="flex items-center {{ request()->routeIs('admin.events*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.events*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                            </svg>
+                            Events
+                        </span>
+                        @if (request()->routeIs('admin.events*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.participants') }}"
+                       class="flex items-center {{ request()->routeIs('admin.participants*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.participants*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
+                            </svg>
+                            Participants
+                        </span>
+                        @if (request()->routeIs('admin.participants*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.evaluations') }}"
+                       class="flex items-center {{ request()->routeIs('admin.evaluations*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.evaluations*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
+                            </svg>
+                            Evaluations
+                        </span>
+                        @if (request()->routeIs('admin.evaluations*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+                </div>
+            </nav>
+
+            <div class="absolute bottom-0 left-0 w-full border-t border-[#E5EAF1] px-6 py-6">
+                <a href="#" class="mb-5 flex items-center gap-3 text-sm font-bold text-[#7A8BA3]">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.065 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.065 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.065-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Settings
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-3 text-sm font-bold text-[#FF4D4F]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H9m4 8H5a2 2 0 01-2-2V6a2 2 0 012-2h8"/>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="ml-[270px] min-h-screen w-full">
+            <header class="flex h-[78px] items-center justify-between border-b border-[#E5EAF1] bg-white px-9">
+                <h2 class="text-sm font-black uppercase tracking-widest text-[#111827]">
+                    Participants
+                </h2>
+
+                <div class="flex items-center gap-4">
+                    <button type="button" class="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#53657F]">
+                        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D2A64B]"></span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0"/>
+                        </svg>
+                    </button>
+
+                    <div class="flex items-center gap-2 rounded-2xl border border-[#DDE6F2] bg-white px-3 py-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#111827] text-xs font-black text-white">
+                            A
+                        </div>
+                        <span class="text-sm font-bold">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="px-9 py-10">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <div class="h-7 w-1 rounded-full bg-[#D2A64B]"></div>
+                        <h1 class="text-[28px] font-black tracking-tight text-[#111827]">
+                            PARTICIPANTS LIST
+                        </h1>
+                    </div>
+                    <p class="mt-2 text-sm text-[#53657F]">
+                        View registered attendees, approve submissions, and monitor check-ins.
+                    </p>
                 </div>
 
-                <div class="paper-details-grid">
-                  <div class="paper-row">
-                    <span>Submission Status</span>
-                    <span id="detailPaperStatusLabel">-</span>
-                  </div>
-                  <div class="paper-row">
-                    <span>Submitted At</span>
-                    <span id="detailPaperSubmittedAt">-</span>
-                  </div>
-                </div>
-              </div>
-              <a id="detailPaperDownload" class="download-btn" href="#">Download Paper</a>
-            </div>
-          </div>
+                @if (session('status_message'))
+                    <div
+                        class="mt-8 rounded-2xl border px-5 py-4 text-sm font-bold {{ session('status_type') === 'warning' ? 'border-[#F1D49A] bg-[#FFFBF0] text-[#8D5D00]' : 'border-[#B8E3C9] bg-[#EDFFF3] text-[#1D6C3E]' }}"
+                        role="status"
+                    >
+                        {{ session('status_message') }}
+                    </div>
+                @endif
 
-          <div id="paperEmpty" class="paper-empty" style="display:none;">
-            No research paper has been uploaded for this participant yet.
-          </div>
-        </section>
+                <section class="mt-16 overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white" aria-label="Participants table">
+                    <div class="flex flex-col gap-4 border-b border-[#E8EEF5] bg-white px-5 py-5 md:flex-row md:items-center md:justify-between">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-6 w-6 shrink-0 text-[#D2A64B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
+                            </svg>
+                            <h2 class="text-2xl font-black uppercase tracking-wide text-[#111827]">
+                                All Registrations
+                            </h2>
+                            <span class="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#111827] px-2 text-xs font-black text-white">
+                                {{ $participants->count() }}
+                            </span>
+                        </div>
 
-        <section class="review-actions" id="reviewActions" style="display:none;" aria-label="Application review actions">
-          <h3 class="review-actions-title">Application Review</h3>
-          <p class="review-actions-note">Use these actions to approve or reject this pending registration.</p>
-          <div class="review-actions-row">
-            <form id="rejectApplicationForm" method="POST" action="#">
-              @csrf
-              <button class="review-btn reject" id="rejectApplicationBtn" type="submit">Reject Application</button>
-            </form>
-            <form id="approveApplicationForm" method="POST" action="#">
-              @csrf
-              <button class="review-btn approve" id="approveApplicationBtn" type="submit">Approve &amp; Send ID</button>
-            </form>
-          </div>
-        </section>
-      </div>
+                        <select class="h-11 w-full rounded-2xl border border-[#DDE6F2] bg-white px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B] md:w-[260px]" aria-label="Filter by event">
+                            <option>All Events</option>
+                            @foreach ($eventFilterList as $eventName)
+                                <option value="{{ $eventName }}">{{ $eventName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[900px] border-collapse">
+                            <thead>
+                                <tr class="border-b border-[#E8EEF5] bg-[#F8FAFC]">
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                        Participant
+                                    </th>
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                        Registered Event
+                                    </th>
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                        Status
+                                    </th>
+                                    <th class="px-5 py-5 text-right text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($participants as $participant)
+                                    @php
+                                        $name = trim($participant['name'] ?? '');
+                                        $initial = $name !== '' ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($name, 0, 1)) : '?';
+                                        $badgeClass = $statusBadgeClasses[$participant['status_class'] ?? ''] ?? $statusBadgeClasses['gold'];
+                                    @endphp
+                                    <tr class="border-b border-[#E8EEF5] transition last:border-b-0 hover:bg-[#F8FAFC]">
+                                        <td class="px-5 py-5">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#172233] text-sm font-black text-white">
+                                                    {{ $initial }}
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-sm font-black text-[#111827]">
+                                                        {{ $name !== '' ? $name : '—' }}
+                                                    </h3>
+                                                    <p class="mt-1 text-xs font-medium text-[#64748B]">
+                                                        {{ $participant['email'] }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-5 py-5">
+                                            <p class="text-sm font-black text-[#111827]">
+                                                {{ $participant['event_name'] }}
+                                            </p>
+                                        </td>
+                                        <td class="px-5 py-5">
+                                            <span class="inline-flex rounded-full border px-4 py-2 text-xs font-black {{ $badgeClass }}">
+                                                {{ $participant['status_label'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-5 text-right">
+                                            <button
+                                                type="button"
+                                                class="details-btn rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#111827] transition hover:bg-[#EEF3F9]"
+                                                data-registration-id="{{ $participant['registration_id'] }}"
+                                            >
+                                                View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#64748B]">
+                                            No participant registrations found yet.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </section>
+        </main>
     </div>
-  </div>
+</div>
 
-  <script>
+{{-- PARTICIPANT DETAILS MODAL --}}
+<div
+    id="participantDetailsModal"
+    class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="participantDetailsModalTitle"
+    aria-hidden="true"
+>
+    <div class="relative max-h-[min(90vh,880px)] w-full max-w-[650px] overflow-y-auto rounded-3xl border border-[#DDE6F2] bg-white shadow-2xl" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between bg-[#172233] px-6 py-6 text-white">
+            <div class="min-w-0 pr-4">
+                <h2 id="participantDetailsModalTitle" class="text-2xl font-black uppercase tracking-wide">
+                    Participant Details
+                </h2>
+                <p id="participantModalEventSubtitle" class="mt-2 text-sm text-white/70">—</p>
+            </div>
+
+            <button
+                type="button"
+                id="participantDetailsClose"
+                onclick="closeParticipantDetailsModal()"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+                aria-label="Close"
+            >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="px-7 py-7">
+            <section class="rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] p-6">
+                <div class="flex items-center gap-5">
+                    <div
+                        id="participantModalInitial"
+                        class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#172233] text-2xl font-black text-white"
+                    >
+                        —
+                    </div>
+
+                    <div class="min-w-0">
+                        <h3 id="participantModalName" class="text-xl font-black text-[#111827]">—</h3>
+                        <p id="participantModalEmail" class="mt-1 text-sm text-[#64748B]">—</p>
+                        <span
+                            id="participantModalStatus"
+                            class="mt-2 inline-flex rounded-xl border border-[#FCD34D] bg-[#FFFBEB] px-3 py-1 text-xs font-black text-[#D97706]"
+                        >
+                            —
+                        </span>
+                    </div>
+                </div>
+
+                <p id="participantModalLevelRegion" class="mt-4 hidden text-sm font-bold text-[#64748B]"></p>
+
+                <div class="my-6 border-t border-[#DDE6F2]"></div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                            School / University
+                        </p>
+                        <p id="participantModalSchool" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                            User Type
+                        </p>
+                        <p id="participantModalUserType" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                            Role
+                        </p>
+                        <p id="participantModalRole" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                            Registered Event
+                        </p>
+                        <p id="participantModalEvent" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="participantModalPaperSection" class="mt-5 hidden rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] p-5" aria-label="Research paper submission">
+                <div class="flex items-center gap-3 border-b border-[#E8EEF5] pb-4">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#172233] shadow-sm ring-1 ring-[#DDE6F2]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black uppercase tracking-wide text-[#111827]">Research Paper</h3>
+                        <p class="text-xs font-medium text-[#64748B]">Conference submission</p>
+                    </div>
+                </div>
+
+                <div id="paperPresent" class="mt-4 hidden">
+                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
+                        <p id="detailPaperName" class="text-sm font-black text-[#111827]">—</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <span id="detailPaperType" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
+                            <span id="detailPaperSize" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
+                            <span id="detailPaperStatus" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="rounded-xl border border-[#E8EEF5] bg-[#F8FAFC] px-3 py-2">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-[#64748B]">Submission status</p>
+                                <p id="detailPaperStatusLabel" class="mt-1 text-xs font-black text-[#111827]">—</p>
+                            </div>
+                            <div class="rounded-xl border border-[#E8EEF5] bg-[#F8FAFC] px-3 py-2">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-[#64748B]">Submitted at</p>
+                                <p id="detailPaperSubmittedAt" class="mt-1 text-xs font-black text-[#111827]">—</p>
+                            </div>
+                        </div>
+                        <a
+                            id="detailPaperDownload"
+                            href="#"
+                            class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-[#172233] px-4 py-3 text-center text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#0B1220] sm:w-auto"
+                        >
+                            Download Paper
+                        </a>
+                    </div>
+                </div>
+
+                <div id="paperEmpty" class="mt-4 hidden rounded-2xl border border-dashed border-[#DDE6F2] bg-white px-4 py-4 text-center text-sm font-semibold text-[#64748B]">
+                    No research paper has been uploaded for this participant yet.
+                </div>
+            </section>
+
+            <div id="participantModalPendingActions" class="mt-5 hidden grid grid-cols-1 gap-4 md:grid-cols-2">
+                <form id="rejectApplicationForm" method="POST" action="#">
+                    @csrf
+                    <button
+                        type="submit"
+                        id="rejectApplicationBtn"
+                        class="h-14 w-full rounded-2xl border border-[#FCA5A5] bg-white text-sm font-black uppercase tracking-wide text-red-600 transition hover:bg-red-50"
+                    >
+                        Reject
+                    </button>
+                </form>
+
+                <form id="approveApplicationForm" method="POST" action="#">
+                    @csrf
+                    <button
+                        type="submit"
+                        id="approveApplicationBtn"
+                        class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#172233] text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#0B1220]"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2 2 4-5"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z"/>
+                        </svg>
+                        Approve
+                    </button>
+                </form>
+            </div>
+
+            <div
+                id="participantModalApprovedNotice"
+                class="mt-5 hidden rounded-2xl border border-[#86EFAC] bg-[#ECFDF5] px-5 py-4 text-center"
+            >
+                <div class="flex items-center justify-center gap-3 text-sm font-black uppercase tracking-wide text-[#047857]">
+                    <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2 2 4-5"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z"/>
+                    </svg>
+                    Registration Approved
+                </div>
+            </div>
+
+            <div
+                id="participantModalRejectedNotice"
+                class="mt-5 hidden rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 text-center text-sm font-black uppercase tracking-wide text-[#B91C1C]"
+            >
+                Registration Rejected
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
     (function() {
-      const participantRows = @json($participants->values());
-      const participantMap = new Map(participantRows.map(row => [String(row.registration_id), row]));
+        const participantRows = @json($participants->values());
+        const participantMap = new Map(participantRows.map(row => [String(row.registration_id), row]));
 
-      const modal = document.getElementById('participantDetailsModal');
-      const closeBtn = document.getElementById('participantDetailsClose');
-      const detailsButtons = Array.from(document.querySelectorAll('.details-btn'));
+        const modal = document.getElementById('participantDetailsModal');
+        const closeBtn = document.getElementById('participantDetailsClose');
+        const detailsButtons = Array.from(document.querySelectorAll('.details-btn'));
 
-      const detailEventTitle = document.getElementById('detailEventTitle');
-      const detailHeaderParticipant = document.getElementById('detailHeaderParticipant');
-      const detailFullName = document.getElementById('detailFullName');
-      const detailEmail = document.getElementById('detailEmail');
-      const detailSchool = document.getElementById('detailSchool');
-      const detailLevelRegion = document.getElementById('detailLevelRegion');
-      const detailRegistrationStatus = document.getElementById('detailRegistrationStatus');
-      const detailRegistrationStatusValue = document.getElementById('detailRegistrationStatusValue');
+        const participantModalEventSubtitle = document.getElementById('participantModalEventSubtitle');
+        const participantModalInitial = document.getElementById('participantModalInitial');
+        const participantModalName = document.getElementById('participantModalName');
+        const participantModalEmail = document.getElementById('participantModalEmail');
+        const participantModalStatus = document.getElementById('participantModalStatus');
+        const participantModalLevelRegion = document.getElementById('participantModalLevelRegion');
+        const participantModalSchool = document.getElementById('participantModalSchool');
+        const participantModalUserType = document.getElementById('participantModalUserType');
+        const participantModalRole = document.getElementById('participantModalRole');
+        const participantModalEvent = document.getElementById('participantModalEvent');
 
-      const paperPresent = document.getElementById('paperPresent');
-      const paperEmpty = document.getElementById('paperEmpty');
-      const paperSection = document.getElementById('paperSection');
-      const detailPaperName = document.getElementById('detailPaperName');
-      const detailPaperType = document.getElementById('detailPaperType');
-      const detailPaperSize = document.getElementById('detailPaperSize');
-      const detailPaperStatus = document.getElementById('detailPaperStatus');
-      const detailPaperStatusLabel = document.getElementById('detailPaperStatusLabel');
-      const detailPaperSubmittedAt = document.getElementById('detailPaperSubmittedAt');
-      const detailPaperDownload = document.getElementById('detailPaperDownload');
-      const reviewActions = document.getElementById('reviewActions');
-      const rejectApplicationForm = document.getElementById('rejectApplicationForm');
-      const approveApplicationForm = document.getElementById('approveApplicationForm');
-      const rejectApplicationBtn = document.getElementById('rejectApplicationBtn');
-      const approveApplicationBtn = document.getElementById('approveApplicationBtn');
+        const paperSection = document.getElementById('participantModalPaperSection');
+        const paperPresent = document.getElementById('paperPresent');
+        const paperEmpty = document.getElementById('paperEmpty');
+        const detailPaperName = document.getElementById('detailPaperName');
+        const detailPaperType = document.getElementById('detailPaperType');
+        const detailPaperSize = document.getElementById('detailPaperSize');
+        const detailPaperStatus = document.getElementById('detailPaperStatus');
+        const detailPaperStatusLabel = document.getElementById('detailPaperStatusLabel');
+        const detailPaperSubmittedAt = document.getElementById('detailPaperSubmittedAt');
+        const detailPaperDownload = document.getElementById('detailPaperDownload');
 
-      function normalizeText(value, fallback = 'Not provided') {
-        const text = String(value ?? '').trim();
-        return text !== '' ? text : fallback;
-      }
+        const pendingActions = document.getElementById('participantModalPendingActions');
+        const approvedNotice = document.getElementById('participantModalApprovedNotice');
+        const rejectedNotice = document.getElementById('participantModalRejectedNotice');
+        const rejectApplicationForm = document.getElementById('rejectApplicationForm');
+        const approveApplicationForm = document.getElementById('approveApplicationForm');
+        const rejectApplicationBtn = document.getElementById('rejectApplicationBtn');
+        const approveApplicationBtn = document.getElementById('approveApplicationBtn');
 
-      function formatPaperStatus(value) {
-        const status = normalizeText(value, 'Unknown');
-        return status
-          .replaceAll('_', ' ')
-          .split(' ')
-          .map(token => token ? (token.charAt(0).toUpperCase() + token.slice(1).toLowerCase()) : '')
-          .join(' ');
-      }
+        const statusBadgeBase = 'mt-2 inline-flex rounded-xl border px-3 py-1 text-xs font-black ';
+        const statusBadgeByClass = {
+            green: 'border-[#86EFAC] bg-[#ECFDF5] text-[#047857]',
+            gold: 'border-[#FCD34D] bg-[#FFFBEB] text-[#D97706]',
+            red: 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]',
+        };
 
-      function formatRegistrationStatus(value) {
-        return formatPaperStatus(value);
-      }
-
-      function openDetails(registrationId) {
-        const participant = participantMap.get(String(registrationId));
-        if (!participant) {
-          return;
+        function normalizeText(value, fallback = 'Not provided') {
+            const text = String(value ?? '').trim();
+            return text !== '' ? text : fallback;
         }
 
-        detailEventTitle.textContent = normalizeText(participant.event_name, 'Unknown Event');
-        detailFullName.textContent = normalizeText(participant.name, 'Unknown Participant');
-        detailHeaderParticipant.textContent = normalizeText(participant.name, 'Unknown Participant');
-        detailEmail.textContent = normalizeText(participant.email, 'Not provided');
-        detailSchool.textContent = normalizeText(participant.school_affiliation, 'Not provided');
-        detailLevelRegion.textContent = normalizeText(participant.level_region, 'Not provided');
-        const formattedRegistrationStatus = formatRegistrationStatus(participant.registration_status || 'Unknown');
-        detailRegistrationStatus.textContent = formattedRegistrationStatus;
-        detailRegistrationStatusValue.textContent = formattedRegistrationStatus;
-
-        const isConference = String(participant.event_type || '').trim() === 'Conference';
-        modal.classList.toggle('conference-mode', isConference);
-        paperSection.style.display = isConference ? '' : 'none';
-
-        if (!isConference) {
-          paperPresent.style.display = 'none';
-          paperEmpty.style.display = 'none';
+        function formatPaperStatus(value) {
+            const status = normalizeText(value, 'Unknown');
+            return status
+                .replaceAll('_', ' ')
+                .split(' ')
+                .map(token => token ? (token.charAt(0).toUpperCase() + token.slice(1).toLowerCase()) : '')
+                .join(' ');
         }
 
-        const paper = participant.paper || {};
-        if (isConference && paper.has_file) {
-          paperPresent.style.display = '';
-          paperEmpty.style.display = 'none';
-
-          detailPaperName.textContent = normalizeText(paper.file_name, 'Unknown file');
-          detailPaperType.textContent = normalizeText(paper.file_type, 'Unknown');
-          detailPaperSize.textContent = normalizeText(paper.file_size, 'Not available');
-          const formattedPaperStatus = formatPaperStatus(paper.status);
-          detailPaperStatus.textContent = formattedPaperStatus;
-          detailPaperStatusLabel.textContent = formattedPaperStatus;
-          detailPaperSubmittedAt.textContent = normalizeText(paper.submitted_at, 'Not available');
-
-          const downloadUrl = normalizeText(paper.download_url, '');
-          detailPaperDownload.href = downloadUrl;
-          detailPaperDownload.style.pointerEvents = downloadUrl !== '' ? 'auto' : 'none';
-          detailPaperDownload.style.opacity = downloadUrl !== '' ? '1' : '.65';
-        } else if (isConference) {
-          paperPresent.style.display = 'none';
-          paperEmpty.style.display = '';
-          detailPaperDownload.removeAttribute('href');
+        function participantInitial(name) {
+            const n = String(name ?? '').trim();
+            if (!n) {
+                return '?';
+            }
+            return n.charAt(0).toUpperCase();
         }
 
-        const registrationStatus = String(participant.registration_status || '').trim().toLowerCase();
-        const canReview = registrationStatus === 'pending' && (!isConference || Boolean(paper.has_file));
-
-        reviewActions.style.display = canReview ? '' : 'none';
-        if (canReview) {
-          const rejectUrl = normalizeText(participant.reject_url, '');
-          const approveUrl = normalizeText(participant.approve_url, '');
-          rejectApplicationForm.action = rejectUrl;
-          approveApplicationForm.action = approveUrl;
-          rejectApplicationBtn.disabled = rejectUrl === '';
-          approveApplicationBtn.disabled = approveUrl === '';
-        } else {
-          rejectApplicationForm.action = '#';
-          approveApplicationForm.action = '#';
-          rejectApplicationBtn.disabled = true;
-          approveApplicationBtn.disabled = true;
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.setAttribute('aria-hidden', 'false');
         }
 
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden', 'false');
-      }
-
-      function closeModal() {
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden', 'true');
-      }
-
-      detailsButtons.forEach(button => {
-        button.addEventListener('click', () => openDetails(button.dataset.registrationId));
-      });
-
-      rejectApplicationForm.addEventListener('submit', (event) => {
-        const shouldProceed = window.confirm('Reject this application? This will mark the registration as rejected.');
-        if (!shouldProceed) {
-          event.preventDefault();
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.setAttribute('aria-hidden', 'true');
         }
-      });
 
-      approveApplicationForm.addEventListener('submit', (event) => {
-        const shouldProceed = window.confirm('Approve this application and send the digital ID email now?');
-        if (!shouldProceed) {
-          event.preventDefault();
-        }
-      });
+        window.closeParticipantDetailsModal = closeModal;
 
-      closeBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
-          closeModal();
-        }
-      });
+        function openDetails(registrationId) {
+            const participant = participantMap.get(String(registrationId));
+            if (!participant) {
+                return;
+            }
 
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && modal.classList.contains('open')) {
-          closeModal();
+            const eventName = normalizeText(participant.event_name, 'Unknown Event');
+            participantModalEventSubtitle.textContent = eventName;
+            participantModalInitial.textContent = participantInitial(participant.name);
+            participantModalName.textContent = normalizeText(participant.name, 'Unknown Participant');
+            participantModalEmail.textContent = normalizeText(participant.email, 'Not provided');
+
+            const label = normalizeText(participant.status_label, '—');
+            participantModalStatus.textContent = label;
+            const badgeKey = participant.status_class in statusBadgeByClass ? participant.status_class : 'gold';
+            participantModalStatus.className = statusBadgeBase + statusBadgeByClass[badgeKey];
+
+            const lr = normalizeText(participant.level_region, '');
+            if (lr !== 'Not provided' && lr !== '') {
+                participantModalLevelRegion.textContent = 'Level / Region: ' + lr;
+                participantModalLevelRegion.classList.remove('hidden');
+            } else {
+                participantModalLevelRegion.classList.add('hidden');
+            }
+
+            participantModalSchool.textContent = normalizeText(participant.institution ?? participant.school_affiliation, 'Not provided');
+            participantModalUserType.textContent = normalizeText(participant.user_type, 'Not provided');
+            participantModalRole.textContent = normalizeText(participant.participant_role, 'Not provided');
+            participantModalEvent.textContent = eventName;
+
+            const isConference = String(participant.event_type || '').trim() === 'Conference';
+            const paper = participant.paper || {};
+
+            if (isConference) {
+                paperSection.classList.remove('hidden');
+                if (paper.has_file) {
+                    paperPresent.classList.remove('hidden');
+                    paperEmpty.classList.add('hidden');
+
+                    detailPaperName.textContent = normalizeText(paper.file_name, 'Unknown file');
+                    detailPaperType.textContent = normalizeText(paper.file_type, 'Unknown');
+                    detailPaperSize.textContent = normalizeText(paper.file_size, 'Not available');
+                    const formattedPaperStatus = formatPaperStatus(paper.status);
+                    detailPaperStatus.textContent = formattedPaperStatus;
+                    detailPaperStatusLabel.textContent = formattedPaperStatus;
+                    detailPaperSubmittedAt.textContent = normalizeText(paper.submitted_at, 'Not available');
+
+                    const downloadUrl = normalizeText(paper.download_url, '');
+                    detailPaperDownload.href = downloadUrl;
+                    detailPaperDownload.classList.toggle('pointer-events-none', downloadUrl === '');
+                    detailPaperDownload.classList.toggle('opacity-60', downloadUrl === '');
+                } else {
+                    paperPresent.classList.add('hidden');
+                    paperEmpty.classList.remove('hidden');
+                    detailPaperDownload.removeAttribute('href');
+                }
+            } else {
+                paperSection.classList.add('hidden');
+                paperPresent.classList.add('hidden');
+                paperEmpty.classList.add('hidden');
+            }
+
+            const registrationStatus = String(participant.registration_status || '').trim().toLowerCase();
+            const canReview = registrationStatus === 'pending' && (!isConference || Boolean(paper.has_file));
+            const isApprovedFlow = registrationStatus === 'approved' || String(participant.status_label || '').toLowerCase().includes('checked');
+            const isRejected = registrationStatus === 'rejected';
+
+            pendingActions.classList.toggle('hidden', !canReview);
+            approvedNotice.classList.toggle('hidden', !(isApprovedFlow && !canReview));
+            rejectedNotice.classList.toggle('hidden', !isRejected);
+
+            if (canReview) {
+                const rejectUrl = normalizeText(participant.reject_url, '');
+                const approveUrl = normalizeText(participant.approve_url, '');
+                rejectApplicationForm.action = rejectUrl;
+                approveApplicationForm.action = approveUrl;
+                rejectApplicationBtn.disabled = rejectUrl === '';
+                approveApplicationBtn.disabled = approveUrl === '';
+            } else {
+                rejectApplicationForm.action = '#';
+                approveApplicationForm.action = '#';
+                rejectApplicationBtn.disabled = true;
+                approveApplicationBtn.disabled = true;
+            }
+
+            openModal();
         }
-      });
+
+        detailsButtons.forEach(button => {
+            button.addEventListener('click', () => openDetails(button.dataset.registrationId));
+        });
+
+        rejectApplicationForm.addEventListener('submit', (event) => {
+            const shouldProceed = window.confirm('Reject this application? This will mark the registration as rejected.');
+            if (!shouldProceed) {
+                event.preventDefault();
+            }
+        });
+
+        approveApplicationForm.addEventListener('submit', (event) => {
+            const shouldProceed = window.confirm('Approve this application and send the digital ID email now?');
+            if (!shouldProceed) {
+                event.preventDefault();
+            }
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
     })();
-  </script>
-</body>
-
-</html>
+</script>
+@endsection
