@@ -67,7 +67,7 @@ class LoginController extends Controller
       ])->save();
     }
 
-    return redirect()->intended(route('admin.dashboard'));
+    return redirect()->route('admin.dashboard');
   }
 
   /**

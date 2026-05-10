@@ -16,6 +16,10 @@ class EventController extends Controller
 {
   public function landing()
   {
+    if (auth()->check() && auth()->user()?->role === 'admin') {
+      return redirect()->route('admin.dashboard');
+    }
+
     $events = Event::query()
       ->where(function ($query) {
         $query->whereNull('status')
