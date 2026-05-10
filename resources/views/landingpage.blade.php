@@ -302,6 +302,7 @@ $regions = [
     const USER_TYPES = [
       'Student',
       'Faculty',
+      'Admin',
     ];
     const ROLES = [
       'Exhibitor',
