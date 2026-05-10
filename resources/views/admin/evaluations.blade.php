@@ -1,411 +1,384 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Evaluations | NU Lipa EMS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --blue-900: #183d7e;
-      --gold: #f5c36c;
-      --ink: #12356b;
-      --bg: #f2f3f8;
-      --line: #23457e;
-      --text: #1a3462;
-    }
+@section('content')
+<div class="min-h-screen bg-[#F6F8FB] font-sans text-[#111827]">
+    <div class="flex">
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .layout {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 210px 1fr;
-    }
-
-    .sidebar {
-      border-right: 1px solid #e3e5ef;
-      background: #f6f7fb;
-      padding: 22px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .brand {
-      font-weight: 800;
-      color: var(--ink);
-      font-size: 28px;
-      line-height: 1;
-      letter-spacing: .4px;
-    }
-
-    .brand small {
-      margin-top: 6px;
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      background: #112f67;
-      color: #fff;
-      border-radius: 4px;
-      padding: 4px 8px;
-      line-height: 1;
-    }
-
-    .menu-title {
-      margin: 28px 4px 10px;
-      color: #9ca6be;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .8px;
-    }
-
-    .menu {
-      display: grid;
-      gap: 8px;
-    }
-
-    .menu a {
-      text-decoration: none;
-      color: #354f80;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 14px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 2px solid transparent;
-    }
-
-    .menu a svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-    }
-
-    .menu a.active {
-      background: var(--gold);
-      border-color: var(--line);
-      color: #16386d;
-      box-shadow: 3px 3px 0 0 #233f74;
-    }
-
-    .logout {
-      margin-top: 16px;
-      text-decoration: none;
-      color: #ea3640;
-      border: 2px solid #f0b2b5;
-      border-radius: 13px;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 10px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .content {
-      padding: 24px 24px 20px;
-    }
-
-    .page-title {
-      margin: 0;
-      color: var(--ink);
-      font-size: 42px;
-      line-height: 1.04;
-      font-weight: 800;
-    }
-
-    .page-subtitle {
-      margin: 8px 0 18px;
-      color: #677a9a;
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      align-items: start;
-    }
-
-    .review-card {
-      background: #fff;
-      border: 2px solid #e2e6ee;
-      border-radius: 14px;
-      padding: 18px 20px;
-      min-height: 188px;
-      box-shadow: 0 1px 4px rgba(15, 39, 80, .05);
-    }
-
-    .review-card.focus {
-      border-color: #224381;
-      box-shadow: 7px 7px 0 0 #1f3f79;
-    }
-
-    .card-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .identity {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1.5px solid #4e6ba0;
-      background: #f0dcbc;
-      display: grid;
-      place-items: center;
-      font-size: 16px;
-      color: #15396f;
-      font-weight: 700;
-    }
-
-    .name {
-      margin: 0;
-      font-size: 32px;
-      color: #163a70;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .name.warn {
-      color: #f0b85f;
-    }
-
-    .date {
-      margin-top: 2px;
-      color: #7d8faa;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .score {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      border: 1.5px solid #3d5f94;
-      color: #17396f;
-      background: #f6c46d;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 8px;
-      line-height: 1;
-    }
-
-    .score svg {
-      width: 12px;
-      height: 12px;
-      fill: #17396f;
-      stroke: #17396f;
-      stroke-width: 1;
-    }
-
-    .event-name {
-      margin: 0;
-      color: #4f6f97;
-      font-size: 11px;
-      letter-spacing: .9px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .quote {
-      margin: 4px 0 12px;
-      font-size: 12px;
-      font-style: italic;
-      color: #5c7397;
-      line-height: 1.5;
-    }
-
-    .card-foot {
-      border-top: 1px solid #eaedf3;
-      padding-top: 10px;
-      text-align: right;
-    }
-
-    .read-link {
-      color: #17396f;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .7px;
-      text-transform: uppercase;
-      text-decoration: underline;
-    }
-
-    @media (max-width: 1300px) {
-      .cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 1060px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        flex-direction: row;
-        align-items: center;
-        gap: 14px;
-        border-right: 0;
-        border-bottom: 1px solid #e3e5ef;
-        padding: 14px;
-      }
-
-      .sidebar .top,
-      .sidebar .bottom {
-        display: contents;
-      }
-
-      .menu-title,
-      .logout {
-        display: none;
-      }
-
-      .menu {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .page-title {
-        font-size: 28px;
-      }
-
-      .page-subtitle {
-        font-size: 14px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="top">
-        <div class="brand">NU Lipa EMS<br><small>Admin</small></div>
-        <p class="menu-title">ADMIN MENU</p>
-
-        <nav class="menu" aria-label="Admin menu">
-          <a href="{{ route('admin.dashboard') }}">
-            <svg viewBox="0 0 24 24">
-              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
-              <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-            </svg>
-            Dashboard
-          </a>
-          <a href="{{ route('admin.events') }}">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-              <line x1="8" y1="3" x2="8" y2="7"></line>
-              <line x1="16" y1="3" x2="16" y2="7"></line>
-            </svg>
-            Events
-          </a>
-          <a href="{{ route('admin.participants') }}">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4"></circle>
-              <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path>
-            </svg>
-            Participants
-          </a>
-          <a href="{{ route('admin.evaluations') }}" class="active">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 4h16v12H7l-3 4z"></path>
-            </svg>
-            Evaluations
-          </a>
-        </nav>
-      </div>
-
-      <div class="bottom">
-        <form action="{{ route('logout') }}" method="post">
-          @csrf
-          <button type="submit" class="logout" style="background: transparent; font-family: inherit; cursor: pointer;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            LOGOUT
-          </button>
-        </form>
-      </div>
-    </aside>
-
-    <main class="content">
-      <h1 class="page-title">Event Evaluations</h1>
-      <p class="page-subtitle">Review feedback and comments from event participants.</p>
-
-      <section class="cards" aria-label="Evaluation cards">
-        @forelse ($evaluations as $evaluation)
-          <article class="review-card {{ $loop->first ? 'focus' : '' }}">
-            <div class="card-head">
-              <div class="identity">
-                <span class="avatar">{{ $evaluation['avatar'] }}</span>
-                <div>
-                  <p class="name">{{ $evaluation['reviewer_name'] }}</p>
-                  <p class="date">{{ $evaluation['date'] }}</p>
+        {{-- SIDEBAR (match dashboard / participants) --}}
+        <aside class="fixed left-0 top-0 z-40 h-screen w-[270px] border-r border-[#E5EAF1] bg-[#FBFAF7]">
+            <div class="flex h-[78px] items-center border-b border-[#E5EAF1] px-6">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#111827] text-white">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-[13px] font-black tracking-[0.18em] text-[#0F172A]">EVENT</h1>
+                        <p class="text-[10px] font-bold tracking-[0.16em] text-[#C8A25A]">MANAGEMENT SYSTEM</p>
+                    </div>
                 </div>
-              </div>
-              <span class="score">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2.5l2.8 5.6 6.2.9-4.5 4.4 1.1 6.1L12 16.8 6.4 19.5l1.1-6.1L3 9l6.2-.9L12 2.5z"></path>
-                </svg>
-                {{ $evaluation['score'] }}
-              </span>
             </div>
 
-            <p class="event-name">{{ $evaluation['event_name'] }}</p>
-            <p class="quote">"{{ $evaluation['comment_preview'] }}"</p>
-
-            <div class="card-foot">
-              <a href="#" class="read-link" title="{{ $evaluation['comment_full'] !== '' ? $evaluation['comment_full'] : 'No comment provided.' }}">Read Full Review →</a>
+            <div class="px-6 pt-10">
+                <div class="flex items-center gap-3 rounded-2xl border border-[#DDE6F2] bg-[#F4F8FC] p-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111827] text-sm font-black text-white">
+                        A
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-extrabold text-[#111827]">Administrator</h2>
+                        <p class="text-xs text-[#7B8AA0]">admin@system.edu.ph</p>
+                    </div>
+                </div>
             </div>
-          </article>
-        @empty
-          <article class="review-card" style="grid-column: 1 / -1; min-height: 140px; display: grid; place-items: center; text-align: center;">
+
+            <nav class="mt-6 px-4">
+                <p class="px-2 text-[11px] font-black uppercase tracking-widest text-[#D6DEE9]">
+                    Main Navigation
+                </p>
+
+                <div class="mt-4 space-y-2">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="flex items-center {{ request()->routeIs('admin.dashboard') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
+                            </svg>
+                            Dashboard
+                        </span>
+                        @if (request()->routeIs('admin.dashboard'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.events') }}"
+                       class="flex items-center {{ request()->routeIs('admin.events*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.events*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                            </svg>
+                            Events
+                        </span>
+                        @if (request()->routeIs('admin.events*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.participants') }}"
+                       class="flex items-center {{ request()->routeIs('admin.participants*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.participants*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
+                            </svg>
+                            Participants
+                        </span>
+                        @if (request()->routeIs('admin.participants*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.evaluations') }}"
+                       class="flex items-center {{ request()->routeIs('admin.evaluations*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5 {{ request()->routeIs('admin.evaluations*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
+                            </svg>
+                            Evaluations
+                        </span>
+                        @if (request()->routeIs('admin.evaluations*'))
+                            <span class="text-[#D2A64B]">›</span>
+                        @endif
+                    </a>
+                </div>
+            </nav>
+
+            <div class="absolute bottom-0 left-0 w-full border-t border-[#E5EAF1] px-6 py-6">
+                <a href="#" class="mb-5 flex items-center gap-3 text-sm font-bold text-[#7A8BA3]">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.065 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.065 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.065-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Settings
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-3 text-sm font-bold text-[#FF4D4F]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H9m4 8H5a2 2 0 01-2-2V6a2 2 0 012-2h8"/>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        {{-- MAIN --}}
+        <main class="ml-[270px] min-h-screen w-full bg-[#F6F8FB]">
+
+            <header class="flex h-[78px] items-center justify-between border-b border-[#E5EAF1] bg-white px-9">
+                <h2 class="text-sm font-black uppercase tracking-widest text-[#111827]">
+                    Evaluations
+                </h2>
+
+                <div class="flex items-center gap-4">
+                    <button type="button" class="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#53657F]">
+                        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D2A64B]"></span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0"/>
+                        </svg>
+                    </button>
+
+                    <div class="flex items-center gap-2 rounded-2xl border border-[#DDE6F2] bg-white px-3 py-2">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#111827] text-xs font-black text-white">
+                            A
+                        </div>
+                        <span class="text-sm font-bold">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-9 py-10">
+
+                <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <div class="h-7 w-1 rounded-full bg-[#D2A64B]"></div>
+                            <h1 class="text-[28px] font-black tracking-tight text-[#111827]">
+                                EVENT EVALUATIONS
+                            </h1>
+                        </div>
+
+                        <p class="mt-2 text-sm text-[#53657F]">
+                            Review feedback and ratings from event participants.
+                        </p>
+                    </div>
+
+                    <div class="inline-flex items-center gap-3 self-start rounded-2xl border border-[#DDE6F2] bg-white px-5 py-3">
+                        <svg class="h-5 w-5 fill-[#D2A64B] text-[#D2A64B]" viewBox="0 0 24 24">
+                            <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
+                        </svg>
+
+                        <span class="text-sm font-black text-[#111827]">
+                            {{ $averageRating !== null ? number_format($averageRating, 1) : '—' }}
+                        </span>
+                        <span class="text-sm font-bold text-[#53657F]">Avg. Rating</span>
+                    </div>
+                </div>
+
+                <section class="mt-14 grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+                    @forelse ($evaluations as $evaluation)
+                        @php
+                            $reviewBody = $evaluation['comment_full'] !== '' ? $evaluation['comment_full'] : 'No comment provided.';
+                            $modalPayload = [
+                                'name' => $evaluation['reviewer_name'],
+                                'initial' => $evaluation['avatar'],
+                                'date' => $evaluation['date'],
+                                'event' => $evaluation['event_name'],
+                                'rating' => $evaluation['rating'],
+                                'review' => $reviewBody,
+                            ];
+                        @endphp
+                        <article class="rounded-2xl border bg-white p-7 transition hover:-translate-y-1 hover:shadow-md
+                            {{ $loop->first ? 'border-[#D2B06A]' : 'border-[#DDE6F2]' }}">
+
+                            <div class="flex items-start justify-between gap-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#172233] text-base font-black text-white">
+                                        {{ $evaluation['avatar'] }}
+                                    </div>
+
+                                    <div>
+                                        <h2 class="text-xl font-black text-[#111827]">
+                                            {{ $evaluation['reviewer_name'] }}
+                                        </h2>
+                                        <p class="mt-1 text-sm text-[#64748B]">
+                                            {{ $evaluation['date'] }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="flex items-center justify-end gap-0.5">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if ($i <= $evaluation['rating'])
+                                                <svg class="h-5 w-5 fill-[#D2B06A] text-[#D2B06A]" viewBox="0 0 24 24">
+                                                    <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
+                                                </svg>
+                                            @else
+                                                <svg class="h-5 w-5 fill-none text-[#CBD5E1]" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
+                                                </svg>
+                                            @endif
+                                        @endfor
+                                    </div>
+
+                                    <p class="mt-1 text-sm font-black text-[#C8A25A]">
+                                        {{ $evaluation['rating'] }}/5
+                                    </p>
+                                </div>
+                            </div>
+
+                            <p class="mt-6 text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                                {{ $evaluation['event_name'] }}
+                            </p>
+
+                            <div class="mt-3 border-l-2 border-[#DDE6F2] pl-4">
+                                <p class="line-clamp-2 text-sm italic leading-6 text-[#64748B]">
+                                    "{{ $evaluation['comment_preview'] }}"
+                                </p>
+                            </div>
+
+                            <div class="mt-5 border-t border-[#E8EEF5] pt-5">
+                                <div class="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onclick='openEvaluationModal({{ \Illuminate\Support\Js::from($modalPayload) }})'
+                                        class="text-sm font-black uppercase tracking-wide text-[#111827] transition hover:text-[#C8A25A]"
+                                    >
+                                        Read Full Review →
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    @empty
+                        <article class="rounded-2xl border border-[#DDE6F2] bg-white p-12 text-center md:col-span-2 xl:col-span-3">
+                            <p class="text-lg font-black text-[#111827]">No evaluations yet</p>
+                            <p class="mt-2 text-sm text-[#64748B]">
+                                Submitted participant evaluations will appear here.
+                            </p>
+                        </article>
+                    @endforelse
+                </section>
+            </div>
+        </main>
+    </div>
+</div>
+
+{{-- Full review modal --}}
+<div
+    id="evaluationReviewModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
+    onclick="if (event.target === this) closeEvaluationModal()"
+>
+    <div class="relative w-full max-w-[620px] overflow-hidden rounded-3xl border border-[#DDE6F2] bg-white shadow-2xl" onclick="event.stopPropagation()">
+
+        <div class="flex items-start justify-between bg-[#172233] px-6 py-6 text-white">
             <div>
-              <p class="name" style="font-size: 24px; margin-bottom: 8px;">No Evaluations Yet</p>
-              <p class="quote" style="margin: 0; font-size: 14px;">Submitted participant evaluations will appear here.</p>
+                <h2 class="text-2xl font-black uppercase tracking-wide">
+                    Full Review
+                </h2>
+                <p id="evaluationModalEvent" class="mt-2 text-sm text-white/70">
+                    Event name
+                </p>
             </div>
-          </article>
-        @endforelse
-      </section>
-    </main>
-  </div>
-</body>
 
-</html>
+            <button
+                type="button"
+                onclick="closeEvaluationModal()"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+            >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="px-7 py-7">
+            <section class="rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] p-6">
+                <div class="flex items-start justify-between gap-5">
+                    <div class="flex items-center gap-4">
+                        <div
+                            id="evaluationModalInitial"
+                            class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#172233] text-xl font-black text-white"
+                        >
+                            M
+                        </div>
+
+                        <div>
+                            <h3 id="evaluationModalName" class="text-xl font-black text-[#111827]">
+                                Maria Santos
+                            </h3>
+                            <p id="evaluationModalDate" class="mt-1 text-sm text-[#64748B]">
+                                2026-04-21
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <div id="evaluationModalStars" class="flex items-center justify-end gap-0.5"></div>
+                        <p id="evaluationModalRating" class="mt-1 text-sm font-black text-[#C8A25A]">
+                            5/5
+                        </p>
+                    </div>
+                </div>
+
+                <div class="my-6 border-t border-[#DDE6F2]"></div>
+
+                <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                    Review Feedback
+                </p>
+
+                <p id="evaluationModalReview" class="mt-3 whitespace-pre-wrap text-base italic leading-8 text-[#53657F]">
+                    Review text
+                </p>
+            </section>
+
+            <div class="mt-5 flex justify-end">
+                <button
+                    type="button"
+                    onclick="closeEvaluationModal()"
+                    class="rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-8 py-3 text-sm font-black uppercase tracking-wide text-[#111827] transition hover:bg-[#EEF3F9]"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEvaluationModal(data) {
+        const modal = document.getElementById('evaluationReviewModal');
+        const starsContainer = document.getElementById('evaluationModalStars');
+        const rating = parseInt(String(data.rating), 10) || 0;
+
+        document.getElementById('evaluationModalName').textContent = data.name;
+        document.getElementById('evaluationModalInitial').textContent = data.initial;
+        document.getElementById('evaluationModalDate').textContent = data.date;
+        document.getElementById('evaluationModalEvent').textContent = data.event;
+        document.getElementById('evaluationModalRating').textContent = rating + '/5';
+        document.getElementById('evaluationModalReview').textContent = '"' + data.review + '"';
+
+        starsContainer.innerHTML = '';
+
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                starsContainer.innerHTML += `
+                    <svg class="h-5 w-5 fill-[#D2B06A] text-[#D2B06A]" viewBox="0 0 24 24">
+                        <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
+                    </svg>
+                `;
+            } else {
+                starsContainer.innerHTML += `
+                    <svg class="h-5 w-5 fill-none text-[#CBD5E1]" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
+                    </svg>
+                `;
+            }
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeEvaluationModal() {
+        const modal = document.getElementById('evaluationReviewModal');
+
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+    }
+</script>
+@endsection

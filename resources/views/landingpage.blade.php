@@ -47,7 +47,7 @@ $regions = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>NU Lipa EMS</title>
+  <title>Event Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@ $regions = [
     <div class="landing-scroll-content">
       <header class="topbar">
         <div class="container topbar-inner">
-          <div class="brand" aria-label="NU Lipa EMS">
+          <div class="brand" aria-label="Event Management System">
             <span class="brand-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" role="img" focusable="false">
                 <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -68,7 +68,7 @@ $regions = [
                 <line x1="16" y1="3.5" x2="16" y2="7"></line>
               </svg>
             </span>
-            <span class="brand-text">NU Lipa EMS</span>
+            <span class="brand-text">Event Management System</span>
           </div>
           <div class="top-actions">
             <button class="pill pill-muted">Home / Events</button>
@@ -87,7 +87,7 @@ $regions = [
 
       <section class="hero">
         <div class="container hero-inner">
-          <h1>Welcome to <span>NU Lipa Events</span></h1>
+          <h1>Welcome to <span>Event Management System</span></h1>
           <p>The unified platform for typical school events and research conferences. Register, participate, and evaluate all in one place.</p>
           <a href="#events" class="cta">
             <span>View Upcoming Events</span>
@@ -245,7 +245,7 @@ $regions = [
 
       <footer class="footer">
         <div class="container footer-inner">
-          <div class="fbrand" aria-label="NU Lipa Event Management System">
+          <div class="fbrand" aria-label="Event Management System">
             <span class="fbrand-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" role="img" focusable="false">
                 <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -254,9 +254,9 @@ $regions = [
                 <line x1="16" y1="3.5" x2="16" y2="7"></line>
               </svg>
             </span>
-            <span class="fbrand-text">NU Lipa Event Management System</span>
+            <span class="fbrand-text">Event Management System</span>
           </div>
-          <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
+          <div class="fcopy">© 2026 Event Management System. All rights reserved. For typical and conference events.</div>
         </div>
       </footer>
     </div>
@@ -816,7 +816,7 @@ $regions = [
                     <div class="success-grid" style="${isPending ? 'display:none;' : ''}">
                         <div class="pass-card">
                             <div class="pass-top">
-                                <div class="pass-kicker">NU LIPA EVENT PASS</div>
+                                <div class="pass-kicker">EVENT PASS</div>
                               <span class="pass-tag">${escapeHtml(displayLevel)}</span>
                             </div>
                             <div class="pass-event">${escapeHtml(displayEventName)}</div>
