@@ -1,6 +1,42 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $eventCategoryList = $events
+        ->map(function ($event) {
+            $eventTypeRaw = strtolower((string) ($event->event_type ?? ''));
+            return str_contains($eventTypeRaw, 'conference') ? 'Conference Event' : 'School Event';
+        })
+        ->unique()
+        ->values();
+
+    $eventMonthList = $events
+        ->map(function ($event) {
+            $date = $event->event_date ?? $event->start_date;
+            if (! $date) {
+                return null;
+            }
+
+            return [
+                'value' => (int) $date->format('n'),
+                'label' => $date->format('F'),
+            ];
+        })
+        ->filter()
+        ->unique('value')
+        ->sortBy('value')
+        ->values();
+
+    $eventYearList = $events
+        ->map(function ($event) {
+            $date = $event->event_date ?? $event->start_date;
+            return $date ? (int) $date->format('Y') : null;
+        })
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
+@endphp
 <div class="min-h-screen bg-[#F6F8FB] font-sans text-[#111827]">
     <div class="flex">
 
@@ -171,6 +207,7 @@
                     </svg>
 
                     <input
+                        id="eventsSearchInput"
                         type="text"
                         placeholder="Search events..."
                         class="h-12 w-full rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] pl-12 pr-4 text-sm font-medium text-[#111827] outline-none placeholder:text-[#9AA8BA] focus:border-[#D2A64B] focus:ring-2 focus:ring-[#D2A64B]/20"
@@ -188,33 +225,25 @@
                         </svg>
                     </button>
 
-                    <select class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
-                        <option>All Categories</option>
-                        <option>School Event</option>
-                        <option>Conference Event</option>
+                    <select id="eventsCategoryFilter" class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
+                        <option value="all">All Categories</option>
+                        @foreach ($eventCategoryList as $category)
+                            <option value="{{ $category }}">{{ $category }}</option>
+                        @endforeach
                     </select>
 
-                    <select class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
-                        <option>All Months</option>
-                        <option>January</option>
-                        <option>February</option>
-                        <option>March</option>
-                        <option>April</option>
-                        <option>May</option>
-                        <option>June</option>
-                        <option>July</option>
-                        <option>August</option>
-                        <option>September</option>
-                        <option>October</option>
-                        <option>November</option>
-                        <option>December</option>
+                    <select id="eventsMonthFilter" class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
+                        <option value="all">All Months</option>
+                        @foreach ($eventMonthList as $month)
+                            <option value="{{ $month['value'] }}">{{ $month['label'] }}</option>
+                        @endforeach
                     </select>
 
-                    <select class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
-                        <option>All Years</option>
-                        <option>2026</option>
-                        <option>2025</option>
-                        <option>2024</option>
+                    <select id="eventsYearFilter" class="h-12 rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B]">
+                        <option value="all">All Years</option>
+                        @foreach ($eventYearList as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
                     </select>
 
                     {{-- View Toggle --}}
@@ -256,13 +285,39 @@
                     $isConference = str_contains($eventTypeRaw, 'conference');
                     $eventTypeLabel = $isConference ? 'Conference Event' : 'School Event';
                     $badgeStyleClass = $isConference ? 'bg-[#111827] text-white' : 'bg-white text-[#111827]';
-                    $eventStatus = strtolower((string) ($event->status ?? 'active')) === 'archived' ? 'archived' : 'active';
-                    $statusStyleClass = $eventStatus === 'archived' ? 'bg-[#9CA3AF]' : 'bg-[#00C781]';
+                    $eventStatusKey = strtolower((string) ($event->computed_status ?? $event->status ?? 'active'));
+                    $eventStatusLabel = (string) ($event->computed_status_label ?? ucfirst($eventStatusKey));
+                    $statusStyleClass = $eventStatusKey === 'archived'
+                        ? 'bg-[#9CA3AF]'
+                        : ($eventStatusKey === 'done' ? 'bg-[#64748B]' : 'bg-[#00C781]');
+                    $eventMonthValue = $event->event_date
+                        ? $event->event_date->format('n')
+                        : ($event->start_date ? $event->start_date->format('n') : '');
+                    $eventYearValue = $event->event_date
+                        ? $event->event_date->format('Y')
+                        : ($event->start_date ? $event->start_date->format('Y') : '');
+                    $eventSearch = trim(implode(' ', array_filter([
+                        $event->event_name,
+                        $event->location,
+                        $event->hosted_by,
+                        $event->attendance_format,
+                        $event->description,
+                        $eventTypeLabel,
+                    ])));
                     $bannerImage = $event->banner_url ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60';
                     $reminderSummary = $eventReminderSummary[$event->event_id] ?? null;
                     $evaluationRecipientCount = (int) ($reminderSummary['total_recipients'] ?? 0);
+                    $evaluationAlreadySent = (bool) ($reminderSummary['any_sent'] ?? false);
                 @endphp
-                <article class="overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <article
+                    class="overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                    data-event-card
+                    data-event-title="{{ $event->event_name }}"
+                    data-event-category="{{ $eventTypeLabel }}"
+                    data-event-month="{{ $eventMonthValue }}"
+                    data-event-year="{{ $eventYearValue }}"
+                    data-event-search="{{ $eventSearch }}"
+                >
 
                     {{-- Image --}}
                     <div class="relative h-[190px] overflow-hidden">
@@ -281,7 +336,7 @@
 
                         {{-- Status --}}
                         <span class="absolute bottom-4 right-4 rounded-xl {{ $statusStyleClass }} px-4 py-2 text-xs font-black text-white">
-                            • {{ ucfirst($eventStatus) }}
+                            • {{ $eventStatusLabel }}
                         </span>
                     </div>
 
@@ -320,7 +375,8 @@
                                     data-event-date="{{ $eventDate }}"
                                     data-event-location="{{ $event->location ?: 'Location TBA' }}"
                                     data-event-image="{{ $bannerImage }}"
-                                    data-event-status="{{ ucfirst($eventStatus) }}"
+                                    data-event-status="{{ $eventStatusLabel }}"
+                                    data-event-status-key="{{ $eventStatusKey }}"
                                     data-event-type-value="{{ $event->event_type ?: 'School Event' }}"
                                     data-event-hosted-by="{{ $event->hosted_by ?: '' }}"
                                     data-event-attendance-format="{{ $event->attendance_format ?: 'Face-to-Face' }}"
@@ -331,6 +387,7 @@
                                     data-event-archive-url="{{ route('admin.events.archive', ['event' => $event->event_id]) }}"
                                     data-send-evaluation-url="{{ route('admin.events.send-evaluation-reminder', ['event' => $event->event_id]) }}"
                                     data-evaluation-recipient-count="{{ $evaluationRecipientCount }}"
+                                    data-evaluation-already-sent="{{ $evaluationAlreadySent ? 1 : 0 }}"
                                 >
                                     Manage Event ->
                                 </button>
@@ -339,15 +396,12 @@
                     </div>
                 </article>
             @endforeach
-
-            @if ($events->isEmpty())
-                <article class="col-span-full rounded-2xl border border-dashed border-[#DDE6F2] bg-white p-10 text-center">
-                    <h3 class="text-xl font-black text-[#111827]">No events found</h3>
-                    <p class="mt-2 text-sm font-medium text-[#64748B]">
-                        Wala pang event records sa system.
-                    </p>
-                </article>
-            @endif
+            <article id="eventsEmptyState" class="col-span-full rounded-2xl border border-dashed border-[#DDE6F2] bg-white p-10 text-center {{ $events->isEmpty() ? '' : 'hidden' }}">
+                <h3 class="text-xl font-black text-[#111827]">No events found</h3>
+                <p id="eventsEmptyMessage" class="mt-2 text-sm font-medium text-[#64748B]">
+                    {{ $events->isEmpty() ? 'Wala pang event records sa system.' : 'No events found.' }}
+                </p>
+            </article>
         </section>
 
         {{-- CREATE EVENT MODAL --}}
@@ -726,7 +780,7 @@
                     </div>
 
                     {{-- POST-EVENT CONTROLS --}}
-                    <section class="mt-7 overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white">
+                    <section id="managePostEventSection" class="mt-7 overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white">
                         <div class="border-b border-[#DDE6F2] bg-[#F8FAFC] px-7 py-6">
                             <div class="flex items-start gap-3">
                                 <svg class="mt-1 h-5 w-5 text-[#D2B06A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -768,6 +822,13 @@
                                 </svg>
                                 Send Evaluation Links
                             </button>
+
+                            <p
+                                id="manageEvaluationStatusMessage"
+                                class="mt-6 hidden rounded-2xl border border-[#EAD9B6] bg-[#FFFBF5] px-5 py-3 text-sm font-bold text-[#8D5D00]"
+                            >
+                                Evaluation links already sent.
+                            </p>
                         </div>
                     </section>
 
@@ -1256,6 +1317,8 @@
     const manageEventLocation = document.getElementById('manageEventLocation');
     const manageEventStatusBadge = document.getElementById('manageEventStatusBadge');
     const manageSendEvaluationButton = document.getElementById('manageSendEvaluationButton');
+    const manageEvaluationStatusMessage = document.getElementById('manageEvaluationStatusMessage');
+    const managePostEventSection = document.getElementById('managePostEventSection');
     const openEditEventModalFromManageButton = document.getElementById('openEditEventModalFromManage');
     const certificationLogicModal = document.getElementById('certificationLogicModal');
     const certificationConfirmForm = document.getElementById('certificationConfirmForm');
@@ -1274,6 +1337,13 @@
     const editDescriptionInput = document.getElementById('editDescriptionInput');
     const editCurrentImagePreview = document.getElementById('editCurrentImagePreview');
     const editEventTitleLabel = document.getElementById('editEventTitleLabel');
+    const eventsSearchInput = document.getElementById('eventsSearchInput');
+    const eventsCategoryFilter = document.getElementById('eventsCategoryFilter');
+    const eventsMonthFilter = document.getElementById('eventsMonthFilter');
+    const eventsYearFilter = document.getElementById('eventsYearFilter');
+    const eventCards = Array.from(document.querySelectorAll('[data-event-card]'));
+    const eventsEmptyState = document.getElementById('eventsEmptyState');
+    const eventsEmptyMessage = document.getElementById('eventsEmptyMessage');
     let currentManageEventData = null;
 
     function openCreateEventModal() {
@@ -1318,18 +1388,32 @@
         if (manageEventLocation) {
             manageEventLocation.textContent = eventData.location || 'Location TBA';
         }
+        const statusKey = (eventData.statusKey || eventData.status || 'active').toLowerCase();
+        const statusLabel = eventData.status || (statusKey.charAt(0).toUpperCase() + statusKey.slice(1));
+        const isArchived = statusKey === 'archived';
+        const isDone = statusKey === 'done';
+        const alreadySent = String(eventData.evaluationAlreadySent || '0') === '1';
+
         if (manageEventStatusBadge) {
-            const normalizedStatus = (eventData.status || 'Active').toLowerCase();
-            manageEventStatusBadge.textContent = `• ${eventData.status || 'Active'}`;
-            manageEventStatusBadge.classList.toggle('bg-[#00C781]', normalizedStatus !== 'archived');
-            manageEventStatusBadge.classList.toggle('bg-[#9CA3AF]', normalizedStatus === 'archived');
+            manageEventStatusBadge.textContent = `• ${statusLabel}`;
+            manageEventStatusBadge.classList.toggle('bg-[#00C781]', !isArchived && !isDone);
+            manageEventStatusBadge.classList.toggle('bg-[#9CA3AF]', isArchived);
+            manageEventStatusBadge.classList.toggle('bg-[#64748B]', isDone);
+        }
+        if (managePostEventSection) {
+            managePostEventSection.classList.toggle('hidden', !isDone);
         }
         if (manageSendEvaluationButton) {
-            const isArchived = (eventData.status || '').toLowerCase() === 'archived';
-            manageSendEvaluationButton.disabled = isArchived;
-            manageSendEvaluationButton.classList.toggle('opacity-50', isArchived);
-            manageSendEvaluationButton.classList.toggle('cursor-not-allowed', isArchived);
-            manageSendEvaluationButton.title = isArchived ? 'Archived events cannot send reminders.' : '';
+            manageSendEvaluationButton.disabled = !isDone || alreadySent;
+            manageSendEvaluationButton.classList.toggle('opacity-50', !isDone || alreadySent);
+            manageSendEvaluationButton.classList.toggle('cursor-not-allowed', !isDone || alreadySent);
+            manageSendEvaluationButton.classList.toggle('hidden', alreadySent);
+            manageSendEvaluationButton.title = alreadySent
+                ? 'Evaluation links already sent.'
+                : (isDone ? '' : 'Post-event actions are available after the event is done.');
+        }
+        if (manageEvaluationStatusMessage) {
+            manageEvaluationStatusMessage.classList.toggle('hidden', !alreadySent);
         }
 
         manageEventModal.classList.remove('hidden');
@@ -1435,9 +1519,55 @@
         }
     }
 
+    function applyEventFilters() {
+        const searchValue = String(eventsSearchInput?.value || '').trim().toLowerCase();
+        const categoryValue = String(eventsCategoryFilter?.value || 'all');
+        const monthValue = String(eventsMonthFilter?.value || 'all');
+        const yearValue = String(eventsYearFilter?.value || 'all');
+        let visibleCount = 0;
+
+        eventCards.forEach(card => {
+            const searchTarget = String(card.dataset.eventSearch || '').toLowerCase();
+            const matchesSearch = searchValue === '' || searchTarget.includes(searchValue);
+            const matchesCategory = categoryValue === 'all' || card.dataset.eventCategory === categoryValue;
+            const matchesMonth = monthValue === 'all' || card.dataset.eventMonth === monthValue;
+            const matchesYear = yearValue === 'all' || card.dataset.eventYear === yearValue;
+            const shouldShow = matchesSearch && matchesCategory && matchesMonth && matchesYear;
+
+            card.classList.toggle('hidden', !shouldShow);
+            if (shouldShow) {
+                visibleCount += 1;
+            }
+        });
+
+        if (eventsEmptyState) {
+            const showEmpty = visibleCount === 0;
+            eventsEmptyState.classList.toggle('hidden', !showEmpty);
+            if (eventsEmptyMessage) {
+                eventsEmptyMessage.textContent = showEmpty
+                    ? 'No events found.'
+                    : '';
+            }
+        }
+    }
+
     if (openCreateEventModalButton) {
         openCreateEventModalButton.addEventListener('click', openCreateEventModal);
     }
+
+    if (eventsSearchInput) {
+        eventsSearchInput.addEventListener('input', applyEventFilters);
+    }
+    if (eventsCategoryFilter) {
+        eventsCategoryFilter.addEventListener('change', applyEventFilters);
+    }
+    if (eventsMonthFilter) {
+        eventsMonthFilter.addEventListener('change', applyEventFilters);
+    }
+    if (eventsYearFilter) {
+        eventsYearFilter.addEventListener('change', applyEventFilters);
+    }
+    applyEventFilters();
 
     manageEventTriggers.forEach((trigger) => {
         trigger.addEventListener('click', () => {
@@ -1449,6 +1579,7 @@
                 location: trigger.dataset.eventLocation,
                 image: trigger.dataset.eventImage,
                 status: trigger.dataset.eventStatus,
+                statusKey: trigger.dataset.eventStatusKey,
                 eventTypeValue: trigger.dataset.eventTypeValue,
                 hostedBy: trigger.dataset.eventHostedBy,
                 attendanceFormat: trigger.dataset.eventAttendanceFormat,
@@ -1459,6 +1590,7 @@
                 archiveUrl: trigger.dataset.eventArchiveUrl,
                 sendEvaluationUrl: trigger.dataset.sendEvaluationUrl,
                 evaluationRecipientCount: trigger.dataset.evaluationRecipientCount,
+                evaluationAlreadySent: trigger.dataset.evaluationAlreadySent,
             };
             openManageEventModal(currentManageEventData);
         });

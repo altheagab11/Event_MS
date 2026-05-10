@@ -2,7 +2,15 @@
 
 @section('content')
 @php
-    $eventFilterList = $participants->pluck('event_name')->unique()->filter()->sort()->values();
+    $eventFilterList = $participants
+        ->map(fn ($participant) => [
+            'id' => $participant['event_id'] ?? null,
+            'name' => $participant['event_name'] ?? '',
+        ])
+        ->filter(fn ($event) => ! empty($event['id']) && $event['name'] !== '')
+        ->unique('id')
+        ->sortBy('name')
+        ->values();
     $statusBadgeClasses = [
         'green' => 'border-[#86EFAC] bg-[#ECFDF5] text-[#047857]',
         'gold' => 'border-[#FCD34D] bg-[#FFFBEB] text-[#D97706]',
@@ -175,15 +183,15 @@
                             <h2 class="text-2xl font-black uppercase tracking-wide text-[#111827]">
                                 All Registrations
                             </h2>
-                            <span class="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#111827] px-2 text-xs font-black text-white">
+                            <span id="participantsCount" class="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#111827] px-2 text-xs font-black text-white">
                                 {{ $participants->count() }}
                             </span>
                         </div>
 
-                        <select class="h-11 w-full rounded-2xl border border-[#DDE6F2] bg-white px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B] md:w-[260px]" aria-label="Filter by event">
-                            <option>All Events</option>
-                            @foreach ($eventFilterList as $eventName)
-                                <option value="{{ $eventName }}">{{ $eventName }}</option>
+                        <select id="participantEventFilter" class="h-11 w-full rounded-2xl border border-[#DDE6F2] bg-white px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B] md:w-[260px]" aria-label="Filter by event">
+                            <option value="all">All Events</option>
+                            @foreach ($eventFilterList as $event)
+                                <option value="{{ $event['id'] }}">{{ $event['name'] }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -213,7 +221,7 @@
                                         $initial = $name !== '' ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($name, 0, 1)) : '?';
                                         $badgeClass = $statusBadgeClasses[$participant['status_class'] ?? ''] ?? $statusBadgeClasses['gold'];
                                     @endphp
-                                    <tr class="border-b border-[#E8EEF5] transition last:border-b-0 hover:bg-[#F8FAFC]">
+                                    <tr class="border-b border-[#E8EEF5] transition last:border-b-0 hover:bg-[#F8FAFC]" data-participant-row data-event-id="{{ $participant['event_id'] }}">
                                         <td class="px-5 py-5">
                                             <div class="flex items-center gap-4">
                                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#172233] text-sm font-black text-white">
@@ -250,12 +258,12 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#64748B]">
-                                            No participant registrations found yet.
-                                        </td>
-                                    </tr>
                                 @endforelse
+                                <tr id="participantsEmptyState" class="{{ $participants->isEmpty() ? '' : 'hidden' }}">
+                                    <td id="participantsEmptyMessage" colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#64748B]">
+                                        No participant registrations found yet.
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -454,6 +462,11 @@
     (function() {
         const participantRows = @json($participants->values());
         const participantMap = new Map(participantRows.map(row => [String(row.registration_id), row]));
+        const participantTableRows = Array.from(document.querySelectorAll('[data-participant-row]'));
+        const participantEventFilter = document.getElementById('participantEventFilter');
+        const participantsCount = document.getElementById('participantsCount');
+        const participantsEmptyState = document.getElementById('participantsEmptyState');
+        const participantsEmptyMessage = document.getElementById('participantsEmptyMessage');
 
         const modal = document.getElementById('participantDetailsModal');
         const closeBtn = document.getElementById('participantDetailsClose');
@@ -496,6 +509,32 @@
             red: 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]',
         };
 
+        function applyParticipantFilter() {
+            const selectedEventId = participantEventFilter ? participantEventFilter.value : 'all';
+            let visibleCount = 0;
+
+            participantTableRows.forEach(row => {
+                const rowEventId = row.dataset.eventId || '';
+                const shouldShow = selectedEventId === 'all' || rowEventId === selectedEventId;
+                row.classList.toggle('hidden', !shouldShow);
+                if (shouldShow) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (participantsCount) {
+                participantsCount.textContent = String(visibleCount);
+            }
+
+            if (participantsEmptyState && participantsEmptyMessage) {
+                const showEmpty = visibleCount === 0;
+                participantsEmptyState.classList.toggle('hidden', !showEmpty);
+                participantsEmptyMessage.textContent = selectedEventId === 'all'
+                    ? 'No participant registrations found yet.'
+                    : 'No participants found for this event.';
+            }
+        }
+
         function normalizeText(value, fallback = 'Not provided') {
             const text = String(value ?? '').trim();
             return text !== '' ? text : fallback;
@@ -531,6 +570,11 @@
         }
 
         window.closeParticipantDetailsModal = closeModal;
+
+        if (participantEventFilter) {
+            participantEventFilter.addEventListener('change', applyParticipantFilter);
+            applyParticipantFilter();
+        }
 
         function openDetails(registrationId) {
             const participant = participantMap.get(String(registrationId));

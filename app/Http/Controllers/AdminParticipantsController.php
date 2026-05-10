@@ -69,12 +69,13 @@ class AdminParticipantsController extends Controller
         $verification = $verificationProfiles->get($profileKey);
 
         $payload = (array) ($verification?->payload ?? []);
-        $schoolFrom = trim((string) ($payload['school_from'] ?? ''));
-        $schoolLevel = trim((string) ($payload['school_level'] ?? ''));
+        $schoolAffiliation = trim((string) ($payload['school_affiliation'] ?? $payload['region'] ?? ''));
+        $userType = trim((string) ($payload['user_type'] ?? $payload['school_from'] ?? ''));
+        $participantRole = trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
         $region = trim((string) ($payload['region'] ?? ''));
-        $levelRegion = $schoolLevel !== '' && $region !== ''
-          ? $schoolLevel . ' / ' . $region
-          : ($schoolLevel !== '' ? $schoolLevel : ($region !== '' ? $region : 'Not provided'));
+        $levelRegion = $participantRole !== '' && $region !== ''
+          ? $participantRole . ' / ' . $region
+          : ($participantRole !== '' ? $participantRole : ($region !== '' ? $region : 'Not provided'));
 
         $paperDetails = $this->buildPaperDetails($registration, $latestPaper);
 
@@ -87,13 +88,16 @@ class AdminParticipantsController extends Controller
         return [
           'registration_id' => (int) $registration->registration_id,
           'registration_status' => (string) $registration->status,
+          'event_id' => (int) $registration->event_id,
           'name' => trim(($registration->user->firstname ?? '') . ' ' . ($registration->user->lastname ?? '')),
           'email' => (string) ($registration->user->email ?? ''),
           'event_name' => (string) ($registration->event->event_name ?? 'Unknown Event'),
           'event_type' => (string) ($registration->event->event_type ?? 'School Event'),
           'status_label' => $statusLabel,
           'status_class' => $statusClass,
-          'school_affiliation' => $schoolFrom !== '' ? $schoolFrom : 'Not provided',
+          'school_affiliation' => $schoolAffiliation !== '' ? $schoolAffiliation : 'Not provided',
+          'user_type' => $userType !== '' ? $userType : 'Not provided',
+          'participant_role' => $participantRole !== '' ? $participantRole : 'Not provided',
           'level_region' => $levelRegion,
           'paper' => $paperDetails,
           'approve_url' => route('admin.participants.approve', ['registration' => $registration->registration_id]),

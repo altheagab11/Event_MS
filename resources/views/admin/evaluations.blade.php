@@ -168,17 +168,6 @@
 
                 <section class="mt-14 grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
                     @forelse ($evaluations as $evaluation)
-                        @php
-                            $reviewBody = $evaluation['comment_full'] !== '' ? $evaluation['comment_full'] : 'No comment provided.';
-                            $modalPayload = [
-                                'name' => $evaluation['reviewer_name'],
-                                'initial' => $evaluation['avatar'],
-                                'date' => $evaluation['date'],
-                                'event' => $evaluation['event_name'],
-                                'rating' => $evaluation['rating'],
-                                'review' => $reviewBody,
-                            ];
-                        @endphp
                         <article class="rounded-2xl border bg-white p-7 transition hover:-translate-y-1 hover:shadow-md
                             {{ $loop->first ? 'border-[#D2B06A]' : 'border-[#DDE6F2]' }}">
 
@@ -233,7 +222,7 @@
                                 <div class="flex justify-end">
                                     <button
                                         type="button"
-                                        onclick='openEvaluationModal({{ \Illuminate\Support\Js::from($modalPayload) }})'
+                                        data-evaluation-id="{{ $evaluation['id'] }}"
                                         class="text-sm font-black uppercase tracking-wide text-[#111827] transition hover:text-[#C8A25A]"
                                     >
                                         Read Full Review →
@@ -322,6 +311,13 @@
                 <p id="evaluationModalReview" class="mt-3 whitespace-pre-wrap text-base italic leading-8 text-[#53657F]">
                     Review text
                 </p>
+
+                <div id="evaluationModalExtras" class="mt-6 hidden">
+                    <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                        Additional Responses
+                    </p>
+                    <div id="evaluationModalExtrasList" class="mt-3 space-y-3 text-sm text-[#53657F]"></div>
+                </div>
             </section>
 
             <div class="mt-5 flex justify-end">
@@ -338,47 +334,115 @@
 </div>
 
 <script>
-    function openEvaluationModal(data) {
-        const modal = document.getElementById('evaluationReviewModal');
-        const starsContainer = document.getElementById('evaluationModalStars');
-        const rating = parseInt(String(data.rating), 10) || 0;
+    const evaluationRows = @json($evaluations->values());
+    const evaluationMap = new Map(evaluationRows.map(row => [String(row.id), row]));
+    const evaluationModal = document.getElementById('evaluationReviewModal');
+    const evaluationModalStars = document.getElementById('evaluationModalStars');
+    const evaluationModalName = document.getElementById('evaluationModalName');
+    const evaluationModalInitial = document.getElementById('evaluationModalInitial');
+    const evaluationModalDate = document.getElementById('evaluationModalDate');
+    const evaluationModalEvent = document.getElementById('evaluationModalEvent');
+    const evaluationModalRating = document.getElementById('evaluationModalRating');
+    const evaluationModalReview = document.getElementById('evaluationModalReview');
+    const evaluationModalExtras = document.getElementById('evaluationModalExtras');
+    const evaluationModalExtrasList = document.getElementById('evaluationModalExtrasList');
 
-        document.getElementById('evaluationModalName').textContent = data.name;
-        document.getElementById('evaluationModalInitial').textContent = data.initial;
-        document.getElementById('evaluationModalDate').textContent = data.date;
-        document.getElementById('evaluationModalEvent').textContent = data.event;
-        document.getElementById('evaluationModalRating').textContent = rating + '/5';
-        document.getElementById('evaluationModalReview').textContent = '"' + data.review + '"';
-
-        starsContainer.innerHTML = '';
+    function renderModalStars(rating) {
+        if (!evaluationModalStars) return;
+        evaluationModalStars.innerHTML = '';
 
         for (let i = 1; i <= 5; i++) {
             if (i <= rating) {
-                starsContainer.innerHTML += `
+                evaluationModalStars.innerHTML += `
                     <svg class="h-5 w-5 fill-[#D2B06A] text-[#D2B06A]" viewBox="0 0 24 24">
                         <path d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
                     </svg>
                 `;
             } else {
-                starsContainer.innerHTML += `
+                evaluationModalStars.innerHTML += `
                     <svg class="h-5 w-5 fill-none text-[#CBD5E1]" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 2.5l2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 17.3l-5.8 3.06 1.11-6.46-4.7-4.58 6.49-.94L12 2.5z"/>
                     </svg>
                 `;
             }
         }
+    }
 
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+    function renderModalExtras(extras) {
+        if (!evaluationModalExtras || !evaluationModalExtrasList) return;
+        const hasExtras = Array.isArray(extras) && extras.length > 0;
+        evaluationModalExtras.classList.toggle('hidden', !hasExtras);
+        evaluationModalExtrasList.innerHTML = '';
+
+        if (!hasExtras) return;
+
+        extras.forEach(item => {
+            const label = String(item.label || '').trim();
+            const value = String(item.value || '').trim();
+            if (!label && !value) return;
+
+            const row = document.createElement('div');
+            row.className = 'flex flex-wrap items-start gap-2';
+            const labelEl = document.createElement('span');
+            labelEl.className = 'font-black text-[#111827]';
+            labelEl.textContent = label !== '' ? label + ':' : 'Response:';
+            const valueEl = document.createElement('span');
+            valueEl.textContent = value !== '' ? value : 'Not provided';
+            row.append(labelEl, valueEl);
+            evaluationModalExtrasList.append(row);
+        });
+    }
+
+    function openEvaluationModalById(evaluationId) {
+        if (!evaluationModal) return;
+        const evaluation = evaluationMap.get(String(evaluationId));
+
+        if (!evaluation) {
+            if (evaluationModalName) evaluationModalName.textContent = 'Review not found';
+            if (evaluationModalInitial) evaluationModalInitial.textContent = '?';
+            if (evaluationModalDate) evaluationModalDate.textContent = '—';
+            if (evaluationModalEvent) evaluationModalEvent.textContent = '—';
+            if (evaluationModalRating) evaluationModalRating.textContent = '0/5';
+            if (evaluationModalReview) evaluationModalReview.textContent = 'Review not found.';
+            renderModalStars(0);
+            renderModalExtras([]);
+        } else {
+            const rating = parseInt(String(evaluation.rating), 10) || 0;
+            const scoreLabel = evaluation.score !== undefined && evaluation.score !== null && String(evaluation.score).trim() !== ''
+                ? String(evaluation.score)
+                : String(rating);
+            if (evaluationModalName) evaluationModalName.textContent = evaluation.reviewer_name || 'Unknown Reviewer';
+            if (evaluationModalInitial) evaluationModalInitial.textContent = evaluation.avatar || '?';
+            if (evaluationModalDate) evaluationModalDate.textContent = evaluation.date || '—';
+            if (evaluationModalEvent) evaluationModalEvent.textContent = evaluation.event_name || 'Unknown Event';
+            if (evaluationModalRating) evaluationModalRating.textContent = scoreLabel + '/5';
+            if (evaluationModalReview) {
+                const reviewText = evaluation.comment_full && String(evaluation.comment_full).trim() !== ''
+                    ? evaluation.comment_full
+                    : 'No comment provided.';
+                evaluationModalReview.textContent = '"' + reviewText + '"';
+            }
+            renderModalStars(rating);
+            renderModalExtras(evaluation.additional_answers || []);
+        }
+
+        evaluationModal.classList.remove('hidden');
+        evaluationModal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
     }
 
     function closeEvaluationModal() {
-        const modal = document.getElementById('evaluationReviewModal');
-
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (!evaluationModal) return;
+        evaluationModal.classList.add('hidden');
+        evaluationModal.classList.remove('flex');
         document.body.classList.remove('overflow-hidden');
     }
+
+    window.closeEvaluationModal = closeEvaluationModal;
+
+    const readButtons = Array.from(document.querySelectorAll('[data-evaluation-id]'));
+    readButtons.forEach(button => {
+        button.addEventListener('click', () => openEvaluationModalById(button.dataset.evaluationId));
+    });
 </script>
 @endsection

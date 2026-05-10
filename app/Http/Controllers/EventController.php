@@ -64,6 +64,20 @@ class EventController extends Controller
       ->orderByDesc('event_date')
       ->get();
 
+    $today = Carbon::today();
+    $events->each(function (Event $event) use ($today): void {
+      $endDate = $event->end_date ?? $event->event_date;
+      if ($endDate !== null && ! $endDate instanceof Carbon) {
+        $endDate = Carbon::parse((string) $endDate);
+      }
+
+      $isArchived = (string) $event->status === 'archived';
+      $isDone = ! $isArchived && $endDate instanceof Carbon && $endDate->lt($today);
+
+      $event->setAttribute('computed_status', $isArchived ? 'archived' : ($isDone ? 'done' : 'active'));
+      $event->setAttribute('computed_status_label', $isArchived ? 'Archived' : ($isDone ? 'Done' : 'Active'));
+    });
+
     $hasReminderTracking = Schema::hasColumn('registrations', 'evaluation_reminder_sent_at')
       && Schema::hasColumn('registrations', 'evaluation_reminder_status');
 
@@ -71,15 +85,16 @@ class EventController extends Controller
     if ($hasReminderTracking) {
       $eventReminderSummary = Registration::query()
         ->selectRaw('event_id')
-        ->selectRaw('COUNT(*) as total_recipients')
-        ->selectRaw('SUM(CASE WHEN evaluation_reminder_sent_at IS NOT NULL THEN 1 ELSE 0 END) as sent_count')
+        ->selectRaw("SUM(CASE WHEN status IN ('approved', 'pending') THEN 1 ELSE 0 END) as total_recipients")
+        ->selectRaw("SUM(CASE WHEN status IN ('approved', 'pending') AND evaluation_reminder_sent_at IS NOT NULL THEN 1 ELSE 0 END) as sent_count")
+        ->selectRaw('SUM(CASE WHEN evaluation_reminder_sent_at IS NOT NULL THEN 1 ELSE 0 END) as any_sent_count')
         ->selectRaw('MAX(evaluation_reminder_sent_at) as last_sent_at')
-        ->whereIn('status', ['approved', 'pending'])
         ->groupBy('event_id')
         ->get()
         ->mapWithKeys(function ($row): array {
           $sentCount = (int) ($row->sent_count ?? 0);
           $totalRecipients = (int) ($row->total_recipients ?? 0);
+          $anySentCount = (int) ($row->any_sent_count ?? 0);
           $lastSentRaw = $row->last_sent_at;
 
           return [
@@ -87,7 +102,7 @@ class EventController extends Controller
               'sent_count' => $sentCount,
               'total_recipients' => $totalRecipients,
               'fully_sent' => $totalRecipients > 0 && $sentCount >= $totalRecipients,
-              'any_sent' => $sentCount > 0,
+              'any_sent' => $anySentCount > 0,
               'last_sent_at' => $lastSentRaw ? Carbon::parse((string) $lastSentRaw)->format('M d, Y h:i A') : null,
             ],
           ];
@@ -172,6 +187,18 @@ class EventController extends Controller
         ->route('admin.events')
         ->with('status_type', 'warning')
         ->with('status', 'Evaluation reminders can only be sent after the event has ended.');
+    }
+
+    $alreadyProcessed = Registration::query()
+      ->where('event_id', $event->event_id)
+      ->whereNotNull('evaluation_reminder_sent_at')
+      ->exists();
+
+    if ($alreadyProcessed) {
+      return redirect()
+        ->route('admin.events')
+        ->with('status_type', 'warning')
+        ->with('status', 'Evaluation reminders were already processed for this event.');
     }
 
     $hasPendingRecipients = Registration::query()
