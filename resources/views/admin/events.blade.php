@@ -637,25 +637,35 @@
                                     Event Banner Image
                                 </label>
 
-                                <label class="flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#E3CFA4] bg-white px-6 py-8 text-center transition hover:bg-[#FFF8EA]">
+                                <label id="createBannerUploadBox" class="relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-[#E3CFA4] bg-white px-6 py-8 text-center transition hover:bg-[#FFF8EA]">
                                     <input
                                         type="file"
+                                        id="createBannerImageInput"
                                         name="banner_image"
                                         accept="image/png,image/jpeg,image/jpg,image/webp"
                                         class="hidden"
                                     >
 
-                                    <svg class="h-12 w-12 text-[#C8A25A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <img
+                                        id="createBannerImagePreview"
+                                        src=""
+                                        alt="Selected event banner preview"
+                                        class="absolute inset-0 hidden h-full w-full object-cover opacity-30"
+                                    >
+
+                                    <svg id="createBannerUploadIcon" class="relative z-10 h-12 w-12 text-[#C8A25A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01.88-7.903A5 5 0 1117.9 9H18a4 4 0 010 8h-1m-5-4v8m0 0l-3-3m3 3l3-3"/>
                                     </svg>
 
-                                    <p class="mt-3 text-base font-black text-[#111827]">
+                                    <p id="createBannerUploadTitle" class="relative z-10 mt-3 text-base font-black text-[#111827]">
                                         Upload image
                                     </p>
 
-                                    <p class="mt-2 text-sm text-[#7B8AA0]">
+                                    <p id="createBannerUploadHint" class="relative z-10 mt-2 text-sm text-[#7B8AA0]">
                                         PNG, JPG, WEBP up to 5MB
                                     </p>
+
+                                    <p id="createBannerFileName" class="relative z-10 mt-2 hidden max-w-full truncate text-xs font-bold text-[#111827]"></p>
                                 </label>
                                 @error('banner_image') <p class="mt-2 text-xs font-semibold text-[#DC2626]">{{ $message }}</p> @enderror
                             </div>
@@ -1079,9 +1089,10 @@
                             </div>
 
                             <div class="mt-6">
-                                <label class="relative flex min-h-[130px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-[#E3CFA4] bg-white px-6 py-8 text-center transition hover:bg-[#FFF8EA]">
+                                <label id="editBannerUploadBox" class="relative flex min-h-[130px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-[#E3CFA4] bg-white px-6 py-8 text-center transition hover:bg-[#FFF8EA]">
                                     <input
                                         type="file"
+                                        id="editBannerImageInput"
                                         name="banner_image"
                                         accept="image/png,image/jpeg,image/jpg,image/webp"
                                         class="hidden"
@@ -1095,13 +1106,19 @@
                                     >
 
                                     <div class="relative z-10 flex flex-col items-center">
-                                        <svg class="h-12 w-12 text-[#C8A25A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <svg id="editBannerUploadIcon" class="h-12 w-12 text-[#C8A25A]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01.88-7.903A5 5 0 1117.9 9H18a4 4 0 010 8h-1m-5-4v8m0 0l-3-3m3 3l3-3"/>
                                         </svg>
 
-                                        <p class="mt-3 text-base font-black text-[#111827]">
+                                        <p id="editBannerUploadTitle" class="mt-3 text-base font-black text-[#111827]">
                                             Replace image
                                         </p>
+
+                                        <p id="editBannerUploadHint" class="mt-2 text-sm text-[#7B8AA0]">
+                                            PNG, JPG, WEBP up to 5MB
+                                        </p>
+
+                                        <p id="editBannerFileName" class="mt-2 hidden max-w-full truncate text-xs font-bold text-[#111827]"></p>
                                     </div>
                                 </label>
                                 @error('banner_image', 'editEvent') <p class="mt-2 text-xs font-semibold text-[#DC2626]">{{ $message }}</p> @enderror
@@ -1336,6 +1353,19 @@
     const editLocationInput = document.getElementById('editLocationInput');
     const editDescriptionInput = document.getElementById('editDescriptionInput');
     const editCurrentImagePreview = document.getElementById('editCurrentImagePreview');
+    const createBannerImageInput = document.getElementById('createBannerImageInput');
+    const createBannerImagePreview = document.getElementById('createBannerImagePreview');
+    const createBannerUploadBox = document.getElementById('createBannerUploadBox');
+    const createBannerUploadIcon = document.getElementById('createBannerUploadIcon');
+    const createBannerUploadTitle = document.getElementById('createBannerUploadTitle');
+    const createBannerUploadHint = document.getElementById('createBannerUploadHint');
+    const createBannerFileName = document.getElementById('createBannerFileName');
+    const editBannerImageInput = document.getElementById('editBannerImageInput');
+    const editBannerUploadBox = document.getElementById('editBannerUploadBox');
+    const editBannerUploadIcon = document.getElementById('editBannerUploadIcon');
+    const editBannerUploadTitle = document.getElementById('editBannerUploadTitle');
+    const editBannerUploadHint = document.getElementById('editBannerUploadHint');
+    const editBannerFileName = document.getElementById('editBannerFileName');
     const editEventTitleLabel = document.getElementById('editEventTitleLabel');
     const eventsSearchInput = document.getElementById('eventsSearchInput');
     const eventsCategoryFilter = document.getElementById('eventsCategoryFilter');
@@ -1469,6 +1499,68 @@
         editEventTitleLabel.textContent = selectedEventType === 'School Event'
             ? 'School Event Title'
             : 'Conference Event Title';
+    }
+
+    function syncBannerPreview({
+        input,
+        preview,
+        uploadBox,
+        uploadIcon,
+        uploadTitle,
+        uploadHint,
+        fileNameLabel,
+        filledTitle,
+        defaultTitle,
+    }) {
+        if (!input) return;
+
+        const selectedFile = input.files && input.files[0] ? input.files[0] : null;
+        if (!selectedFile) {
+            if (fileNameLabel) {
+                fileNameLabel.textContent = '';
+                fileNameLabel.classList.add('hidden');
+            }
+            if (uploadTitle) {
+                uploadTitle.textContent = defaultTitle;
+            }
+            if (uploadHint) {
+                uploadHint.textContent = 'PNG, JPG, WEBP up to 5MB';
+            }
+            if (uploadIcon) {
+                uploadIcon.classList.remove('hidden');
+            }
+            if (preview && preview.id === 'createBannerImagePreview') {
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+            if (uploadBox) {
+                uploadBox.classList.remove('border-[#111827]');
+            }
+            return;
+        }
+
+        if (fileNameLabel) {
+            fileNameLabel.textContent = selectedFile.name;
+            fileNameLabel.classList.remove('hidden');
+        }
+        if (uploadTitle) {
+            uploadTitle.textContent = filledTitle;
+        }
+        if (uploadHint) {
+            uploadHint.textContent = 'Image selected. Ready to upload.';
+        }
+        if (uploadIcon) {
+            uploadIcon.classList.add('hidden');
+        }
+        if (uploadBox) {
+            uploadBox.classList.add('border-[#111827]');
+        }
+
+        if (preview) {
+            const objectUrl = URL.createObjectURL(selectedFile);
+            preview.src = objectUrl;
+            preview.classList.remove('hidden');
+        }
     }
 
     function openEditEventModal(eventData) {
@@ -1617,6 +1709,38 @@
         input.addEventListener('change', syncEditEventTitleLabel);
     });
     syncEditEventTitleLabel();
+
+    if (createBannerImageInput) {
+        createBannerImageInput.addEventListener('change', () => {
+            syncBannerPreview({
+                input: createBannerImageInput,
+                preview: createBannerImagePreview,
+                uploadBox: createBannerUploadBox,
+                uploadIcon: createBannerUploadIcon,
+                uploadTitle: createBannerUploadTitle,
+                uploadHint: createBannerUploadHint,
+                fileNameLabel: createBannerFileName,
+                filledTitle: 'Image selected',
+                defaultTitle: 'Upload image',
+            });
+        });
+    }
+
+    if (editBannerImageInput) {
+        editBannerImageInput.addEventListener('change', () => {
+            syncBannerPreview({
+                input: editBannerImageInput,
+                preview: editCurrentImagePreview,
+                uploadBox: editBannerUploadBox,
+                uploadIcon: editBannerUploadIcon,
+                uploadTitle: editBannerUploadTitle,
+                uploadHint: editBannerUploadHint,
+                fileNameLabel: editBannerFileName,
+                filledTitle: 'New image selected',
+                defaultTitle: 'Replace image',
+            });
+        });
+    }
 
     if (openEditEventModalFromManageButton) {
         openEditEventModalFromManageButton.addEventListener('click', () => {

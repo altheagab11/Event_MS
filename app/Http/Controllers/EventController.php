@@ -123,6 +123,7 @@ class EventController extends Controller
     $payload['event_date'] = $payload['start_date'];
 
     if ($request->hasFile('banner_image')) {
+      $this->ensurePublicStorageLinkExists();
       $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');
     }
 
@@ -139,6 +140,7 @@ class EventController extends Controller
     $payload['event_date'] = $payload['start_date'];
 
     if ($request->hasFile('banner_image')) {
+      $this->ensurePublicStorageLinkExists();
       $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');
       $this->deleteStoredBannerIfLocal($event->banner_image);
     }
@@ -261,6 +263,21 @@ class EventController extends Controller
 
     if (Storage::disk('public')->exists($relativePath)) {
       Storage::disk('public')->delete($relativePath);
+    }
+  }
+
+  private function ensurePublicStorageLinkExists(): void
+  {
+    $publicStoragePath = public_path('storage');
+    if (is_link($publicStoragePath) || is_dir($publicStoragePath)) {
+      return;
+    }
+
+    // Some local setups miss the storage symlink, which makes uploaded files unreachable.
+    try {
+      Artisan::call('storage:link');
+    } catch (\Throwable $exception) {
+      // Keep upload flow running; DB can still store relative path.
     }
   }
 }
