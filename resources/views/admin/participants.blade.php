@@ -12,186 +12,63 @@
         ->sortBy('name')
         ->values();
     $statusBadgeClasses = [
-        'green' => 'border-[#86EFAC] bg-[#ECFDF5] text-[#047857]',
-        'gold' => 'border-[#FCD34D] bg-[#FFFBEB] text-[#D97706]',
-        'red' => 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]',
+        'green' => 'border-[#22C55E]/40 bg-[#22C55E]/15 text-[#86EFAC]',
+        'gold'  => 'border-[#FACC15]/40 bg-[#FACC15]/15 text-[#FACC15]',
+        'red'   => 'border-[#EF4444]/40 bg-[#EF4444]/15 text-[#FCA5A5]',
     ];
 @endphp
-<div class="min-h-screen bg-[#F6F8FB] font-sans text-[#111827]">
+<div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
 
-        {{-- SIDEBAR (match dashboard) --}}
-        <aside class="fixed left-0 top-0 z-40 h-screen w-[270px] border-r border-[#E5EAF1] bg-[#FBFAF7]">
-            <div class="flex h-[78px] items-center border-b border-[#E5EAF1] px-6">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#111827] text-white">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-[13px] font-black tracking-[0.18em] text-[#0F172A]">EVENT</h1>
-                        <p class="text-[10px] font-bold tracking-[0.16em] text-[#C8A25A]">MANAGEMENT SYSTEM</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-6 pt-10">
-                <div class="flex items-center gap-3 rounded-2xl border border-[#DDE6F2] bg-[#F4F8FC] p-3">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111827] text-sm font-black text-white">
-                        A
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-extrabold text-[#111827]">Administrator</h2>
-                        <p class="text-xs text-[#7B8AA0]">admin@system.edu.ph</p>
-                    </div>
-                </div>
-            </div>
-
-            <nav class="mt-6 px-4">
-                <p class="px-2 text-[11px] font-black uppercase tracking-widest text-[#D6DEE9]">
-                    Main Navigation
-                </p>
-
-                <div class="mt-4 space-y-2">
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="flex items-center {{ request()->routeIs('admin.dashboard') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
-                        <span class="flex items-center gap-3">
-                            <svg class="h-5 w-5 {{ request()->routeIs('admin.dashboard') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
-                            </svg>
-                            Dashboard
-                        </span>
-                        @if (request()->routeIs('admin.dashboard'))
-                            <span class="text-[#D2A64B]">›</span>
-                        @endif
-                    </a>
-
-                    <a href="{{ route('admin.events') }}"
-                       class="flex items-center {{ request()->routeIs('admin.events*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
-                        <span class="flex items-center gap-3">
-                            <svg class="h-5 w-5 {{ request()->routeIs('admin.events*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
-                            </svg>
-                            Events
-                        </span>
-                        @if (request()->routeIs('admin.events*'))
-                            <span class="text-[#D2A64B]">›</span>
-                        @endif
-                    </a>
-
-                    <a href="{{ route('admin.participants') }}"
-                       class="flex items-center {{ request()->routeIs('admin.participants*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
-                        <span class="flex items-center gap-3">
-                            <svg class="h-5 w-5 {{ request()->routeIs('admin.participants*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
-                            </svg>
-                            Participants
-                        </span>
-                        @if (request()->routeIs('admin.participants*'))
-                            <span class="text-[#D2A64B]">›</span>
-                        @endif
-                    </a>
-
-                    <a href="{{ route('admin.evaluations') }}"
-                       class="flex items-center {{ request()->routeIs('admin.evaluations*') ? 'justify-between rounded-2xl border-l-2 border-[#D2A64B] bg-[#FFF8EA] px-4 py-3 text-sm font-black text-[#0F172A]' : 'gap-3 rounded-2xl px-4 py-3 text-sm font-bold text-[#53657F] hover:bg-[#F4F7FB]' }}">
-                        <span class="flex items-center gap-3">
-                            <svg class="h-5 w-5 {{ request()->routeIs('admin.evaluations*') ? 'text-[#D2A64B]' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
-                            </svg>
-                            Evaluations
-                        </span>
-                        @if (request()->routeIs('admin.evaluations*'))
-                            <span class="text-[#D2A64B]">›</span>
-                        @endif
-                    </a>
-                </div>
-            </nav>
-
-            <div class="absolute bottom-0 left-0 w-full border-t border-[#E5EAF1] px-6 py-6">
-                <a href="#" class="mb-5 flex items-center gap-3 text-sm font-bold text-[#7A8BA3]">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.065 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.065 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.065-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    Settings
-                </a>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="flex items-center gap-3 text-sm font-bold text-[#FF4D4F]">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H9m4 8H5a2 2 0 01-2-2V6a2 2 0 012-2h8"/>
-                        </svg>
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </aside>
+        @include('admin.partials.sidebar')
 
         <main class="ml-[270px] min-h-screen w-full">
-            <header class="flex h-[78px] items-center justify-between border-b border-[#E5EAF1] bg-white px-9">
-                <h2 class="text-sm font-black uppercase tracking-widest text-[#111827]">
-                    Participants
-                </h2>
 
-                <div class="flex items-center gap-4">
-                    <button type="button" class="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-[#DDE6F2] bg-white text-[#53657F]">
-                        <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#D2A64B]"></span>
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 01-6 0"/>
-                        </svg>
-                    </button>
-
-                    <div class="flex items-center gap-2 rounded-2xl border border-[#DDE6F2] bg-white px-3 py-2">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#111827] text-xs font-black text-white">
-                            A
-                        </div>
-                        <span class="text-sm font-bold">Admin</span>
-                    </div>
-                </div>
-            </header>
+            @include('admin.partials.topbar', ['topbarTitle' => 'Participants'])
 
             <section class="px-9 py-10">
+
+                {{-- Page Header --}}
                 <div>
                     <div class="flex items-center gap-3">
-                        <div class="h-7 w-1 rounded-full bg-[#D2A64B]"></div>
-                        <h1 class="text-[28px] font-black tracking-tight text-[#111827]">
+                        <div class="h-7 w-1 rounded-full bg-[#60A5FA]"></div>
+                        <h1 class="text-[28px] font-black tracking-tight text-[#F8FAFC]">
                             PARTICIPANTS LIST
                         </h1>
                     </div>
-                    <p class="mt-2 text-sm text-[#53657F]">
+                    <p class="mt-2 text-sm text-[#CBD5E1]">
                         View registered attendees, approve submissions, and monitor check-ins.
                     </p>
                 </div>
 
                 @if (session('status_message'))
                     <div
-                        class="mt-8 rounded-2xl border px-5 py-4 text-sm font-bold {{ session('status_type') === 'warning' ? 'border-[#F1D49A] bg-[#FFFBF0] text-[#8D5D00]' : 'border-[#B8E3C9] bg-[#EDFFF3] text-[#1D6C3E]' }}"
+                        class="mt-8 rounded-2xl border px-5 py-4 text-sm font-bold backdrop-blur-md {{ session('status_type') === 'warning' ? 'border-[#FACC15]/40 bg-[#FACC15]/12 text-[#FACC15]' : 'border-[#22C55E]/40 bg-[#22C55E]/12 text-[#86EFAC]' }}"
                         role="status"
                     >
                         {{ session('status_message') }}
                     </div>
                 @endif
 
-                <section class="mt-16 overflow-hidden rounded-2xl border border-[#DDE6F2] bg-white" aria-label="Participants table">
-                    <div class="flex flex-col gap-4 border-b border-[#E8EEF5] bg-white px-5 py-5 md:flex-row md:items-center md:justify-between">
+                {{-- Main Table Container --}}
+                <section class="mt-16 overflow-hidden rounded-2xl border border-[#60A5FA]/20 bg-[#1E375A]/65 shadow-lg shadow-black/20 backdrop-blur-md" aria-label="Participants table">
+                    <div class="flex flex-col gap-4 border-b border-[#1E3357] bg-[#10213A]/70 px-5 py-5 md:flex-row md:items-center md:justify-between">
                         <div class="flex items-center gap-3">
-                            <svg class="h-6 w-6 shrink-0 text-[#D2A64B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="h-6 w-6 shrink-0 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
                             </svg>
-                            <h2 class="text-2xl font-black uppercase tracking-wide text-[#111827]">
+                            <h2 class="text-2xl font-black uppercase tracking-wide text-[#F8FAFC]">
                                 All Registrations
                             </h2>
-                            <span id="participantsCount" class="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#111827] px-2 text-xs font-black text-white">
+                            <span id="participantsCount" class="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#3B82F6] px-2 text-xs font-black text-white">
                                 {{ $participants->count() }}
                             </span>
                         </div>
 
-                        <select id="participantEventFilter" class="h-11 w-full rounded-2xl border border-[#DDE6F2] bg-white px-5 text-sm font-black text-[#111827] outline-none focus:border-[#D2A64B] md:w-[260px]" aria-label="Filter by event">
-                            <option value="all">All Events</option>
+                        <select id="participantEventFilter" class="h-11 w-full rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-5 text-sm font-black text-[#F8FAFC] outline-none transition focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30 md:w-[260px]" aria-label="Filter by event">
+                            <option value="all" class="bg-[#0D1B31] text-[#F8FAFC]">All Events</option>
                             @foreach ($eventFilterList as $event)
-                                <option value="{{ $event['id'] }}">{{ $event['name'] }}</option>
+                                <option value="{{ $event['id'] }}" class="bg-[#0D1B31] text-[#F8FAFC]">{{ $event['name'] }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -199,17 +76,17 @@
                     <div class="overflow-x-auto">
                         <table class="w-full min-w-[900px] border-collapse">
                             <thead>
-                                <tr class="border-b border-[#E8EEF5] bg-[#F8FAFC]">
-                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                <tr class="border-b border-[#1E3357] bg-[#0D1B31]/70">
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Participant
                                     </th>
-                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Registered Event
                                     </th>
-                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Status
                                     </th>
-                                    <th class="px-5 py-5 text-right text-xs font-black uppercase tracking-widest text-[#64748B]">
+                                    <th class="px-5 py-5 text-right text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Action
                                     </th>
                                 </tr>
@@ -221,24 +98,24 @@
                                         $initial = $name !== '' ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($name, 0, 1)) : '?';
                                         $badgeClass = $statusBadgeClasses[$participant['status_class'] ?? ''] ?? $statusBadgeClasses['gold'];
                                     @endphp
-                                    <tr class="border-b border-[#E8EEF5] transition last:border-b-0 hover:bg-[#F8FAFC]" data-participant-row data-event-id="{{ $participant['event_id'] }}">
+                                    <tr class="border-b border-[#1E3357]/60 transition last:border-b-0 hover:bg-[#13284A]/60" data-participant-row data-event-id="{{ $participant['event_id'] }}">
                                         <td class="px-5 py-5">
                                             <div class="flex items-center gap-4">
-                                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#172233] text-sm font-black text-white">
+                                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3B82F6] text-sm font-black text-white">
                                                     {{ $initial }}
                                                 </div>
                                                 <div>
-                                                    <h3 class="text-sm font-black text-[#111827]">
+                                                    <h3 class="text-sm font-black text-[#F8FAFC]">
                                                         {{ $name !== '' ? $name : '—' }}
                                                     </h3>
-                                                    <p class="mt-1 text-xs font-medium text-[#64748B]">
+                                                    <p class="mt-1 text-xs font-medium text-[#94A3B8]">
                                                         {{ $participant['email'] }}
                                                     </p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-5 py-5">
-                                            <p class="text-sm font-black text-[#111827]">
+                                            <p class="text-sm font-black text-[#F8FAFC]">
                                                 {{ $participant['event_name'] }}
                                             </p>
                                         </td>
@@ -250,7 +127,7 @@
                                         <td class="px-5 py-5 text-right">
                                             <button
                                                 type="button"
-                                                class="details-btn rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#111827] transition hover:bg-[#EEF3F9]"
+                                                class="details-btn rounded-2xl border border-[#60A5FA]/25 bg-[#13284A]/70 px-5 py-2 text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:border-[#60A5FA]/50 hover:bg-[#13284A]"
                                                 data-registration-id="{{ $participant['registration_id'] }}"
                                             >
                                                 View Details
@@ -260,7 +137,7 @@
                                 @empty
                                 @endforelse
                                 <tr id="participantsEmptyState" class="{{ $participants->isEmpty() ? '' : 'hidden' }}">
-                                    <td id="participantsEmptyMessage" colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#64748B]">
+                                    <td id="participantsEmptyMessage" colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#94A3B8]">
                                         No participant registrations found yet.
                                     </td>
                                 </tr>
@@ -276,26 +153,26 @@
 {{-- PARTICIPANT DETAILS MODAL --}}
 <div
     id="participantDetailsModal"
-    class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
+    class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
     aria-labelledby="participantDetailsModalTitle"
     aria-hidden="true"
 >
-    <div class="relative max-h-[min(90vh,880px)] w-full max-w-[650px] overflow-y-auto rounded-3xl border border-[#DDE6F2] bg-white shadow-2xl" onclick="event.stopPropagation()">
-        <div class="flex items-start justify-between bg-[#172233] px-6 py-6 text-white">
+    <div class="relative max-h-[min(90vh,880px)] w-full max-w-[650px] overflow-y-auto rounded-3xl border border-[#60A5FA]/25 bg-[#10213A] shadow-2xl shadow-black/40" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between border-b border-[#1E3357] bg-[#0D1B31] px-6 py-6 text-white">
             <div class="min-w-0 pr-4">
-                <h2 id="participantDetailsModalTitle" class="text-2xl font-black uppercase tracking-wide">
+                <h2 id="participantDetailsModalTitle" class="text-2xl font-black uppercase tracking-wide text-[#F8FAFC]">
                     Participant Details
                 </h2>
-                <p id="participantModalEventSubtitle" class="mt-2 text-sm text-white/70">—</p>
+                <p id="participantModalEventSubtitle" class="mt-2 text-sm text-[#60A5FA]">—</p>
             </div>
 
             <button
                 type="button"
                 id="participantDetailsClose"
                 onclick="closeParticipantDetailsModal()"
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#60A5FA]/20 bg-[#13284A]/70 text-[#F8FAFC] transition hover:border-[#60A5FA]/50 hover:bg-[#13284A]"
                 aria-label="Close"
             >
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
@@ -305,104 +182,104 @@
         </div>
 
         <div class="px-7 py-7">
-            <section class="rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] p-6">
+            <section class="rounded-2xl border border-[#60A5FA]/20 bg-[#13284A]/60 p-6">
                 <div class="flex items-center gap-5">
                     <div
                         id="participantModalInitial"
-                        class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#172233] text-2xl font-black text-white"
+                        class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#3B82F6] text-2xl font-black text-white"
                     >
                         —
                     </div>
 
                     <div class="min-w-0">
-                        <h3 id="participantModalName" class="text-xl font-black text-[#111827]">—</h3>
-                        <p id="participantModalEmail" class="mt-1 text-sm text-[#64748B]">—</p>
+                        <h3 id="participantModalName" class="text-xl font-black text-[#F8FAFC]">—</h3>
+                        <p id="participantModalEmail" class="mt-1 text-sm text-[#94A3B8]">—</p>
                         <span
                             id="participantModalStatus"
-                            class="mt-2 inline-flex rounded-xl border border-[#FCD34D] bg-[#FFFBEB] px-3 py-1 text-xs font-black text-[#D97706]"
+                            class="mt-2 inline-flex rounded-xl border border-[#FACC15]/40 bg-[#FACC15]/15 px-3 py-1 text-xs font-black text-[#FACC15]"
                         >
                             —
                         </span>
                     </div>
                 </div>
 
-                <p id="participantModalLevelRegion" class="mt-4 hidden text-sm font-bold text-[#64748B]"></p>
+                <p id="participantModalLevelRegion" class="mt-4 hidden text-sm font-bold text-[#CBD5E1]"></p>
 
-                <div class="my-6 border-t border-[#DDE6F2]"></div>
+                <div class="my-6 border-t border-[#1E3357]"></div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
-                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                    <div class="rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/60 p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#60A5FA]">
                             School / University
                         </p>
-                        <p id="participantModalSchool" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                        <p id="participantModalSchool" class="mt-2 text-sm font-black text-[#F8FAFC]">—</p>
                     </div>
 
-                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
-                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                    <div class="rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/60 p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#60A5FA]">
                             User Type
                         </p>
-                        <p id="participantModalUserType" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                        <p id="participantModalUserType" class="mt-2 text-sm font-black text-[#F8FAFC]">—</p>
                     </div>
 
-                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
-                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                    <div class="rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/60 p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#60A5FA]">
                             Role
                         </p>
-                        <p id="participantModalRole" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                        <p id="participantModalRole" class="mt-2 text-sm font-black text-[#F8FAFC]">—</p>
                     </div>
 
-                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
-                        <p class="text-sm font-black uppercase tracking-widest text-[#C8A25A]">
+                    <div class="rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/60 p-4">
+                        <p class="text-sm font-black uppercase tracking-widest text-[#60A5FA]">
                             Registered Event
                         </p>
-                        <p id="participantModalEvent" class="mt-2 text-sm font-black text-[#111827]">—</p>
+                        <p id="participantModalEvent" class="mt-2 text-sm font-black text-[#F8FAFC]">—</p>
                     </div>
                 </div>
             </section>
 
-            <section id="participantModalPaperSection" class="mt-5 hidden rounded-2xl border border-[#DDE6F2] bg-[#F8FAFC] p-5" aria-label="Research paper submission">
-                <div class="flex items-center gap-3 border-b border-[#E8EEF5] pb-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#172233] shadow-sm ring-1 ring-[#DDE6F2]">
+            <section id="participantModalPaperSection" class="mt-5 hidden rounded-2xl border border-[#60A5FA]/20 bg-[#13284A]/60 p-5" aria-label="Research paper submission">
+                <div class="flex items-center gap-3 border-b border-[#1E3357] pb-4">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#60A5FA]/25 bg-[#0D1B31]/70 text-[#60A5FA]">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black uppercase tracking-wide text-[#111827]">Research Paper</h3>
-                        <p class="text-xs font-medium text-[#64748B]">Conference submission</p>
+                        <h3 class="text-sm font-black uppercase tracking-wide text-[#F8FAFC]">Research Paper</h3>
+                        <p class="text-xs font-medium text-[#94A3B8]">Conference submission</p>
                     </div>
                 </div>
 
                 <div id="paperPresent" class="mt-4 hidden">
-                    <div class="rounded-2xl border border-[#DDE6F2] bg-white p-4">
-                        <p id="detailPaperName" class="text-sm font-black text-[#111827]">—</p>
+                    <div class="rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/60 p-4">
+                        <p id="detailPaperName" class="text-sm font-black text-[#F8FAFC]">—</p>
                         <div class="mt-2 flex flex-wrap gap-2">
-                            <span id="detailPaperType" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
-                            <span id="detailPaperSize" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
-                            <span id="detailPaperStatus" class="rounded-lg border border-[#DDE6F2] bg-[#F8FAFC] px-2 py-1 text-xs font-bold text-[#53657F]">—</span>
+                            <span id="detailPaperType" class="rounded-lg border border-[#60A5FA]/25 bg-[#13284A]/70 px-2 py-1 text-xs font-bold text-[#CBD5E1]">—</span>
+                            <span id="detailPaperSize" class="rounded-lg border border-[#60A5FA]/25 bg-[#13284A]/70 px-2 py-1 text-xs font-bold text-[#CBD5E1]">—</span>
+                            <span id="detailPaperStatus" class="rounded-lg border border-[#60A5FA]/25 bg-[#13284A]/70 px-2 py-1 text-xs font-bold text-[#CBD5E1]">—</span>
                         </div>
                         <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div class="rounded-xl border border-[#E8EEF5] bg-[#F8FAFC] px-3 py-2">
-                                <p class="text-[10px] font-black uppercase tracking-wider text-[#64748B]">Submission status</p>
-                                <p id="detailPaperStatusLabel" class="mt-1 text-xs font-black text-[#111827]">—</p>
+                            <div class="rounded-xl border border-[#1E3357] bg-[#13284A]/70 px-3 py-2">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-[#94A3B8]">Submission status</p>
+                                <p id="detailPaperStatusLabel" class="mt-1 text-xs font-black text-[#F8FAFC]">—</p>
                             </div>
-                            <div class="rounded-xl border border-[#E8EEF5] bg-[#F8FAFC] px-3 py-2">
-                                <p class="text-[10px] font-black uppercase tracking-wider text-[#64748B]">Submitted at</p>
-                                <p id="detailPaperSubmittedAt" class="mt-1 text-xs font-black text-[#111827]">—</p>
+                            <div class="rounded-xl border border-[#1E3357] bg-[#13284A]/70 px-3 py-2">
+                                <p class="text-[10px] font-black uppercase tracking-wider text-[#94A3B8]">Submitted at</p>
+                                <p id="detailPaperSubmittedAt" class="mt-1 text-xs font-black text-[#F8FAFC]">—</p>
                             </div>
                         </div>
                         <a
                             id="detailPaperDownload"
                             href="#"
-                            class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-[#172233] px-4 py-3 text-center text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#0B1220] sm:w-auto"
+                            class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-[#3B82F6] px-4 py-3 text-center text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB] sm:w-auto"
                         >
                             Download Paper
                         </a>
                     </div>
                 </div>
 
-                <div id="paperEmpty" class="mt-4 hidden rounded-2xl border border-dashed border-[#DDE6F2] bg-white px-4 py-4 text-center text-sm font-semibold text-[#64748B]">
+                <div id="paperEmpty" class="mt-4 hidden rounded-2xl border border-dashed border-[#60A5FA]/25 bg-[#0D1B31]/40 px-4 py-4 text-center text-sm font-semibold text-[#94A3B8]">
                     No research paper has been uploaded for this participant yet.
                 </div>
             </section>
@@ -413,7 +290,7 @@
                     <button
                         type="submit"
                         id="rejectApplicationBtn"
-                        class="h-14 w-full rounded-2xl border border-[#FCA5A5] bg-white text-sm font-black uppercase tracking-wide text-red-600 transition hover:bg-red-50"
+                        class="h-14 w-full rounded-2xl border border-[#EF4444]/50 bg-[#EF4444]/10 text-sm font-black uppercase tracking-wide text-[#FCA5A5] transition hover:border-[#EF4444] hover:bg-[#EF4444]/20"
                     >
                         Reject
                     </button>
@@ -424,7 +301,7 @@
                     <button
                         type="submit"
                         id="approveApplicationBtn"
-                        class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#172233] text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#0B1220]"
+                        class="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#3B82F6] text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB]"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2 2 4-5"/>
@@ -437,9 +314,9 @@
 
             <div
                 id="participantModalApprovedNotice"
-                class="mt-5 hidden rounded-2xl border border-[#86EFAC] bg-[#ECFDF5] px-5 py-4 text-center"
+                class="mt-5 hidden rounded-2xl border border-[#22C55E]/40 bg-[#22C55E]/15 px-5 py-4 text-center"
             >
-                <div class="flex items-center justify-center gap-3 text-sm font-black uppercase tracking-wide text-[#047857]">
+                <div class="flex items-center justify-center gap-3 text-sm font-black uppercase tracking-wide text-[#86EFAC]">
                     <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2 2 4-5"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z"/>
@@ -450,7 +327,7 @@
 
             <div
                 id="participantModalRejectedNotice"
-                class="mt-5 hidden rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-5 py-4 text-center text-sm font-black uppercase tracking-wide text-[#B91C1C]"
+                class="mt-5 hidden rounded-2xl border border-[#EF4444]/40 bg-[#EF4444]/15 px-5 py-4 text-center text-sm font-black uppercase tracking-wide text-[#FCA5A5]"
             >
                 Registration Rejected
             </div>
@@ -504,9 +381,9 @@
 
         const statusBadgeBase = 'mt-2 inline-flex rounded-xl border px-3 py-1 text-xs font-black ';
         const statusBadgeByClass = {
-            green: 'border-[#86EFAC] bg-[#ECFDF5] text-[#047857]',
-            gold: 'border-[#FCD34D] bg-[#FFFBEB] text-[#D97706]',
-            red: 'border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]',
+            green: 'border-[#22C55E]/40 bg-[#22C55E]/15 text-[#86EFAC]',
+            gold:  'border-[#FACC15]/40 bg-[#FACC15]/15 text-[#FACC15]',
+            red:   'border-[#EF4444]/40 bg-[#EF4444]/15 text-[#FCA5A5]',
         };
 
         function applyParticipantFilter() {
