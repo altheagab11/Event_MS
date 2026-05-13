@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\DigitalPassPreviewMail;
 use App\Mail\RegistrationRejectedMail;
+use App\Models\EventRegistrant;
 use App\Models\Paper;
 use App\Models\Registration;
 use App\Models\RegistrationVerificationCode;
@@ -18,409 +19,504 @@ use Throwable;
 
 class AdminParticipantsController extends Controller
 {
-  public function index()
-  {
-    $registrations = Registration::query()
-      ->whereHas('user', function ($query) {
-        $query->where('role', 'participant');
-      })
-      ->with([
-        'user:id,firstname,lastname,email',
-        'event:event_id,event_name,event_type',
-        'attendance:attendance_id,registration_id,check_in_time',
-      ])
-      ->select(['registration_id', 'user_id', 'event_id', 'status', 'registration_date'])
-      ->orderByDesc('registration_date')
-      ->get();
+    public function index()
+    {
+        $registrations = Registration::query()
+            ->where(function ($query) {
+                $query->whereHas('user', function ($userQuery) {
+                    $userQuery->where('role', 'participant');
+                })->orWhereNotNull('event_registrant_id');
+            })
+            ->with([
+                'user:id,firstname,lastname,email',
+                'eventRegistrant:event_registrant_id,first_name,last_name,email,school_university,user_type,participant_role',
+                'event:event_id,event_name,event_type',
+                'attendance:attendance_id,registration_id,check_in_time',
+            ])
+            ->select(['registration_id', 'user_id', 'event_registrant_id', 'event_id', 'status', 'registration_date'])
+            ->orderByDesc('registration_date')
+            ->get();
 
-    $userIds = $registrations->pluck('user_id')->unique()->values();
-    $eventIds = $registrations->pluck('event_id')->unique()->values();
-    $emails = $registrations
-      ->map(fn (Registration $registration): string => strtolower((string) ($registration->user->email ?? '')))
-      ->filter(fn (string $email): bool => $email !== '')
-      ->unique()
-      ->values();
+        $userIds = $registrations->pluck('user_id')->filter()->unique()->values();
+        $registrantIds = $registrations->pluck('event_registrant_id')->filter()->unique()->values();
+        $eventIds = $registrations->pluck('event_id')->unique()->values();
+        $emails = $registrations
+            ->map(function (Registration $registration): string {
+                $fromUser = strtolower(trim((string) ($registration->user->email ?? '')));
+                if ($fromUser !== '') {
+                    return $fromUser;
+                }
 
-    $latestPapers = Paper::query()
-      ->whereIn('user_id', $userIds)
-      ->whereIn('event_id', $eventIds)
-      ->orderByDesc('paper_id')
-      ->get()
-      ->groupBy(fn (Paper $paper): string => $paper->user_id . '-' . $paper->event_id)
-      ->map(fn ($group): ?Paper => $group->first());
+                return strtolower(trim((string) ($registration->eventRegistrant->email ?? '')));
+            })
+            ->filter(fn (string $email): bool => $email !== '')
+            ->unique()
+            ->values();
 
-    $verificationProfiles = RegistrationVerificationCode::query()
-      ->where('status', 'verified')
-      ->whereIn('email', $emails)
-      ->whereIn('event_id', $eventIds)
-      ->orderByDesc('id')
-      ->get()
-      ->groupBy(fn (RegistrationVerificationCode $verification): string => strtolower($verification->email) . '-' . $verification->event_id)
-      ->map(fn ($group): ?RegistrationVerificationCode => $group->first());
+        $latestPapers = collect();
+        if ($eventIds->isNotEmpty() && ($userIds->isNotEmpty() || $registrantIds->isNotEmpty())) {
+            $latestPapers = Paper::query()
+                ->whereIn('event_id', $eventIds)
+                ->where(function ($query) use ($userIds, $registrantIds) {
+                    $applied = false;
+                    if ($userIds->isNotEmpty()) {
+                        $query->whereIn('user_id', $userIds);
+                        $applied = true;
+                    }
+                    if ($registrantIds->isNotEmpty()) {
+                        if ($applied) {
+                            $query->orWhereIn('event_registrant_id', $registrantIds);
+                        } else {
+                            $query->whereIn('event_registrant_id', $registrantIds);
+                        }
+                    }
+                })
+                ->orderByDesc('paper_id')
+                ->get()
+                ->groupBy(function (Paper $paper): string {
+                    if ($paper->user_id !== null) {
+                        return (string) $paper->user_id.'-'.$paper->event_id;
+                    }
 
-    $participants = $registrations
-      ->map(function (Registration $registration) use ($latestPapers, $verificationProfiles): array {
-        $paperKey = $registration->user_id . '-' . $registration->event_id;
-        $profileKey = strtolower((string) ($registration->user->email ?? '')) . '-' . $registration->event_id;
+                    return 'r'.(string) $paper->event_registrant_id.'-'.$paper->event_id;
+                })
+                ->map(fn ($group): ?Paper => $group->first());
+        }
 
-        /** @var ?\App\Models\Paper $latestPaper */
-        $latestPaper = $latestPapers->get($paperKey);
-        /** @var ?\App\Models\RegistrationVerificationCode $verification */
-        $verification = $verificationProfiles->get($profileKey);
+        $verificationProfiles = RegistrationVerificationCode::query()
+            ->where('status', 'verified')
+            ->whereIn('email', $emails)
+            ->whereIn('event_id', $eventIds)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy(fn (RegistrationVerificationCode $verification): string => strtolower($verification->email).'-'.$verification->event_id)
+            ->map(fn ($group): ?RegistrationVerificationCode => $group->first());
 
-        $payload = (array) ($verification?->payload ?? []);
-        $schoolAffiliation = trim((string) ($payload['school_affiliation'] ?? $payload['region'] ?? ''));
-        $userType = trim((string) ($payload['user_type'] ?? $payload['school_from'] ?? ''));
-        $participantRole = trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
-        $region = trim((string) ($payload['region'] ?? ''));
-        $levelRegion = $participantRole !== '' && $region !== ''
-          ? $participantRole . ' / ' . $region
-          : ($participantRole !== '' ? $participantRole : ($region !== '' ? $region : 'Not provided'));
+        $participants = $registrations
+            ->map(function (Registration $registration) use ($latestPapers, $verificationProfiles): array {
+                $paperKey = $registration->user_id !== null
+                  ? (string) $registration->user_id.'-'.$registration->event_id
+                  : 'r'.(string) $registration->event_registrant_id.'-'.$registration->event_id;
 
-        $paperDetails = $this->buildPaperDetails($registration, $latestPaper);
+                $emailForProfile = strtolower(trim((string) ($registration->user?->email ?? $registration->eventRegistrant?->email ?? '')));
+                $profileKey = $emailForProfile.'-'.$registration->event_id;
 
-        [$statusLabel, $statusClass] = $this->resolveDisplayStatus(
-          (string) $registration->status,
-          $latestPaper?->status,
-          $registration->attendance?->check_in_time,
-        );
+                /** @var ?Paper $latestPaper */
+                $latestPaper = $latestPapers->get($paperKey);
+                /** @var ?RegistrationVerificationCode $verification */
+                $verification = $verificationProfiles->get($profileKey);
 
-        return [
-          'registration_id' => (int) $registration->registration_id,
-          'registration_status' => (string) $registration->status,
-          'event_id' => (int) $registration->event_id,
-          'name' => trim(($registration->user->firstname ?? '') . ' ' . ($registration->user->lastname ?? '')),
-          'email' => (string) ($registration->user->email ?? ''),
-          'event_name' => (string) ($registration->event->event_name ?? 'Unknown Event'),
-          'event_type' => (string) ($registration->event->event_type ?? 'School Event'),
-          'status_label' => $statusLabel,
-          'status_class' => $statusClass,
-          'school_affiliation' => $schoolAffiliation !== '' ? $schoolAffiliation : 'Not provided',
-          'user_type' => $userType !== '' ? $userType : 'Not provided',
-          'participant_role' => $participantRole !== '' ? $participantRole : 'Not provided',
-          'level_region' => $levelRegion,
-          'paper' => $paperDetails,
-          'approve_url' => route('admin.participants.approve', ['registration' => $registration->registration_id]),
-          'reject_url' => route('admin.participants.reject', ['registration' => $registration->registration_id]),
-        ];
-      });
+                $payload = (array) ($verification?->payload ?? []);
+                $registrant = $registration->eventRegistrant;
 
-    return view('admin.participants', [
-      'participants' => $participants,
-    ]);
-  }
+                $schoolAffiliation = $registrant !== null
+                  ? trim((string) $registrant->school_university)
+                  : trim((string) ($payload['school_affiliation'] ?? $payload['region'] ?? ''));
 
-  public function downloadLatestPaper(Registration $registration): BinaryFileResponse
-  {
-    $paper = Paper::query()
-      ->where('user_id', $registration->user_id)
-      ->where('event_id', $registration->event_id)
-      ->orderByDesc('paper_id')
-      ->first();
+                $userType = $registrant !== null
+                  ? trim((string) $registrant->user_type)
+                  : trim((string) ($payload['user_type'] ?? $payload['school_from'] ?? ''));
 
-    if ($paper === null || trim((string) $paper->file_path) === '') {
-      abort(404, 'No uploaded paper found for this participant.');
-    }
+                $participantRole = $registrant !== null
+                  ? trim((string) $registrant->participant_role)
+                  : trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
 
-    $path = trim((string) $paper->file_path);
-    $absolutePath = $this->resolveStoredFileAbsolutePath($path);
+                $region = trim((string) ($payload['region'] ?? ''));
+                $levelRegion = $participantRole !== '' && $region !== ''
+                  ? $participantRole.' / '.$region
+                  : ($participantRole !== '' ? $participantRole : ($region !== '' ? $region : 'Not provided'));
 
-    if ($absolutePath === null) {
-      abort(404, 'Uploaded paper file does not exist.');
-    }
+                $paperDetails = $this->buildPaperDetails($registration, $latestPaper);
 
-    return response()->download($absolutePath, basename($path));
-  }
+                [$statusLabel, $statusClass] = $this->resolveDisplayStatus(
+                    (string) $registration->status,
+                    $latestPaper?->status,
+                    $registration->attendance?->check_in_time,
+                );
 
-  public function rejectApplication(Registration $registration): RedirectResponse
-  {
-    if ((string) $registration->status !== 'pending') {
-      return redirect()
-        ->route('admin.participants')
-        ->with('status_type', 'warning')
-        ->with('status_message', 'Only pending registrations can be reviewed.');
-    }
+                $displayName = trim((string) ($registration->user?->firstname ?? '').' '.(string) ($registration->user?->lastname ?? ''));
+                if ($displayName === '' && $registrant !== null) {
+                    $displayName = trim((string) $registrant->first_name.' '.(string) $registrant->last_name);
+                }
 
-    $registration->loadMissing(['event:event_id,event_type,event_name', 'user:id,firstname,lastname,email']);
-    $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
+                $displayEmail = (string) ($registration->user?->email ?? $registrant?->email ?? '');
 
-    DB::transaction(function () use ($registration, $isConference): void {
-      Registration::query()
-        ->where('registration_id', $registration->registration_id)
-        ->update(['status' => 'rejected']);
+                return [
+                    'registration_id' => (int) $registration->registration_id,
+                    'registration_status' => (string) $registration->status,
+                    'event_id' => (int) $registration->event_id,
+                    'name' => $displayName !== '' ? $displayName : 'Participant',
+                    'email' => $displayEmail,
+                    'event_name' => (string) ($registration->event->event_name ?? 'Unknown Event'),
+                    'event_type' => (string) ($registration->event->event_type ?? 'School Event'),
+                    'status_label' => $statusLabel,
+                    'status_class' => $statusClass,
+                    'school_affiliation' => $schoolAffiliation !== '' ? $schoolAffiliation : 'Not provided',
+                    'user_type' => $userType !== '' ? $userType : 'Not provided',
+                    'participant_role' => $participantRole !== '' ? $participantRole : 'Not provided',
+                    'level_region' => $levelRegion,
+                    'paper' => $paperDetails,
+                    'approve_url' => route('admin.participants.approve', ['registration' => $registration->registration_id]),
+                    'reject_url' => route('admin.participants.reject', ['registration' => $registration->registration_id]),
+                ];
+            });
 
-      if (! $isConference) {
-        return;
-      }
-
-      $latestPaper = Paper::query()
-        ->where('user_id', $registration->user_id)
-        ->where('event_id', $registration->event_id)
-        ->orderByDesc('paper_id')
-        ->lockForUpdate()
-        ->first();
-
-      if ($latestPaper !== null && $latestPaper->status !== 'rejected') {
-        $latestPaper->forceFill(['status' => 'rejected'])->save();
-      }
-    });
-
-    $fullName = trim((string) ($registration->user->firstname ?? '') . ' ' . (string) ($registration->user->lastname ?? ''));
-    $recipientEmail = (string) ($registration->user->email ?? '');
-
-    if ($recipientEmail !== '') {
-      try {
-        Mail::to($recipientEmail)->send(new RegistrationRejectedMail(
-          fullName: $fullName !== '' ? $fullName : 'Participant',
-          eventName: (string) ($registration->event->event_name ?? 'the selected event')
-        ));
-      } catch (Throwable $exception) {
-        Log::error('Registration rejection email failed.', [
-          'registration_id' => $registration->registration_id,
-          'email' => $recipientEmail,
-          'error' => $exception->getMessage(),
+        return view('admin.participants', [
+            'participants' => $participants,
         ]);
+    }
+
+    public function downloadLatestPaper(Registration $registration): BinaryFileResponse
+    {
+        $paper = $this->resolveLatestPaperForRegistration($registration, false);
+
+        if ($paper === null || trim((string) $paper->file_path) === '') {
+            abort(404, 'No uploaded paper found for this participant.');
+        }
+
+        $path = trim((string) $paper->file_path);
+        $absolutePath = $this->resolveStoredFileAbsolutePath($path);
+
+        if ($absolutePath === null) {
+            abort(404, 'Uploaded paper file does not exist.');
+        }
+
+        return response()->download($absolutePath, basename($path));
+    }
+
+    public function rejectApplication(Registration $registration): RedirectResponse
+    {
+        if ((string) $registration->status !== 'pending') {
+            return redirect()
+                ->route('admin.participants')
+                ->with('status_type', 'warning')
+                ->with('status_message', 'Only pending registrations can be reviewed.');
+        }
+
+        $registration->loadMissing([
+            'event:event_id,event_type,event_name',
+            'user:id,firstname,lastname,email',
+            'eventRegistrant:event_registrant_id,first_name,last_name,email',
+        ]);
+        $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
+
+        DB::transaction(function () use ($registration, $isConference): void {
+            Registration::query()
+                ->where('registration_id', $registration->registration_id)
+                ->update(['status' => 'rejected']);
+
+            if ($registration->event_registrant_id !== null) {
+                EventRegistrant::query()
+                    ->where('event_registrant_id', $registration->event_registrant_id)
+                    ->update(['status' => 'rejected']);
+            }
+
+            if (! $isConference) {
+                return;
+            }
+
+            $latestPaper = $this->resolveLatestPaperForRegistration($registration, true);
+
+            if ($latestPaper !== null && $latestPaper->status !== 'rejected') {
+                $latestPaper->forceFill(['status' => 'rejected'])->save();
+            }
+        });
+
+        $fullName = $registration->user !== null
+          ? trim((string) ($registration->user->firstname ?? '').' '.(string) ($registration->user->lastname ?? ''))
+          : trim((string) ($registration->eventRegistrant?->first_name ?? '').' '.(string) ($registration->eventRegistrant?->last_name ?? ''));
+        $recipientEmail = (string) ($registration->user->email ?? $registration->eventRegistrant?->email ?? '');
+
+        if ($recipientEmail !== '') {
+            try {
+                Mail::to($recipientEmail)->send(new RegistrationRejectedMail(
+                    fullName: $fullName !== '' ? $fullName : 'Participant',
+                    eventName: (string) ($registration->event->event_name ?? 'the selected event')
+                ));
+            } catch (Throwable $exception) {
+                Log::error('Registration rejection email failed.', [
+                    'registration_id' => $registration->registration_id,
+                    'email' => $recipientEmail,
+                    'error' => $exception->getMessage(),
+                ]);
+
+                return redirect()
+                    ->route('admin.participants')
+                    ->with('status_type', 'warning')
+                    ->with('status_message', 'Application rejected, but rejection email could not be sent.');
+            }
+        }
 
         return redirect()
-          ->route('admin.participants')
-          ->with('status_type', 'warning')
-          ->with('status_message', 'Application rejected, but rejection email could not be sent.');
-      }
+            ->route('admin.participants')
+            ->with('status_type', 'success')
+            ->with('status_message', 'Application rejected and participant notified.');
     }
 
-    return redirect()
-      ->route('admin.participants')
-      ->with('status_type', 'success')
-      ->with('status_message', 'Application rejected and participant notified.');
-  }
-
-  public function approveAndSendId(Registration $registration): RedirectResponse
-  {
-    if ((string) $registration->status !== 'pending') {
-      return redirect()
-        ->route('admin.participants')
-        ->with('status_type', 'warning')
-        ->with('status_message', 'Only pending registrations can be reviewed.');
-    }
-
-    $registration->loadMissing([
-      'user:id,firstname,lastname,email',
-      'event:event_id,event_name,event_type,event_date,location',
-    ]);
-
-    $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
-
-    $result = DB::transaction(function () use ($registration, $isConference): array {
-      Registration::query()
-        ->where('registration_id', $registration->registration_id)
-        ->update(['status' => 'approved']);
-
-      if ($isConference) {
-        $latestPaper = Paper::query()
-          ->where('user_id', $registration->user_id)
-          ->where('event_id', $registration->event_id)
-          ->orderByDesc('paper_id')
-          ->lockForUpdate()
-          ->first();
-
-        if ($latestPaper !== null && in_array($latestPaper->status, ['submitted', 'under_review'], true)) {
-          $latestPaper->forceFill(['status' => 'accepted'])->save();
+    public function approveAndSendId(Registration $registration): RedirectResponse
+    {
+        if ((string) $registration->status !== 'pending') {
+            return redirect()
+                ->route('admin.participants')
+                ->with('status_type', 'warning')
+                ->with('status_message', 'Only pending registrations can be reviewed.');
         }
-      }
 
-      $digitalId = DB::table('digital_ids')
-        ->where('user_id', $registration->user_id)
-        ->where('event_id', $registration->event_id)
-        ->lockForUpdate()
-        ->first();
-
-      if ($digitalId === null) {
-        $passCode = $this->generateUniquePassCode();
-        DB::table('digital_ids')->insert([
-          'user_id' => $registration->user_id,
-          'event_id' => $registration->event_id,
-          'qr_code' => $passCode,
-          'issued_at' => now(),
+        $registration->loadMissing([
+            'user:id,firstname,lastname,email',
+            'eventRegistrant:event_registrant_id,first_name,last_name,email',
+            'event:event_id,event_name,event_type,event_date,location',
         ]);
-      } else {
-        $passCode = (string) $digitalId->qr_code;
-      }
 
-      return [
-        'pass_code' => $passCode,
-      ];
-    });
+        $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
 
-    $passData = [
-      'event_name' => (string) ($registration->event->event_name ?? 'Event'),
-      'event_date' => $this->formatEventDate($registration->event->event_date ?? null),
-      'location' => (string) ($registration->event->location ?? 'TBA'),
-      'full_name' => trim((string) ($registration->user->firstname ?? '') . ' ' . (string) ($registration->user->lastname ?? '')),
-      'email' => (string) ($registration->user->email ?? ''),
-      'school_level' => 'Participant',
-      'pass_code' => (string) $result['pass_code'],
-    ];
+        $result = DB::transaction(function () use ($registration, $isConference): array {
+            Registration::query()
+                ->where('registration_id', $registration->registration_id)
+                ->update(['status' => 'approved']);
 
-    $mailSent = true;
-    try {
-      Mail::to($passData['email'])->send(new DigitalPassPreviewMail($passData));
-    } catch (Throwable $exception) {
-      $mailSent = false;
-      Log::error('Approve & Send ID email failed.', [
-        'registration_id' => $registration->registration_id,
-        'email' => $passData['email'],
-        'error' => $exception->getMessage(),
-      ]);
+            if ($registration->event_registrant_id !== null) {
+                EventRegistrant::query()
+                    ->where('event_registrant_id', $registration->event_registrant_id)
+                    ->update(['status' => 'approved']);
+            }
+
+            if ($isConference) {
+                $latestPaper = $this->resolveLatestPaperForRegistration($registration, true);
+
+                if ($latestPaper !== null && in_array($latestPaper->status, ['submitted', 'under_review'], true)) {
+                    $latestPaper->forceFill(['status' => 'accepted'])->save();
+                }
+            }
+
+            $digitalId = DB::table('digital_ids')
+                ->where('event_id', $registration->event_id)
+                ->where(function ($query) use ($registration) {
+                    if ($registration->user_id !== null) {
+                        $query->where('user_id', $registration->user_id);
+                    } elseif ($registration->event_registrant_id !== null) {
+                        $query->where('event_registrant_id', $registration->event_registrant_id);
+                    }
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if ($digitalId === null) {
+                $passCode = $this->generateUniquePassCode();
+                DB::table('digital_ids')->insert([
+                    'user_id' => $registration->user_id,
+                    'event_registrant_id' => $registration->event_registrant_id,
+                    'event_id' => $registration->event_id,
+                    'qr_code' => $passCode,
+                    'issued_at' => now(),
+                ]);
+            } else {
+                $passCode = (string) $digitalId->qr_code;
+            }
+
+            return [
+                'pass_code' => $passCode,
+            ];
+        });
+
+        $passData = [
+            'event_name' => (string) ($registration->event->event_name ?? 'Event'),
+            'event_date' => $this->formatEventDate($registration->event->event_date ?? null),
+            'location' => (string) ($registration->event->location ?? 'TBA'),
+            'full_name' => $registration->user !== null
+              ? trim((string) ($registration->user->firstname ?? '').' '.(string) ($registration->user->lastname ?? ''))
+              : trim((string) ($registration->eventRegistrant?->first_name ?? '').' '.(string) ($registration->eventRegistrant?->last_name ?? '')),
+            'email' => (string) ($registration->user->email ?? $registration->eventRegistrant?->email ?? ''),
+            'school_level' => 'Participant',
+            'pass_code' => (string) $result['pass_code'],
+        ];
+
+        $mailSent = true;
+        try {
+            Mail::to($passData['email'])->send(new DigitalPassPreviewMail($passData));
+        } catch (Throwable $exception) {
+            $mailSent = false;
+            Log::error('Approve & Send ID email failed.', [
+                'registration_id' => $registration->registration_id,
+                'email' => $passData['email'],
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
+        if (! $mailSent) {
+            return redirect()
+                ->route('admin.participants')
+                ->with('status_type', 'warning')
+                ->with('status_message', 'Application approved, but sending the digital ID email failed. Please check mail configuration.');
+        }
+
+        return redirect()
+            ->route('admin.participants')
+            ->with('status_type', 'success')
+            ->with('status_message', 'Application approved and digital ID email sent.');
     }
 
-    if (! $mailSent) {
-      return redirect()
-        ->route('admin.participants')
-        ->with('status_type', 'warning')
-        ->with('status_message', 'Application approved, but sending the digital ID email failed. Please check mail configuration.');
+    private function resolveLatestPaperForRegistration(Registration $registration, bool $withLock = false): ?Paper
+    {
+        if ($registration->user_id === null && $registration->event_registrant_id === null) {
+            return null;
+        }
+
+        $query = Paper::query()
+            ->where('event_id', $registration->event_id)
+            ->where(function ($query) use ($registration) {
+                if ($registration->user_id !== null) {
+                    $query->where('user_id', $registration->user_id);
+                } elseif ($registration->event_registrant_id !== null) {
+                    $query->where('event_registrant_id', $registration->event_registrant_id);
+                }
+            })
+            ->orderByDesc('paper_id');
+
+        if ($withLock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
     }
 
-    return redirect()
-      ->route('admin.participants')
-      ->with('status_type', 'success')
-      ->with('status_message', 'Application approved and digital ID email sent.');
-  }
+    private function buildPaperDetails(Registration $registration, ?Paper $paper): array
+    {
+        if ($paper === null || trim((string) $paper->file_path) === '') {
+            return [
+                'has_file' => false,
+                'status' => null,
+                'title' => null,
+                'file_name' => null,
+                'file_type' => null,
+                'file_size' => null,
+                'submitted_at' => null,
+                'download_url' => null,
+            ];
+        }
 
-  private function buildPaperDetails(Registration $registration, ?Paper $paper): array
-  {
-    if ($paper === null || trim((string) $paper->file_path) === '') {
-      return [
-        'has_file' => false,
-        'status' => null,
-        'title' => null,
-        'file_name' => null,
-        'file_type' => null,
-        'file_size' => null,
-        'submitted_at' => null,
-        'download_url' => null,
-      ];
+        $path = trim((string) $paper->file_path);
+        $absolutePath = $this->resolveStoredFileAbsolutePath($path);
+        $exists = $absolutePath !== null;
+
+        $fileSize = null;
+        $mimeType = null;
+        if ($exists) {
+            $sizeInBytes = filesize($absolutePath);
+            $mimeType = function_exists('mime_content_type') ? (mime_content_type($absolutePath) ?: null) : null;
+            $fileSize = $this->formatFileSize($sizeInBytes);
+        }
+
+        return [
+            'has_file' => $exists,
+            'status' => (string) $paper->status,
+            'title' => (string) $paper->title,
+            'file_name' => basename($path),
+            'file_type' => $this->formatFileType($path, $mimeType),
+            'file_size' => $fileSize,
+            'submitted_at' => $paper->created_at?->format('M d, Y h:i A'),
+            'download_url' => $exists
+              ? route('admin.participants.paper.download', ['registration' => $registration->registration_id])
+              : null,
+        ];
     }
 
-    $path = trim((string) $paper->file_path);
-    $absolutePath = $this->resolveStoredFileAbsolutePath($path);
-    $exists = $absolutePath !== null;
+    private function formatFileSize(?int $bytes): ?string
+    {
+        if ($bytes === null || $bytes < 0) {
+            return null;
+        }
 
-    $fileSize = null;
-    $mimeType = null;
-    if ($exists) {
-      $sizeInBytes = filesize($absolutePath);
-      $mimeType = function_exists('mime_content_type') ? (mime_content_type($absolutePath) ?: null) : null;
-      $fileSize = $this->formatFileSize($sizeInBytes);
+        if ($bytes < 1024) {
+            return $bytes.' B';
+        }
+
+        $kb = $bytes / 1024;
+        if ($kb < 1024) {
+            return number_format($kb, 2).' KB';
+        }
+
+        $mb = $kb / 1024;
+
+        return number_format($mb, 2).' MB';
     }
 
-    return [
-      'has_file' => $exists,
-      'status' => (string) $paper->status,
-      'title' => (string) $paper->title,
-      'file_name' => basename($path),
-      'file_type' => $this->formatFileType($path, $mimeType),
-      'file_size' => $fileSize,
-      'submitted_at' => $paper->created_at?->format('M d, Y h:i A'),
-      'download_url' => $exists
-        ? route('admin.participants.paper.download', ['registration' => $registration->registration_id])
-        : null,
-    ];
-  }
+    private function formatFileType(string $path, ?string $mimeType): string
+    {
+        if ($mimeType !== null && $mimeType !== '') {
+            return $mimeType;
+        }
 
-  private function formatFileSize(?int $bytes): ?string
-  {
-    if ($bytes === null || $bytes < 0) {
-      return null;
+        $extension = strtoupper((string) pathinfo($path, PATHINFO_EXTENSION));
+
+        return $extension !== '' ? $extension : 'Unknown';
     }
 
-    if ($bytes < 1024) {
-      return $bytes . ' B';
+    private function resolveStoredFileAbsolutePath(string $path): ?string
+    {
+        $relativePath = ltrim($path, '/');
+        $publicPath = storage_path('app/public/'.$relativePath);
+        if (is_file($publicPath)) {
+            return $publicPath;
+        }
+
+        $localPath = storage_path('app/'.$relativePath);
+        if (is_file($localPath)) {
+            return $localPath;
+        }
+
+        return null;
     }
 
-    $kb = $bytes / 1024;
-    if ($kb < 1024) {
-      return number_format($kb, 2) . ' KB';
+    private function formatEventDate(mixed $eventDate): string
+    {
+        if ($eventDate === null || (string) $eventDate === '') {
+            return 'TBA';
+        }
+
+        try {
+            return Carbon::parse((string) $eventDate)->format('F j, Y');
+        } catch (Throwable) {
+            return (string) $eventDate;
+        }
     }
 
-    $mb = $kb / 1024;
-    return number_format($mb, 2) . ' MB';
-  }
+    private function generateUniquePassCode(): string
+    {
+        do {
+            $code = 'NUL-'.strtoupper(Str::random(10));
+            $exists = DB::table('digital_ids')->where('qr_code', $code)->exists();
+        } while ($exists);
 
-  private function formatFileType(string $path, ?string $mimeType): string
-  {
-    if ($mimeType !== null && $mimeType !== '') {
-      return $mimeType;
+        return $code;
     }
 
-    $extension = strtoupper((string) pathinfo($path, PATHINFO_EXTENSION));
-    return $extension !== '' ? $extension : 'Unknown';
-  }
+    private function resolveDisplayStatus(string $registrationStatus, ?string $paperStatus, mixed $checkInTime): array
+    {
+        if ($checkInTime !== null) {
+            return ['Checked-in', 'green'];
+        }
 
-  private function resolveStoredFileAbsolutePath(string $path): ?string
-  {
-    $relativePath = ltrim($path, '/');
-    $publicPath = storage_path('app/public/' . $relativePath);
-    if (is_file($publicPath)) {
-      return $publicPath;
+        if (in_array($paperStatus, ['submitted', 'under_review'], true)) {
+            return ['Pending Paper', 'gold'];
+        }
+
+        if ($registrationStatus === 'approved') {
+            return ['Registered', 'green'];
+        }
+
+        if ($registrationStatus === 'pending') {
+            return ['Pending Approval', 'gold'];
+        }
+
+        if ($registrationStatus === 'rejected') {
+            return ['Rejected', 'red'];
+        }
+
+        if ($registrationStatus === 'cancelled') {
+            return ['Cancelled', 'gold'];
+        }
+
+        return ['Unknown', 'gold'];
     }
-
-    $localPath = storage_path('app/' . $relativePath);
-    if (is_file($localPath)) {
-      return $localPath;
-    }
-
-    return null;
-  }
-
-  private function formatEventDate(mixed $eventDate): string
-  {
-    if ($eventDate === null || (string) $eventDate === '') {
-      return 'TBA';
-    }
-
-    try {
-      return Carbon::parse((string) $eventDate)->format('F j, Y');
-    } catch (Throwable) {
-      return (string) $eventDate;
-    }
-  }
-
-  private function generateUniquePassCode(): string
-  {
-    do {
-      $code = 'NUL-' . strtoupper(Str::random(10));
-      $exists = DB::table('digital_ids')->where('qr_code', $code)->exists();
-    } while ($exists);
-
-    return $code;
-  }
-
-  private function resolveDisplayStatus(string $registrationStatus, ?string $paperStatus, mixed $checkInTime): array
-  {
-    if ($checkInTime !== null) {
-      return ['Checked-in', 'green'];
-    }
-
-    if (in_array($paperStatus, ['submitted', 'under_review'], true)) {
-      return ['Pending Paper', 'gold'];
-    }
-
-    if ($registrationStatus === 'approved') {
-      return ['Registered', 'green'];
-    }
-
-    if ($registrationStatus === 'pending') {
-      return ['Pending Approval', 'gold'];
-    }
-
-    if ($registrationStatus === 'rejected') {
-      return ['Rejected', 'red'];
-    }
-
-    if ($registrationStatus === 'cancelled') {
-      return ['Cancelled', 'gold'];
-    }
-
-    return ['Unknown', 'gold'];
-  }
 }

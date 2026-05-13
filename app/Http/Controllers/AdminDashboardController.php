@@ -11,41 +11,44 @@ use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
-  public function index(Request $request)
-  {
-    $totalParticipants = Registration::query()
-      ->whereHas('user', fn($q) => $q->where('role', 'participant'))
-      ->count();
+    public function index(Request $request)
+    {
+        $totalParticipants = Registration::query()
+            ->where(function ($query) {
+                $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', 'participant'))
+                    ->orWhereNotNull('event_registrant_id');
+            })
+            ->count();
 
-    $pendingPapers = Paper::query()
-      ->whereIn('status', ['submitted', 'under_review'])
-      ->count();
+        $pendingPapers = Paper::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
 
-    $activeEvents = Event::query()
-      ->where(function ($query) {
-        $query->whereNull('status')
-          ->orWhere('status', '!=', 'archived');
-      })
-      ->whereDate('event_date', '>=', now()->startOfDay())
-      ->count();
+        $activeEvents = Event::query()
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhere('status', '!=', 'archived');
+            })
+            ->whereDate('event_date', '>=', now()->startOfDay())
+            ->count();
 
-    $totalCheckedIn = Attendance::query()
-      ->whereNotNull('check_in_time')
-      ->count();
+        $totalCheckedIn = Attendance::query()
+            ->whereNotNull('check_in_time')
+            ->count();
 
-    $papersSubmitted = Paper::query()->count();
+        $papersSubmitted = Paper::query()->count();
 
-    $evaluationsCount = Evaluation::query()->count();
-    $avgScore = (float) number_format((float) (Evaluation::query()->avg('score') ?? 0), 1);
+        $evaluationsCount = Evaluation::query()->count();
+        $avgScore = (float) number_format((float) (Evaluation::query()->avg('score') ?? 0), 1);
 
-    return view('admin.dashboard', compact(
-      'totalParticipants',
-      'pendingPapers',
-      'activeEvents',
-      'totalCheckedIn',
-      'papersSubmitted',
-      'evaluationsCount',
-      'avgScore'
-    ));
-  }
+        return view('admin.dashboard', compact(
+            'totalParticipants',
+            'pendingPapers',
+            'activeEvents',
+            'totalCheckedIn',
+            'papersSubmitted',
+            'evaluationsCount',
+            'avgScore'
+        ));
+    }
 }

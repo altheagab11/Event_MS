@@ -8,41 +8,47 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Registration extends Model
 {
-  protected $table = 'registrations';
+    protected $table = 'registrations';
 
-  protected $primaryKey = 'registration_id';
+    protected $primaryKey = 'registration_id';
 
-  public $timestamps = false;
+    public $timestamps = false;
 
-  protected $fillable = [
-    'user_id',
-    'event_id',
-    'registration_date',
-    'status',
-    'evaluation_reminder_sent_at',
-    'evaluation_reminder_status',
-  ];
-
-  protected function casts(): array
-  {
-    return [
-      'registration_date' => 'datetime',
-      'evaluation_reminder_sent_at' => 'datetime',
+    protected $fillable = [
+        'user_id',
+        'event_registrant_id',
+        'event_id',
+        'registration_date',
+        'status',
+        'evaluation_reminder_sent_at',
+        'evaluation_reminder_status',
     ];
-  }
 
-  public function user(): BelongsTo
-  {
-    return $this->belongsTo(User::class);
-  }
+    protected function casts(): array
+    {
+        return [
+            'registration_date' => 'datetime',
+            'evaluation_reminder_sent_at' => 'datetime',
+        ];
+    }
 
-  public function event(): BelongsTo
-  {
-    return $this->belongsTo(Event::class, 'event_id', 'event_id');
-  }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
-  public function attendance(): HasOne
-  {
-    return $this->hasOne(Attendance::class, 'registration_id', 'registration_id');
-  }
+    public function eventRegistrant(): BelongsTo
+    {
+        return $this->belongsTo(EventRegistrant::class, 'event_registrant_id', 'event_registrant_id');
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'event_id');
+    }
+
+    public function attendance(): HasOne
+    {
+        return $this->hasOne(Attendance::class, 'registration_id', 'registration_id');
+    }
 }

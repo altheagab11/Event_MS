@@ -9,27 +9,33 @@ $months = [
 $announcements = [
 [
 'id' => 1,
+'emoji' => '📢',
 'title' => 'Call for Papers: Tech Innovations Summit',
 'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
 'type' => 'important',
 'eventId' => 2,
-'buttonText' => 'Register & Submit Paper'
+'buttonText' => 'Register & Submit Paper',
+'cta' => 'register',
 ],
 [
 'id' => 2,
+'emoji' => '🏀',
 'title' => 'Intramurals 2026 Team Registration',
 'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
 'type' => 'info',
 'eventId' => 4,
-'buttonText' => 'View Intramurals'
+'buttonText' => 'View Intramurals',
+'cta' => 'events',
 ],
 [
 'id' => 3,
+'emoji' => '📝',
 'title' => 'Foundation Day Reminders',
 'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
 'type' => 'info',
 'eventId' => 1,
-'buttonText' => 'Register Now'
+'buttonText' => 'Register Now',
+'cta' => 'register',
 ],
 ];
 
@@ -101,6 +107,37 @@ $regions = [
         </div>
       </section>
 
+      <section class="announce" aria-labelledby="announce-heading">
+        <div class="container">
+          <h2 id="announce-heading" class="announce-title">
+            <span class="announce-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </span>
+            Latest Announcements
+          </h2>
+          <div class="announce-grid">
+            @foreach ($announcements as $item)
+            <article class="announce-card {{ ($item['type'] ?? '') === 'important' ? 'important' : '' }}">
+              <div class="announce-card-body">
+                <h3>
+                  <span class="announce-emoji" aria-hidden="true">{{ $item['emoji'] ?? '' }}</span>
+                  {{ $item['title'] }}
+                </h3>
+                <p>{{ $item['description'] }}</p>
+              </div>
+              @if (($item['cta'] ?? 'register') === 'events')
+              <a href="#events" class="announce-btn ghost">{{ $item['buttonText'] }}</a>
+              @else
+              <button type="button" class="announce-btn gold open-register" data-event-id="{{ $item['eventId'] }}">{{ $item['buttonText'] }}</button>
+              @endif
+            </article>
+            @endforeach
+          </div>
+        </div>
+      </section>
 
       <section id="events" class="events">
         <div class="container">

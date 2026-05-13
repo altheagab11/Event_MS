@@ -8,58 +8,63 @@ use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
-  protected $table = 'events';
+    protected $table = 'events';
 
-  protected $primaryKey = 'event_id';
+    protected $primaryKey = 'event_id';
 
-  public $timestamps = false;
+    public $timestamps = false;
 
-  protected $fillable = [
-    'event_name',
-    'hosted_by',
-    'event_type',
-    'attendance_format',
-    'description',
-    'location',
-    'banner_image',
-    'event_date',
-    'start_date',
-    'end_date',
-    'status',
-  ];
-
-  protected function casts(): array
-  {
-    return [
-      'event_date' => 'date',
-      'start_date' => 'date',
-      'end_date' => 'date',
+    protected $fillable = [
+        'event_name',
+        'hosted_by',
+        'event_type',
+        'attendance_format',
+        'description',
+        'location',
+        'banner_image',
+        'event_date',
+        'start_date',
+        'end_date',
+        'status',
     ];
-  }
 
-  public function getBannerUrlAttribute(): ?string
-  {
-    if (! $this->banner_image) {
-      return null;
+    protected function casts(): array
+    {
+        return [
+            'event_date' => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ];
     }
 
-    $bannerImage = (string) $this->banner_image;
+    public function getBannerUrlAttribute(): ?string
+    {
+        if (! $this->banner_image) {
+            return null;
+        }
 
-    if (filter_var($bannerImage, FILTER_VALIDATE_URL)) {
-      return $bannerImage;
+        $bannerImage = (string) $this->banner_image;
+
+        if (filter_var($bannerImage, FILTER_VALIDATE_URL)) {
+            return $bannerImage;
+        }
+
+        $relativePath = ltrim($bannerImage, '/');
+        $relativePath = preg_replace('#^storage/#', '', $relativePath) ?? $relativePath;
+        $relativePath = preg_replace('#^public/#', '', $relativePath) ?? $relativePath;
+
+        return Storage::disk('public')->exists($relativePath)
+          ? asset('storage/'.ltrim($relativePath, '/'))
+          : null;
     }
 
-    $relativePath = ltrim($bannerImage, '/');
-    $relativePath = preg_replace('#^storage/#', '', $relativePath) ?? $relativePath;
-    $relativePath = preg_replace('#^public/#', '', $relativePath) ?? $relativePath;
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(Registration::class, 'event_id', 'event_id');
+    }
 
-    return Storage::disk('public')->exists($relativePath)
-      ? asset('storage/' . ltrim($relativePath, '/'))
-      : null;
-  }
-
-  public function registrations(): HasMany
-  {
-    return $this->hasMany(Registration::class, 'event_id', 'event_id');
-  }
+    public function eventRegistrants(): HasMany
+    {
+        return $this->hasMany(EventRegistrant::class, 'event_id', 'event_id');
+    }
 }
