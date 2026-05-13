@@ -63,9 +63,11 @@ $regions = [
 <body class="landing-page">
   <div class="landing-scroll">
     <div class="landing-scroll-content">
+
+      {{-- Header: brand only --}}
       <header class="topbar">
         <div class="container topbar-inner">
-          <div class="brand" aria-label="Event Management System">
+          <a href="#" class="brand" aria-label="Event Management System home">
             <span class="brand-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" role="img" focusable="false">
                 <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -74,81 +76,220 @@ $regions = [
                 <line x1="16" y1="3.5" x2="16" y2="7"></line>
               </svg>
             </span>
-            <span class="brand-text">Event Management System</span>
-          </div>
-          <div class="top-actions">
-            <button class="pill pill-muted">Home / Events</button>
-            <a href="{{ route('admin.login') }}" class="pill pill-gold admin-btn" style="text-decoration:none;">
-              <span class="pill-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
-                  <path d="M9.5 12l2 2 3.5-3.5"></path>
-                </svg>
-              </span>
-              <span>Admin Login</span>
-            </a>
-          </div>
-        </div>
-      </header>
-
-      <section class="hero">
-        <div class="container hero-inner">
-          <h1>Welcome to <span>Event Management System</span></h1>
-          <p>The unified platform for typical school events and research conferences. Register, participate, and evaluate all in one place.</p>
-          <a href="#events" class="cta">
-            <span>View Upcoming Events</span>
-            <span class="cta-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <line x1="4" y1="12" x2="20" y2="12"></line>
-                <polyline points="13,5 20,12 13,19"></polyline>
-              </svg>
+            <span class="brand-text">
+              <span class="brand-name">Event Management System</span>
+              <span class="brand-tag">Academic Events Portal</span>
             </span>
           </a>
         </div>
+      </header>
+
+      {{-- Hero --}}
+      <section class="hero" aria-label="Welcome">
+        <div class="container hero-inner reveal">
+          <span class="hero-badge">
+            <span class="dot" aria-hidden="true"></span>
+            Your Academic Events Portal
+          </span>
+          <h1>One Platform for Every<br><span class="accent">Campus Event &amp; Conference</span></h1>
+          <p>Discover school events, submit research papers, attend conferences, and share your feedback — all in a single, modern portal built for students, faculty, and organizers.</p>
+
+          <div class="hero-ctas">
+            <a href="#events" class="cta cta-primary">
+              <span>Explore Events</span>
+              <span class="cta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <line x1="4" y1="12" x2="20" y2="12"></line>
+                  <polyline points="13,5 20,12 13,19"></polyline>
+                </svg>
+              </span>
+            </a>
+            <a href="#announcements" class="cta cta-secondary">
+              <span class="cta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </span>
+              <span>View Announcements</span>
+            </a>
+          </div>
+
+          <div class="hero-stats" aria-label="System overview">
+            <div>
+              <div class="hero-stat-value">{{ count($events) }}+</div>
+              <div class="hero-stat-label">Available Events</div>
+            </div>
+            <div>
+              <div class="hero-stat-value">2</div>
+              <div class="hero-stat-label">Event Categories</div>
+            </div>
+            <div>
+              <div class="hero-stat-value">100%</div>
+              <div class="hero-stat-label">Digital Workflow</div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section class="announce" aria-labelledby="announce-heading">
+      {{-- Why Use This System --}}
+      <section class="features" id="features" aria-labelledby="features-heading">
         <div class="container">
-          <h2 id="announce-heading" class="announce-title">
-            <span class="announce-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-              </svg>
-            </span>
-            Latest Announcements
-          </h2>
+          <div class="features-head reveal">
+            <span class="section-eyebrow">Why Use This System</span>
+            <h2 id="features-heading" class="section-heading">Everything you need for academic events</h2>
+            <p class="section-subheading">From quick event sign-ups to research conference submissions and post-event evaluations — all powered by a single, streamlined workflow.</p>
+          </div>
+
+          <div class="features-grid">
+            <article class="feature-card reveal">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M9 4h6a2 2 0 0 1 2 2v0H7v0a2 2 0 0 1 2-2z"></path>
+                  <rect x="5" y="4" width="14" height="17" rx="2"></rect>
+                  <path d="M9 12l2 2 4-4"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Event Registration</h3>
+              <p class="feature-desc">Sign up for school events or conferences in seconds with a guided, email-verified form.</p>
+            </article>
+
+            <article class="feature-card reveal delay-1">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 3 14 8 19 8"></polyline>
+                  <line x1="8" y1="13" x2="16" y2="13"></line>
+                  <line x1="8" y1="17" x2="14" y2="17"></line>
+                </svg>
+              </span>
+              <h3 class="feature-title">Conference Submission</h3>
+              <p class="feature-desc">Submit your research paper for review and track its approval status through the portal.</p>
+            </article>
+
+            <article class="feature-card reveal delay-2">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <polygon points="12,3 14.7,9 21,9.7 16.5,14 17.8,20.4 12,17.3 6.2,20.4 7.5,14 3,9.7 9.3,9"></polygon>
+                </svg>
+              </span>
+              <h3 class="feature-title">Evaluation Forms</h3>
+              <p class="feature-desc">Share your feedback to help organizers improve future events with star ratings and comments.</p>
+            </article>
+
+            <article class="feature-card reveal delay-3">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                  <path d="M14 14h3v3h-3z"></path>
+                  <path d="M20 14v3"></path>
+                  <path d="M14 20h3"></path>
+                  <path d="M20 20h1"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Digital QR Pass / ID</h3>
+              <p class="feature-desc">Get a digital event pass for fast, paperless check-in straight at the venue entrance.</p>
+            </article>
+
+            <article class="feature-card reveal delay-4">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                  <path d="M3 7l9 6 9-6"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Email Notifications</h3>
+              <p class="feature-desc">Receive confirmations, reminders, and important updates directly in your inbox.</p>
+            </article>
+
+            <article class="feature-card reveal delay-5">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M3 12h4l3-8 4 16 3-8h4"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Event Status Tracking</h3>
+              <p class="feature-desc">See upcoming, ongoing, and completed events at a glance with clear visual cues.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {{-- How It Works --}}
+      <section class="how" id="how-it-works" aria-labelledby="how-heading">
+        <div class="container">
+          <div class="how-head reveal">
+            <span class="section-eyebrow">How It Works</span>
+            <h2 id="how-heading" class="section-heading">Three simple steps</h2>
+            <p class="section-subheading">Find what interests you, fill out a quick form, and you're ready to participate.</p>
+          </div>
+
+          <div class="how-grid">
+            <article class="step-card reveal">
+              <div class="step-num">1</div>
+              <h3 class="step-title">Browse Available Events</h3>
+              <p class="step-desc">Discover upcoming school events and academic conferences by category or month.</p>
+            </article>
+            <article class="step-card reveal delay-1">
+              <div class="step-num">2</div>
+              <h3 class="step-title">Register or Submit Requirements</h3>
+              <p class="step-desc">Complete the registration form, and upload your research paper if applicable.</p>
+            </article>
+            <article class="step-card reveal delay-2">
+              <div class="step-num">3</div>
+              <h3 class="step-title">Receive Updates &amp; Participate</h3>
+              <p class="step-desc">Get email confirmations, your digital pass, and friendly reminders along the way.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {{-- Latest Announcements --}}
+      <section class="announce" id="announcements" aria-labelledby="announce-heading">
+        <div class="container">
+          <div class="announce-head reveal">
+            <span class="section-eyebrow">News &amp; Updates</span>
+            <h2 id="announce-heading" class="section-heading">Latest Announcements</h2>
+            <p class="section-subheading">Important updates and reminders from the organizing team.</p>
+          </div>
+
           <div class="announce-grid">
             @foreach ($announcements as $item)
-            <article class="announce-card {{ ($item['type'] ?? '') === 'important' ? 'important' : '' }}">
-              <div class="announce-card-body">
-                <h3>
-                  <span class="announce-emoji" aria-hidden="true">{{ $item['emoji'] ?? '' }}</span>
-                  {{ $item['title'] }}
-                </h3>
-                <p>{{ $item['description'] }}</p>
-              </div>
-              @if (($item['cta'] ?? 'register') === 'events')
-              <a href="#events" class="announce-btn ghost">{{ $item['buttonText'] }}</a>
-              @else
-              <button type="button" class="announce-btn gold open-register" data-event-id="{{ $item['eventId'] }}">{{ $item['buttonText'] }}</button>
-              @endif
-            </article>
+              @php $isImportant = ($item['type'] ?? '') === 'important'; @endphp
+              <article class="announce-card {{ $isImportant ? 'important' : '' }} reveal">
+                <div class="announce-card-head">
+                  <span class="announce-icon-tile" aria-hidden="true">{{ $item['emoji'] ?? '' }}</span>
+                  <span class="announce-tag">{{ $isImportant ? 'Important' : 'Update' }}</span>
+                </div>
+                <div class="announce-card-body">
+                  <h3>{{ $item['title'] }}</h3>
+                  <p>{{ $item['description'] }}</p>
+                </div>
+                @if (($item['cta'] ?? 'register') === 'events')
+                  <a href="#events" class="announce-btn ghost">{{ $item['buttonText'] }}</a>
+                @else
+                  <button type="button" class="announce-btn gold open-register" data-event-id="{{ $item['eventId'] }}">{{ $item['buttonText'] }}</button>
+                @endif
+              </article>
             @endforeach
           </div>
         </div>
       </section>
 
-      <section id="events" class="events">
+      {{-- Discover Events --}}
+      <section id="events" class="events" aria-labelledby="events-heading">
         <div class="container">
-          <div class="events-head">
-            <h2>Discover Events</h2>
-            <p>Browse through school gatherings and major conferences.</p>
+          <div class="events-head reveal">
+            <span class="section-eyebrow">Event Catalog</span>
+            <h2 id="events-heading">Discover Events</h2>
+            <p>Browse upcoming school gatherings and major academic conferences. Filter by category or month to find what interests you.</p>
           </div>
 
           <div class="filters">
-            <div class="filter-group">
-              <button class="fbtn active" data-category="All">
+            <div class="filter-group" role="tablist" aria-label="Event category">
+              <button class="fbtn active" data-category="All" type="button">
                 <span class="filter-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" role="img" focusable="false">
                     <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -159,7 +300,7 @@ $regions = [
                 </span>
                 <span>All</span>
               </button>
-              <button class="fbtn" data-category="School Event">
+              <button class="fbtn" data-category="School Event" type="button">
                 <span class="filter-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" role="img" focusable="false">
                     <path d="M3 9l9-4 9 4-9 4-9-4z"></path>
@@ -168,7 +309,7 @@ $regions = [
                 </span>
                 <span>School</span>
               </button>
-              <button class="fbtn" data-category="Conference Event">
+              <button class="fbtn" data-category="Conference Event" type="button">
                 <span class="filter-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" role="img" focusable="false">
                     <rect x="4" y="7" width="16" height="12" rx="2"></rect>
@@ -179,7 +320,8 @@ $regions = [
                 <span>Conference</span>
               </button>
             </div>
-            <button class="fmonth" id="toggleDateFilter">
+
+            <button class="fmonth" id="toggleDateFilter" type="button" aria-haspopup="true">
               <span class="month-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" role="img" focusable="false">
                   <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -191,109 +333,140 @@ $regions = [
               <span>Filter by Month</span>
             </button>
 
-            <div class="date-pop" id="dateFilterPop">
+            <div class="date-pop" id="dateFilterPop" role="dialog" aria-label="Filter events by date">
               <label for="yearInput">Year</label>
               <input id="yearInput" type="number" placeholder="e.g. 2026">
               <label>Month</label>
               <div class="month-grid" id="monthBtns">
-                <button class="mbtn month-all active" data-month="All">All Months</button>
+                <button class="mbtn month-all active" data-month="All" type="button">All Months</button>
                 @foreach($months as $m)
-                <button class="mbtn" data-month="{{ $m['value'] }}">{{ $m['label'] }}</button>
+                  <button class="mbtn" data-month="{{ $m['value'] }}" type="button">{{ $m['label'] }}</button>
                 @endforeach
               </div>
               <div class="dp-actions">
-                <button class="clear" id="clearDateFilter">Clear</button>
-                <button class="apply" id="applyDateFilter">Apply</button>
+                <button class="clear" id="clearDateFilter" type="button">Clear</button>
+                <button class="apply" id="applyDateFilter" type="button">Apply</button>
               </div>
             </div>
           </div>
 
           <div class="events-grid" id="eventsGrid">
             @forelse ($events as $event)
-            <article class="event-card" data-id="{{ $event['id'] }}" data-type="{{ $event['type'] }}" data-month="{{ $event['month'] }}" data-year="{{ $event['year'] }}">
-              <div class="event-media">
-                <img src="{{ $event['image'] }}" alt="{{ $event['title'] }}">
-                <span class="badge {{ $event['type'] === 'Conference Event' ? 'conference' : '' }}">{{ $event['type'] }}</span>
-              </div>
-              <div class="event-body">
-                <h3 class="event-title">{{ $event['title'] }}</h3>
-                <p class="meta">
-                  <span class="meta-row">
-                    <span class="meta-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
-                        <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
-                        <line x1="8" y1="3.8" x2="8" y2="7"></line>
-                        <line x1="16" y1="3.8" x2="16" y2="7"></line>
-                      </svg>
-                    </span>
-                    <span>{{ $event['date'] }}</span>
-                  </span>
-                  <span class="meta-row">
-                    <span class="meta-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
-                        <circle cx="12" cy="11" r="1.9"></circle>
-                      </svg>
-                    </span>
-                    <span>{{ $event['location'] }}</span>
-                  </span>
-                  <span class="meta-row">
-                    <span class="meta-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect>
-                        <line x1="3.5" y1="10" x2="20.5" y2="10"></line>
-                        <line x1="8" y1="14" x2="10" y2="14"></line>
-                        <line x1="12" y1="14" x2="14" y2="14"></line>
-                        <line x1="16" y1="14" x2="18" y2="14"></line>
-                      </svg>
-                    </span>
-                    <span>{{ $event['attendance_format'] }}</span>
-                  </span>
-                </p>
-                <p class="desc">{{ $event['description'] }}</p>
-                <div class="event-actions">
-                  @if ($event['status'] === 'active')
-                  <button class="event-btn open-register" data-event-id="{{ $event['id'] }}">Register Now</button>
-                  @else
-                  <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}">
-                    <span class="eval-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" role="img" focusable="false">
-                        <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                      </svg>
-                    </span>
-                    <span>Evaluate Event</span>
-                  </button>
-                  @endif
+              <article class="event-card reveal" data-id="{{ $event['id'] }}" data-type="{{ $event['type'] }}" data-month="{{ $event['month'] }}" data-year="{{ $event['year'] }}">
+                <div class="event-media">
+                  <img src="{{ $event['image'] }}" alt="{{ $event['title'] }}" loading="lazy">
+                  <span class="badge {{ $event['type'] === 'Conference Event' ? 'conference' : '' }}">{{ $event['type'] }}</span>
                 </div>
-              </div>
-            </article>
+                <div class="event-body">
+                  <h3 class="event-title">{{ $event['title'] }}</h3>
+                  <p class="meta">
+                    <span class="meta-row">
+                      <span class="meta-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                          <rect x="4.5" y="5.8" width="15" height="13.7" rx="2.2"></rect>
+                          <line x1="4.5" y1="9" x2="19.5" y2="9"></line>
+                          <line x1="8" y1="3.8" x2="8" y2="7"></line>
+                          <line x1="16" y1="3.8" x2="16" y2="7"></line>
+                        </svg>
+                      </span>
+                      <span>{{ $event['date'] }}</span>
+                    </span>
+                    <span class="meta-row">
+                      <span class="meta-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                          <path d="M12 20s-5.2-4.6-5.2-8.9A5.2 5.2 0 1 1 17.2 11c0 4.3-5.2 9-5.2 9Z"></path>
+                          <circle cx="12" cy="11" r="1.9"></circle>
+                        </svg>
+                      </span>
+                      <span>{{ $event['location'] }}</span>
+                    </span>
+                    <span class="meta-row">
+                      <span class="meta-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                          <rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect>
+                          <line x1="3.5" y1="10" x2="20.5" y2="10"></line>
+                          <line x1="8" y1="14" x2="10" y2="14"></line>
+                          <line x1="12" y1="14" x2="14" y2="14"></line>
+                          <line x1="16" y1="14" x2="18" y2="14"></line>
+                        </svg>
+                      </span>
+                      <span>{{ $event['attendance_format'] }}</span>
+                    </span>
+                  </p>
+                  <p class="desc">{{ $event['description'] }}</p>
+                  <div class="event-actions">
+                    @if ($event['status'] === 'active')
+                      <button class="event-btn open-register" data-event-id="{{ $event['id'] }}" type="button">
+                        <span>Register Now</span>
+                        <span class="cta-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                            <polyline points="13,5 20,12 13,19"></polyline>
+                          </svg>
+                        </span>
+                      </button>
+                    @else
+                      <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}" type="button">
+                        <span class="eval-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" role="img" focusable="false">
+                            <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
+                          </svg>
+                        </span>
+                        <span>Evaluate Event</span>
+                      </button>
+                    @endif
+                  </div>
+                </div>
+              </article>
             @empty
-            <article class="event-card" style="grid-column: 1 / -1;">
-              <div class="event-body">
-                <h3 class="event-title">No events available</h3>
-                <p class="desc">Admin has not published any events yet.</p>
-              </div>
-            </article>
+              <article class="event-card" style="grid-column: 1 / -1;">
+                <div class="event-body">
+                  <h3 class="event-title">No events available</h3>
+                  <p class="desc">Admin has not published any events yet. Please check back soon.</p>
+                </div>
+              </article>
             @endforelse
           </div>
         </div>
       </section>
 
-      <footer class="footer">
-        <div class="container footer-inner">
-          <div class="fbrand" aria-label="Event Management System">
-            <span class="fbrand-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-                <line x1="8" y1="3.5" x2="8" y2="7"></line>
-                <line x1="16" y1="3.5" x2="16" y2="7"></line>
-              </svg>
-            </span>
-            <span class="fbrand-text">Event Management System</span>
+      {{-- Footer --}}
+      <footer class="footer" aria-label="Site footer">
+        <div class="container">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <div class="fbrand">
+                <span class="fbrand-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                    <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                    <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                    <line x1="16" y1="3.5" x2="16" y2="7"></line>
+                  </svg>
+                </span>
+                <span class="fbrand-text">
+                  <span class="fbrand-name">Event Management System</span>
+                  <span class="fbrand-tag">Academic Events Portal</span>
+                </span>
+              </div>
+              <p class="footer-desc">A unified platform for school events, academic conferences, paper submissions, and post-event evaluations — designed for students, faculty, and organizers.</p>
+            </div>
+
+            <nav class="footer-nav" aria-label="Footer quick links">
+              <h4 class="footer-links-title">Quick Links</h4>
+              <ul class="footer-links">
+                <li><a href="#features">Why Use This System</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#announcements">Latest Announcements</a></li>
+                <li><a href="#events">Discover Events</a></li>
+              </ul>
+            </nav>
           </div>
-          <div class="fcopy">© 2026 Event Management System. All rights reserved. For typical and conference events.</div>
+
+          <div class="footer-bottom">
+            <p class="fcopy">© {{ date('Y') }} Event Management System. All rights reserved.</p>
+            <p class="fcopy">Built for typical school events and academic conferences.</p>
+          </div>
         </div>
       </footer>
     </div>
