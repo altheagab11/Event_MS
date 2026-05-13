@@ -942,6 +942,12 @@ a.announce-btn { text-decoration: none; }
     cursor: pointer;
 }
 .admin-portal-footer { background: rgba(26, 35, 50, .92); border-top: 1px solid rgba(255,255,255,.12); padding: 18px 0; }
+.admin-portal .footer { background: rgba(11, 18, 36, .92); border-top: 1px solid rgba(148, 163, 184, .14); padding: 18px 0; }
+.admin-portal .footer .footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 0; border-top: 0; }
+.admin-portal .footer .fbrand-icon { width: 32px; height: 32px; }
+.admin-portal .footer .fbrand-icon svg { width: 18px; height: 18px; }
+.admin-portal .footer .fbrand-name { font-size: 15px; }
+.admin-portal .footer .fbrand-tag { font-size: 10px; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px); z-index: 100; display: none; padding: 16px; }
 .modal.open { display: flex; align-items: center; justify-content: center; }

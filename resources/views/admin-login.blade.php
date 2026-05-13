@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Login | NU Lipa EMS</title>
+  <title>Admin Login | Event Management System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,9 +13,11 @@
 
 <body class="login-page">
   <div class="admin-portal open" aria-hidden="false">
+
+    {{-- Header: brand only (matches landing page) --}}
     <header class="topbar">
       <div class="container topbar-inner">
-        <div class="brand" aria-label="NU Lipa EMS">
+        <a href="{{ url('/') }}" class="brand" aria-label="Event Management System home">
           <span class="brand-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img" focusable="false">
               <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
@@ -24,20 +26,11 @@
               <line x1="16" y1="3.5" x2="16" y2="7"></line>
             </svg>
           </span>
-          <span class="brand-text">NU Lipa EMS</span>
-        </div>
-        <div class="top-actions">
-          <a href="{{ url('/') }}" class="pill pill-muted" style="text-decoration:none;">Home / Events</a>
-          <button type="button" class="pill pill-gold admin-btn">
-            <span class="pill-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <path d="M12 3l7 3v5c0 4.8-3 8.6-7 10-4-1.4-7-5.2-7-10V6l7-3z"></path>
-                <path d="M9.5 12l2 2 3.5-3.5"></path>
-              </svg>
-            </span>
-            <span>Admin Login</span>
-          </button>
-        </div>
+          <span class="brand-text">
+            <span class="brand-name">Event Management System</span>
+            <span class="brand-tag">Academic Events Portal</span>
+          </span>
+        </a>
       </div>
     </header>
 
@@ -50,7 +43,7 @@
           </svg>
         </div>
         <h2>Admin Portal</h2>
-        <p>Secure access to NU Lipa EMS</p>
+        <p>Secure access to your admin dashboard</p>
 
         @if ($errors->any())
         <div style="margin-bottom: 12px; padding: 10px 12px; border: 1px solid #ef9a9a; border-radius: 8px; background: #fff3f3; color: #8b1c1c; font-size: 13px;">
@@ -69,7 +62,7 @@
                 <path d="M4.5 8 12 13l7.5-5"></path>
               </svg>
             </span>
-            <input type="email" name="email" value="{{ old('email') }}" placeholder="admin@nu.edu.ph" autocomplete="username" required>
+            <input type="email" name="email" value="{{ old('email') }}" placeholder="admin@example.com" autocomplete="username" required>
           </label>
           <label class="admin-input-wrap">
             <span class="admin-input-icon" aria-hidden="true">
@@ -85,20 +78,26 @@
       </div>
     </div>
 
-    <footer class="footer">
-      <div class="container footer-inner">
-        <div class="fbrand" aria-label="NU Lipa Event Management System">
-          <span class="fbrand-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img" focusable="false">
-              <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
-              <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
-              <line x1="8" y1="3.5" x2="8" y2="7"></line>
-              <line x1="16" y1="3.5" x2="16" y2="7"></line>
-            </svg>
-          </span>
-          <span class="fbrand-text">NU Lipa Event Management System</span>
+    {{-- Footer (compact, matches landing page brand) --}}
+    <footer class="footer" aria-label="Site footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <div class="fbrand">
+            <span class="fbrand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <rect x="3.5" y="5.5" width="17" height="15" rx="2.5"></rect>
+                <line x1="3.5" y1="9" x2="20.5" y2="9"></line>
+                <line x1="8" y1="3.5" x2="8" y2="7"></line>
+                <line x1="16" y1="3.5" x2="16" y2="7"></line>
+              </svg>
+            </span>
+            <span class="fbrand-text">
+              <span class="fbrand-name">Event Management System</span>
+              <span class="fbrand-tag">Academic Events Portal</span>
+            </span>
+          </div>
+          <p class="fcopy">© {{ date('Y') }} Event Management System. All rights reserved.</p>
         </div>
-        <div class="fcopy">© 2026 NU Lipa. All rights reserved. For typical and conference events.</div>
       </div>
     </footer>
   </div>
