@@ -37,7 +37,36 @@
         ->sort()
         ->values();
     // Ensure newest-created events appear first in the grid (upper-left)
-    $events = $events->sortByDesc('created_at')->values();
+    // Robust sort: prefer `created_at`, then `event_date`/`start_date`, then `id` as fallback.
+    $events = $events->sortByDesc(function ($event) {
+        $ts = 0;
+        if (! empty($event->created_at)) {
+            if ($event->created_at instanceof \DateTimeInterface) {
+                $ts = (int) $event->created_at->getTimestamp();
+            } else {
+                $t = strtotime((string) $event->created_at);
+                $ts = $t === false ? 0 : (int) $t;
+            }
+        } elseif (! empty($event->event_date)) {
+            if ($event->event_date instanceof \DateTimeInterface) {
+                $ts = (int) $event->event_date->getTimestamp();
+            } else {
+                $t = strtotime((string) $event->event_date);
+                $ts = $t === false ? 0 : (int) $t;
+            }
+        } elseif (! empty($event->start_date)) {
+            if ($event->start_date instanceof \DateTimeInterface) {
+                $ts = (int) $event->start_date->getTimestamp();
+            } else {
+                $t = strtotime((string) $event->start_date);
+                $ts = $t === false ? 0 : (int) $t;
+            }
+        } elseif (! empty($event->event_id) || ! empty($event->id)) {
+            $ts = (int) ($event->event_id ?? $event->id ?? 0);
+        }
+
+        return $ts;
+    })->values();
 @endphp
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">

@@ -50,20 +50,53 @@ $regions = [
   // Ensure newest-created events appear first (upper-left)
   if (isset($events)) {
     if ($events instanceof \Illuminate\Support\Collection) {
-      $events = $events->sortByDesc('created_at')->values();
+      $events = $events->sortByDesc(function ($e) {
+        $ts = 0;
+        if (! empty($e->created_at)) {
+          if ($e->created_at instanceof \DateTimeInterface) {
+            $ts = (int) $e->created_at->getTimestamp();
+          } else {
+            $t = strtotime((string) $e->created_at);
+            $ts = $t === false ? 0 : (int) $t;
+          }
+        } elseif (! empty($e->event_date)) {
+          if ($e->event_date instanceof \DateTimeInterface) {
+            $ts = (int) $e->event_date->getTimestamp();
+          } else {
+            $t = strtotime((string) $e->event_date);
+            $ts = $t === false ? 0 : (int) $t;
+          }
+        } elseif (! empty($e->start_date)) {
+          if ($e->start_date instanceof \DateTimeInterface) {
+            $ts = (int) $e->start_date->getTimestamp();
+          } else {
+            $t = strtotime((string) $e->start_date);
+            $ts = $t === false ? 0 : (int) $t;
+          }
+        } elseif (! empty($e->id) || ! empty($e['id'])) {
+          $ts = (int) ($e->id ?? ($e['id'] ?? 0));
+        }
+        return $ts;
+      })->values();
     } elseif (is_array($events)) {
       usort($events, function ($a, $b) {
-        $getTs = function ($v) {
-          if ($v instanceof \DateTimeInterface) return $v->getTimestamp();
-          if (is_numeric($v)) return (int) $v;
-          if (is_string($v)) {
-            $t = strtotime($v);
-            return $t === false ? 0 : $t;
+        $getTs = function ($item) {
+          $keys = ['created_at', 'event_date', 'start_date', 'id'];
+          foreach ($keys as $k) {
+            if (array_key_exists($k, (array) $item) && ! empty($item[$k])) {
+              $v = $item[$k];
+              if ($v instanceof \DateTimeInterface) return (int) $v->getTimestamp();
+              if (is_numeric($v)) return (int) $v;
+              if (is_string($v)) {
+                $t = strtotime($v);
+                return $t === false ? 0 : (int) $t;
+              }
+            }
           }
           return 0;
         };
-        $ta = $getTs($a['created_at'] ?? null);
-        $tb = $getTs($b['created_at'] ?? null);
+        $ta = $getTs($a);
+        $tb = $getTs($b);
         return $tb <=> $ta;
       });
     }
