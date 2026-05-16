@@ -46,6 +46,29 @@ $regions = [
 'Region XI (Davao Region)', 'Region XII (SOCCSKSARGEN)', 'Region XIII (Caraga)', 'BARMM (Bangsamoro Autonomous Region in Muslim Mindanao)'
 ];
 @endphp
+@php
+  // Ensure newest-created events appear first (upper-left)
+  if (isset($events)) {
+    if ($events instanceof \Illuminate\Support\Collection) {
+      $events = $events->sortByDesc('created_at')->values();
+    } elseif (is_array($events)) {
+      usort($events, function ($a, $b) {
+        $getTs = function ($v) {
+          if ($v instanceof \DateTimeInterface) return $v->getTimestamp();
+          if (is_numeric($v)) return (int) $v;
+          if (is_string($v)) {
+            $t = strtotime($v);
+            return $t === false ? 0 : $t;
+          }
+          return 0;
+        };
+        $ta = $getTs($a['created_at'] ?? null);
+        $tb = $getTs($b['created_at'] ?? null);
+        return $tb <=> $ta;
+      });
+    }
+  }
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 

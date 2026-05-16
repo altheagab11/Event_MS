@@ -36,6 +36,8 @@
         ->unique()
         ->sort()
         ->values();
+    // Ensure newest-created events appear first in the grid (upper-left)
+    $events = $events->sortByDesc('created_at')->values();
 @endphp
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
@@ -135,6 +137,7 @@
                     {{-- View Toggle --}}
                     <div class="flex items-center gap-2 rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 p-1">
                         <button
+                            id="gridViewButton"
                             type="button"
                             class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3B82F6] text-white shadow-sm"
                             title="Grid View"
@@ -145,6 +148,7 @@
                         </button>
 
                         <button
+                            id="listViewButton"
                             type="button"
                             class="flex h-10 w-10 items-center justify-center rounded-xl text-[#64748B] transition hover:bg-[#13284A]/70 hover:text-[#60A5FA]"
                             title="List View"
@@ -159,7 +163,7 @@
         </section>
 
         {{-- EVENT GRID --}}
-        <section class="mt-7 grid grid-cols-1 gap-7 lg:grid-cols-2 2xl:grid-cols-3">
+        <section id="eventsContainer" class="mt-7 grid grid-cols-1 gap-7 lg:grid-cols-2 2xl:grid-cols-3">
             @foreach ($events as $event)
                 @php
                     $eventDate = $event->event_date
@@ -212,6 +216,9 @@
                         <img
                             src="{{ $bannerImage }}"
                             alt="{{ $event->event_name }}"
+                            loading="lazy"
+                            decoding="async"
+                            fetchpriority="low"
                             class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                         >
 
@@ -400,7 +407,7 @@
                             {{-- Hosted By --}}
                             <div class="mt-5">
                                 <label class="mb-3 block text-sm font-black uppercase tracking-widest text-[#94A3B8]">
-                                    Hosted By / Department
+                                    Hosted By: (Department / School / Program)
                                 </label>
 
                                 <input
@@ -858,7 +865,7 @@
 
                             <div class="mt-5">
                                 <label class="mb-3 block text-sm font-black uppercase tracking-widest text-[#94A3B8]">
-                                    Hosted By / Department
+                                    Hosted By: (Department / School / Program)
                                 </label>
 
                                 <input
@@ -1718,6 +1725,90 @@
             }
         }
     });
+
+    // Prevent selecting past dates: set `min` on start/end date inputs to today
+    (function() {
+        const pad = (n) => String(n).padStart(2, '0');
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+        const setMins = () => {
+            const createStart = document.querySelector('#createEventModal input[name="start_date"]');
+            const createEnd = document.querySelector('#createEventModal input[name="end_date"]');
+            if (createStart) createStart.min = todayStr;
+            if (createEnd) createEnd.min = todayStr;
+
+            if (typeof editStartDateInput !== 'undefined' && editStartDateInput) editStartDateInput.min = todayStr;
+            if (typeof editEndDateInput !== 'undefined' && editEndDateInput) editEndDateInput.min = todayStr;
+        };
+
+        // Apply immediately on load
+        setMins();
+
+        // Re-apply when opening modals (covers interactive flows)
+        if (openCreateEventModalButton) {
+            openCreateEventModalButton.addEventListener('click', setMins);
+        }
+        if (openEditEventModalFromManageButton) {
+            openEditEventModalFromManageButton.addEventListener('click', setMins);
+        }
+    })();
+
+    // View toggle (grid / list) with persistence
+    (function() {
+        const gridBtn = document.getElementById('gridViewButton');
+        const listBtn = document.getElementById('listViewButton');
+        const eventsContainer = document.getElementById('eventsContainer');
+
+        const applyGrid = () => {
+            if (!eventsContainer) return;
+            eventsContainer.classList.remove('flex', 'flex-col');
+            eventsContainer.classList.add('grid', 'grid-cols-1', 'gap-7', 'lg:grid-cols-2', '2xl:grid-cols-3');
+            if (gridBtn) gridBtn.classList.add('bg-[#3B82F6]','text-white');
+            if (listBtn) listBtn.classList.remove('bg-[#3B82F6]','text-white');
+            localStorage.setItem('eventsView', 'grid');
+            // remove list-view specific style
+            document.body.classList.remove('events-list-view');
+            // re-apply filters & batching so visibility is consistent
+            applyEventFilters();
+        };
+
+        const applyList = () => {
+            if (!eventsContainer) return;
+            eventsContainer.classList.remove('grid', 'lg:grid-cols-2', '2xl:grid-cols-3');
+            eventsContainer.classList.add('flex', 'flex-col', 'gap-4');
+            if (listBtn) listBtn.classList.add('bg-[#3B82F6]','text-white');
+            if (gridBtn) gridBtn.classList.remove('bg-[#3B82F6]','text-white');
+            localStorage.setItem('eventsView', 'list');
+            // add list-view body flag for CSS rules
+            document.body.classList.add('events-list-view');
+            // re-apply filters & batching so visibility is consistent
+            applyEventFilters();
+        };
+
+        if (gridBtn) gridBtn.addEventListener('click', applyGrid);
+        if (listBtn) listBtn.addEventListener('click', applyList);
+
+        // on load, apply stored preference
+        const pref = localStorage.getItem('eventsView') || 'grid';
+        if (pref === 'list') {
+            applyList();
+        } else {
+            applyGrid();
+        }
+
+        // Inject CSS tweaks for list view
+        const listStyle = document.createElement('style');
+        listStyle.innerHTML = `
+            body.events-list-view #eventsContainer article{ display:flex; gap:1rem; align-items:center; }
+            body.events-list-view #eventsContainer article .relative.h-[190px]{ min-width:160px; height:120px; flex:0 0 160px; }
+            body.events-list-view #eventsContainer article img{ height:100%; width:100%; object-fit:cover }
+            /* ensure filter/batch hidden classes still hide items in list view */
+            body.events-list-view #eventsContainer article.hidden{ display:none !important; }
+            body.events-list-view #eventsContainer article.batch-hidden{ display:none !important; }
+        `;
+        document.head.appendChild(listStyle);
+    })();
 
     @if ($errors->any())
         openCreateEventModal();
