@@ -1075,7 +1075,7 @@ $regions = [
                     <p class="success-copy">
                           ${isPending
                             ? 'Your registration is now pending admin approval. Your Digital ID will be sent by email once approved.'
-                            : 'Your registration is complete. A demo digital pass email has been sent. Here is your preview:'}
+                            : 'Your registration is complete. Your digital pass will be sent by email once approved.'}
                     </p>
                         ${!isPending && serverData.mail_sent === false ? '<p class="success-copy" style="margin-top:-2px; color:#8b1e2b;">Registration was saved, but email sending failed. Check your mail .env settings and try again.</p>' : ''}
 
@@ -1146,7 +1146,7 @@ $regions = [
                                         <rect x="20" y="9" width="2" height="2" rx=".5"></rect>
                                     </svg>
                                 </div>
-                                    <p class="qr-note">${isPending ? 'Digital ID details will be generated and emailed after admin approval.' : `Demo pass code: ${escapeHtml(passCode)}. This preview is for testing while scanner/API integration is pending.`}</p>
+                                    <p class="qr-note">${isPending ? 'Digital ID details will be generated and emailed after admin approval.' : 'Your digital pass with QR code will be emailed after admin approval.'}</p>
                             </div>
                         </div>
                     </div>

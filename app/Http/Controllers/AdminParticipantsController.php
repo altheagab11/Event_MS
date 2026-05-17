@@ -8,6 +8,7 @@ use App\Models\EventRegistrant;
 use App\Models\Paper;
 use App\Models\Registration;
 use App\Models\RegistrationVerificationCode;
+use App\Services\DigitalPassService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -265,7 +266,7 @@ class AdminParticipantsController extends Controller
         $registration->loadMissing([
             'user:id,firstname,lastname,email',
             'eventRegistrant:event_registrant_id,first_name,last_name,email',
-            'event:event_id,event_name,event_type,event_date,location',
+            'event:event_id,event_name,event_type,event_date,start_date,end_date,location',
         ]);
 
         $isConference = (string) ($registration->event->event_type ?? '') === 'Conference';
@@ -319,17 +320,8 @@ class AdminParticipantsController extends Controller
             ];
         });
 
-        $passData = [
-            'event_name' => (string) ($registration->event->event_name ?? 'Event'),
-            'event_date' => $this->formatEventDate($registration->event->event_date ?? null),
-            'location' => (string) ($registration->event->location ?? 'TBA'),
-            'full_name' => $registration->user !== null
-              ? trim((string) ($registration->user->firstname ?? '').' '.(string) ($registration->user->lastname ?? ''))
-              : trim((string) ($registration->eventRegistrant?->first_name ?? '').' '.(string) ($registration->eventRegistrant?->last_name ?? '')),
-            'email' => (string) ($registration->user->email ?? $registration->eventRegistrant?->email ?? ''),
-            'school_level' => 'Participant',
-            'pass_code' => (string) $result['pass_code'],
-        ];
+        $passCode = (string) $result['pass_code'];
+        $passData = app(DigitalPassService::class)->buildFromRegistration($registration, $passCode);
 
         $mailSent = true;
         try {
@@ -481,10 +473,23 @@ class AdminParticipantsController extends Controller
         }
     }
 
+    private function formatEventDateTime(mixed $eventDateTime): string
+    {
+        if ($eventDateTime === null || (string) $eventDateTime === '') {
+            return 'TBA';
+        }
+
+        try {
+            return Carbon::parse((string) $eventDateTime)->format('M j, Y • g:i A');
+        } catch (Throwable) {
+            return (string) $eventDateTime;
+        }
+    }
+
     private function generateUniquePassCode(): string
     {
         do {
-            $code = 'NUL-'.strtoupper(Str::random(10));
+            $code = 'EMS-'.strtoupper(Str::random(10));
             $exists = DB::table('digital_ids')->where('qr_code', $code)->exists();
         } while ($exists);
 

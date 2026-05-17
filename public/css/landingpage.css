@@ -764,7 +764,8 @@ a.announce-btn { text-decoration: none; }
 .event-body { padding: 22px 22px 20px; display: flex; flex-direction: column; flex-grow: 1; }
 .event-title { margin: 0 0 12px; color: var(--navy-2); font-size: 17px; line-height: 1.3; font-weight: 700; }
 .meta { margin: 0 0 14px; color: var(--slate-500); font-size: 13px; line-height: 1.5; display: flex; flex-direction: column; gap: 8px; }
-.meta-row { display: inline-flex; align-items: center; gap: 10px; }
+.meta-row { display: flex; align-items: flex-start; gap: 10px; }
+.meta-row > span:last-child { flex: 1; min-width: 0; }
 .meta-icon { width: 16px; height: 16px; color: var(--brand-deep); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .meta-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .desc {
@@ -1146,7 +1147,7 @@ textarea.eval-text { min-height: 110px; }
 .event-overlay h2 { margin: 8px 0 0; font-size: 36px; font-weight: 800; }
 .modal-body { padding: 28px; }
 .chips { display: flex; flex-wrap: wrap; gap: 14px; background: #f9fafb; border: 1px solid #f0f1f3; border-radius: 12px; padding: 14px; margin-bottom: 20px; }
-.chip-item { display: inline-flex; align-items: center; gap: 8px; color: #555; font-weight: 600; }
+.chip-item { display: inline-flex; align-items: flex-start; gap: 8px; color: #555; font-weight: 600; max-width: 100%; line-height: 1.45; }
 .chip-icon { width: 15px; height: 15px; color: #64748B; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .chip-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .desc-block { color: #4b5563; line-height: 1.7; margin-bottom: 28px; }

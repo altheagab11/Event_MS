@@ -1486,6 +1486,9 @@
         if (editHostedByInput) editHostedByInput.value = eventData.hostedBy || '';
         if (editStartDateInput) editStartDateInput.value = eventData.startDate || '';
         if (editEndDateInput) editEndDateInput.value = eventData.endDate || '';
+        if (typeof window.refreshEventScheduleMins === 'function') {
+            window.refreshEventScheduleMins();
+        }
         if (editLocationInput) editLocationInput.value = eventData.location || '';
         if (editDescriptionInput) editDescriptionInput.value = eventData.description || '';
         if (editCurrentImagePreview) editCurrentImagePreview.src = eventData.image || '';
@@ -1726,34 +1729,55 @@
         }
     });
 
-    // Prevent selecting past schedule: set `min` on datetime-local inputs to now
+    // Start/end schedule: block past times; end cannot be before start
     (function() {
         const pad = (n) => String(n).padStart(2, '0');
-        const nowStr = () => {
+        const nowMin = () => {
             const now = new Date();
             return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
         };
 
-        const setMins = () => {
-            const minValue = nowStr();
-            const createStart = document.getElementById('createStartDateInput');
-            const createEnd = document.getElementById('createEndDateInput');
-            if (createStart) createStart.min = minValue;
-            if (createEnd) createEnd.min = minValue;
+        const syncFns = [];
 
-            if (typeof editStartDateInput !== 'undefined' && editStartDateInput) editStartDateInput.min = minValue;
-            if (typeof editEndDateInput !== 'undefined' && editEndDateInput) editEndDateInput.min = minValue;
+        const wireSchedulePair = (startInput, endInput) => {
+            if (!startInput || !endInput) return;
+
+            const syncEndMin = () => {
+                const now = nowMin();
+                startInput.min = now;
+
+                const startValue = startInput.value;
+                const endMin = !startValue || startValue < now ? now : startValue;
+                endInput.min = endMin;
+
+                if (endInput.value && endInput.value < endMin) {
+                    endInput.value = '';
+                }
+            };
+
+            startInput.addEventListener('change', syncEndMin);
+            startInput.addEventListener('input', syncEndMin);
+            syncFns.push(syncEndMin);
+            syncEndMin();
         };
 
-        // Apply immediately on load
-        setMins();
+        const refreshScheduleMins = () => {
+            syncFns.forEach((sync) => sync());
+        };
 
-        // Re-apply when opening modals (covers interactive flows)
+        wireSchedulePair(
+            document.getElementById('createStartDateInput'),
+            document.getElementById('createEndDateInput')
+        );
+        wireSchedulePair(editStartDateInput, editEndDateInput);
+
+        window.refreshEventScheduleMins = refreshScheduleMins;
+
         if (openCreateEventModalButton) {
-            openCreateEventModalButton.addEventListener('click', setMins);
+            openCreateEventModalButton.addEventListener('click', refreshScheduleMins);
         }
         if (openEditEventModalFromManageButton) {
-            openEditEventModalFromManageButton.addEventListener('click', setMins);
+            openEditEventModalFromManageButton.addEventListener('click', refreshScheduleMins);
         }
     })();
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\EventEvaluationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\DigitalPassController;
 use App\Http\Controllers\QrAttendanceController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,14 @@ Route::post('/register/verify-code', [RegistrationController::class, 'verifyCode
 Route::post('/events/{event}/evaluate', [EventEvaluationController::class, 'store'])
   ->middleware('throttle:20,1')
   ->name('events.evaluate');
+
+Route::get('/pass/{pass}', [DigitalPassController::class, 'show'])
+  ->middleware('signed')
+  ->name('digital-pass.show');
+
+Route::get('/pass/{pass}/download', [DigitalPassController::class, 'download'])
+  ->middleware('signed')
+  ->name('digital-pass.download');
 
 Route::get('/admin-login', [LoginController::class, 'create'])->name('admin.login.page');
 Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
