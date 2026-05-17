@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -35,6 +36,28 @@ class Event extends Model
             'start_date' => 'datetime',
             'end_date' => 'datetime',
         ];
+    }
+
+    public function getFormattedScheduleRangeAttribute(): string
+    {
+        $start = $this->start_date ?? $this->event_date;
+        if ($start === null) {
+            return 'Date TBA';
+        }
+
+        $start = $start instanceof Carbon ? $start : Carbon::parse((string) $start);
+        $end = $this->end_date ?? $start;
+        $end = $end instanceof Carbon ? $end : Carbon::parse((string) $end);
+
+        if (! $this->start_date && $this->event_date && ! $this->end_date) {
+            return $start->format('F j, Y');
+        }
+
+        if ($start->toDateString() !== $end->toDateString()) {
+            return $start->format('F j, Y g:i A').' - '.$end->format('F j, Y g:i A');
+        }
+
+        return $start->format('F j, Y g:i A').' - '.$end->format('g:i A');
     }
 
     public function getBannerUrlAttribute(): ?string

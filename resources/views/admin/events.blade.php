@@ -166,10 +166,7 @@
         <section id="eventsContainer" class="mt-7 grid grid-cols-1 gap-7 lg:grid-cols-2 2xl:grid-cols-3">
             @foreach ($events as $event)
                 @php
-                    $displaySchedule = $event->start_date ?? $event->event_date;
-                    $eventDate = $displaySchedule
-                        ? $displaySchedule->format('F j, Y g:i A')
-                        : 'Date TBA';
+                    $eventDate = $event->formatted_schedule_range;
                     $eventStartDateValue = $event->start_date ? $event->start_date->format('Y-m-d\TH:i') : '';
                     $eventEndDateValue = $event->end_date ? $event->end_date->format('Y-m-d\TH:i') : '';
                     $eventTypeRaw = strtolower((string) ($event->event_type ?? ''));
