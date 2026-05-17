@@ -484,9 +484,11 @@
             participantModalEvent.textContent = eventName;
 
             const isConference = String(participant.event_type || '').trim() === 'Conference';
+            const participantRole = String(participant.participant_role || '').trim().toLowerCase();
+            const isPresenter = participantRole === 'presentor';
             const paper = participant.paper || {};
 
-            if (isConference) {
+            if (isConference && isPresenter) {
                 paperSection.classList.remove('hidden');
                 if (paper.has_file) {
                     paperPresent.classList.remove('hidden');
@@ -516,7 +518,7 @@
             }
 
             const registrationStatus = String(participant.registration_status || '').trim().toLowerCase();
-            const canReview = registrationStatus === 'pending' && (!isConference || Boolean(paper.has_file));
+            const canReview = registrationStatus === 'pending' && (!isConference || !isPresenter || Boolean(paper.has_file));
             const isApprovedFlow = registrationStatus === 'approved' || String(participant.status_label || '').toLowerCase().includes('checked');
             const isRejected = registrationStatus === 'rejected';
 

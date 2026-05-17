@@ -131,7 +131,7 @@ class RegistrationController extends Controller
 
         if ($activeEventRegistrant) {
             throw ValidationException::withMessages([
-                'email' => 'You are already registered for this event.',
+                'email' => 'Email address already registered for this event.',
             ]);
         }
 
@@ -145,15 +145,18 @@ class RegistrationController extends Controller
 
         if ($legacyActiveRegistration) {
             throw ValidationException::withMessages([
-                'email' => 'You are already registered for this event.',
+                'email' => 'Email address already registered for this event.',
             ]);
         }
 
+        $participantRole = trim((string) $request->input('school_level'));
+        $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
+
         $paperTempPath = null;
-        if ($isConferenceEvent) {
+        if ($requiresPaper) {
             if (! $request->hasFile('paper_file')) {
                 throw ValidationException::withMessages([
-                    'paper_file' => 'A research paper PDF is required for conference registrations.',
+                    'paper_file' => 'A research paper PDF is required when registering as a Presentor.',
                 ]);
             }
 
@@ -286,10 +289,12 @@ class RegistrationController extends Controller
         $payload = (array) $verification->payload;
         $event = Event::query()->findOrFail($verification->event_id);
         $isConferenceEvent = (string) $event->event_type === 'Conference';
+        $participantRole = trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
+        $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
 
-        if ($isConferenceEvent && empty($verification->paper_temp_path)) {
+        if ($requiresPaper && empty($verification->paper_temp_path)) {
             throw ValidationException::withMessages([
-                'code' => 'Conference registration requires a research paper PDF upload.',
+                'code' => 'Presentor registration requires a research paper PDF upload.',
             ]);
         }
 

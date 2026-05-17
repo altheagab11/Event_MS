@@ -28,6 +28,12 @@ class SendRegistrationVerificationRequest extends FormRequest
       ->where('event_id', $eventId)
       ->where('event_type', 'Conference')
       ->exists();
+    $isSchoolEvent = Event::query()
+      ->where('event_id', $eventId)
+      ->where('event_type', 'School Event')
+      ->exists();
+    $role = strtolower(trim((string) $this->input('school_level')));
+    $requiresPaper = $isConference && $role === 'presentor';
 
     return [
       'event_id' => ['required', 'integer', 'exists:events,event_id'],
@@ -36,8 +42,14 @@ class SendRegistrationVerificationRequest extends FormRequest
       'email' => ['required', 'email', 'max:255'],
       'region' => ['required', 'string', 'max:255'],
       'school_from' => ['required', 'string', 'max:255'],
-      'school_level' => ['required', 'string', 'max:255'],
-      'paper_file' => [Rule::requiredIf($isConference), 'nullable', 'file', 'mimes:pdf', 'max:10240'],
+      'school_level' => [
+        'required',
+        'string',
+        'max:255',
+        Rule::when($isConference, ['in:Presentor,Participant']),
+        Rule::when($isSchoolEvent, ['in:Exhibitor,Participant']),
+      ],
+      'paper_file' => [Rule::requiredIf($requiresPaper), 'nullable', 'file', 'mimes:pdf', 'max:10240'],
     ];
   }
 
@@ -56,7 +68,8 @@ class SendRegistrationVerificationRequest extends FormRequest
       'region.required' => 'School / University is required.',
       'school_from.required' => 'User type is required.',
       'school_level.required' => 'Role is required.',
-      'paper_file.required' => 'A research paper PDF is required for conference registrations.',
+      'paper_file.required' => 'A research paper PDF is required when registering as a Presentor.',
+      'school_level.in' => 'Please select a valid role for this event.',
       'paper_file.mimes' => 'The research paper must be a PDF file.',
       'paper_file.max' => 'The research paper must not exceed 10 MB.',
     ];

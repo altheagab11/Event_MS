@@ -139,7 +139,6 @@ $regions = [
           </a>
         </div>
       </header>
-
       {{-- Hero --}}
       <section class="hero" aria-label="Welcome">
         <div class="container hero-inner reveal">
@@ -147,7 +146,7 @@ $regions = [
             <span class="dot" aria-hidden="true"></span>
             Your Academic Events Portal
           </span>
-          <h1>One Platform for Every<br><span class="accent">Campus Event &amp; Conference</span></h1>
+          <h1>Welcome to <span class="accent">Event Management System</span></h1>
           <p>Discover school events, submit research papers, attend conferences, and share your feedback — all in a single, modern portal built for students, faculty, and organizers.</p>
 
           <div class="hero-ctas">
@@ -187,121 +186,6 @@ $regions = [
           </div>
         </div>
       </section>
-
-      {{-- Why Use This System --}}
-      <section class="features" id="features" aria-labelledby="features-heading">
-        <div class="container">
-          <div class="features-head reveal">
-            <span class="section-eyebrow">Why Use This System</span>
-            <h2 id="features-heading" class="section-heading">Everything you need for academic events</h2>
-            <p class="section-subheading">From quick event sign-ups to research conference submissions and post-event evaluations — all powered by a single, streamlined workflow.</p>
-          </div>
-
-          <div class="features-grid">
-            <article class="feature-card reveal">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <path d="M9 4h6a2 2 0 0 1 2 2v0H7v0a2 2 0 0 1 2-2z"></path>
-                  <rect x="5" y="4" width="14" height="17" rx="2"></rect>
-                  <path d="M9 12l2 2 4-4"></path>
-                </svg>
-              </span>
-              <h3 class="feature-title">Event Registration</h3>
-              <p class="feature-desc">Sign up for school events or conferences in seconds with a guided, email-verified form.</p>
-            </article>
-
-            <article class="feature-card reveal delay-1">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 3 14 8 19 8"></polyline>
-                  <line x1="8" y1="13" x2="16" y2="13"></line>
-                  <line x1="8" y1="17" x2="14" y2="17"></line>
-                </svg>
-              </span>
-              <h3 class="feature-title">Conference Submission</h3>
-              <p class="feature-desc">Submit your research paper for review and track its approval status through the portal.</p>
-            </article>
-
-            <article class="feature-card reveal delay-2">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <polygon points="12,3 14.7,9 21,9.7 16.5,14 17.8,20.4 12,17.3 6.2,20.4 7.5,14 3,9.7 9.3,9"></polygon>
-                </svg>
-              </span>
-              <h3 class="feature-title">Evaluation Forms</h3>
-              <p class="feature-desc">Share your feedback to help organizers improve future events with star ratings and comments.</p>
-            </article>
-
-            <article class="feature-card reveal delay-3">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-                  <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-                  <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-                  <path d="M14 14h3v3h-3z"></path>
-                  <path d="M20 14v3"></path>
-                  <path d="M14 20h3"></path>
-                  <path d="M20 20h1"></path>
-                </svg>
-              </span>
-              <h3 class="feature-title">Digital QR Pass / ID</h3>
-              <p class="feature-desc">Get a digital event pass for fast, paperless check-in straight at the venue entrance.</p>
-            </article>
-
-            <article class="feature-card reveal delay-4">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                  <path d="M3 7l9 6 9-6"></path>
-                </svg>
-              </span>
-              <h3 class="feature-title">Email Notifications</h3>
-              <p class="feature-desc">Receive confirmations, reminders, and important updates directly in your inbox.</p>
-            </article>
-
-            <article class="feature-card reveal delay-5">
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img" focusable="false">
-                  <path d="M3 12h4l3-8 4 16 3-8h4"></path>
-                </svg>
-              </span>
-              <h3 class="feature-title">Event Status Tracking</h3>
-              <p class="feature-desc">See upcoming, ongoing, and completed events at a glance with clear visual cues.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {{-- How It Works --}}
-      <section class="how" id="how-it-works" aria-labelledby="how-heading">
-        <div class="container">
-          <div class="how-head reveal">
-            <span class="section-eyebrow">How It Works</span>
-            <h2 id="how-heading" class="section-heading">Three simple steps</h2>
-            <p class="section-subheading">Find what interests you, fill out a quick form, and you're ready to participate.</p>
-          </div>
-
-          <div class="how-grid">
-            <article class="step-card reveal">
-              <div class="step-num">1</div>
-              <h3 class="step-title">Browse Available Events</h3>
-              <p class="step-desc">Discover upcoming school events and academic conferences by category or month.</p>
-            </article>
-            <article class="step-card reveal delay-1">
-              <div class="step-num">2</div>
-              <h3 class="step-title">Register or Submit Requirements</h3>
-              <p class="step-desc">Complete the registration form, and upload your research paper if applicable.</p>
-            </article>
-            <article class="step-card reveal delay-2">
-              <div class="step-num">3</div>
-              <h3 class="step-title">Receive Updates &amp; Participate</h3>
-              <p class="step-desc">Get email confirmations, your digital pass, and friendly reminders along the way.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
       {{-- Latest Announcements --}}
       <section class="announce" id="announcements" aria-labelledby="announce-heading">
         <div class="container">
@@ -486,6 +370,121 @@ $regions = [
         </div>
       </section>
 
+      {{-- Why Use This System --}}
+      <section class="features" id="features" aria-labelledby="features-heading">
+        <div class="container">
+          <div class="features-head reveal">
+            <span class="section-eyebrow">Why Use This System</span>
+            <h2 id="features-heading" class="section-heading">Everything you need for academic events</h2>
+            <p class="section-subheading">From quick event sign-ups to research conference submissions and post-event evaluations — all powered by a single, streamlined workflow.</p>
+          </div>
+
+          <div class="features-grid">
+            <article class="feature-card reveal">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M9 4h6a2 2 0 0 1 2 2v0H7v0a2 2 0 0 1 2-2z"></path>
+                  <rect x="5" y="4" width="14" height="17" rx="2"></rect>
+                  <path d="M9 12l2 2 4-4"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Event Registration</h3>
+              <p class="feature-desc">Sign up for school events or conferences in seconds with a guided, email-verified form.</p>
+            </article>
+
+            <article class="feature-card reveal delay-1">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 3 14 8 19 8"></polyline>
+                  <line x1="8" y1="13" x2="16" y2="13"></line>
+                  <line x1="8" y1="17" x2="14" y2="17"></line>
+                </svg>
+              </span>
+              <h3 class="feature-title">Conference Submission</h3>
+              <p class="feature-desc">Submit your research paper for review and track its approval status through the portal.</p>
+            </article>
+
+            <article class="feature-card reveal delay-2">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <polygon points="12,3 14.7,9 21,9.7 16.5,14 17.8,20.4 12,17.3 6.2,20.4 7.5,14 3,9.7 9.3,9"></polygon>
+                </svg>
+              </span>
+              <h3 class="feature-title">Evaluation Forms</h3>
+              <p class="feature-desc">Share your feedback to help organizers improve future events with star ratings and comments.</p>
+            </article>
+
+            <article class="feature-card reveal delay-3">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                  <path d="M14 14h3v3h-3z"></path>
+                  <path d="M20 14v3"></path>
+                  <path d="M14 20h3"></path>
+                  <path d="M20 20h1"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Digital QR Pass / ID</h3>
+              <p class="feature-desc">Get a digital event pass for fast, paperless check-in straight at the venue entrance.</p>
+            </article>
+
+            <article class="feature-card reveal delay-4">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                  <path d="M3 7l9 6 9-6"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Email Notifications</h3>
+              <p class="feature-desc">Receive confirmations, reminders, and important updates directly in your inbox.</p>
+            </article>
+
+            <article class="feature-card reveal delay-5">
+              <span class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M3 12h4l3-8 4 16 3-8h4"></path>
+                </svg>
+              </span>
+              <h3 class="feature-title">Event Status Tracking</h3>
+              <p class="feature-desc">See upcoming, ongoing, and completed events at a glance with clear visual cues.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {{-- How It Works --}}
+      <section class="how" id="how-it-works" aria-labelledby="how-heading">
+        <div class="container">
+          <div class="how-head reveal">
+            <span class="section-eyebrow">How It Works</span>
+            <h2 id="how-heading" class="section-heading">Three simple steps</h2>
+            <p class="section-subheading">Find what interests you, fill out a quick form, and you're ready to participate.</p>
+          </div>
+
+          <div class="how-grid">
+            <article class="step-card reveal">
+              <div class="step-num">1</div>
+              <h3 class="step-title">Browse Available Events</h3>
+              <p class="step-desc">Discover upcoming school events and academic conferences by category or month.</p>
+            </article>
+            <article class="step-card reveal delay-1">
+              <div class="step-num">2</div>
+              <h3 class="step-title">Register or Submit Requirements</h3>
+              <p class="step-desc">Complete the registration form, and upload your research paper if applicable.</p>
+            </article>
+            <article class="step-card reveal delay-2">
+              <div class="step-num">3</div>
+              <h3 class="step-title">Receive Updates &amp; Participate</h3>
+              <p class="step-desc">Get email confirmations, your digital pass, and friendly reminders along the way.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
       {{-- Footer --}}
       <footer class="footer" aria-label="Site footer">
         <div class="container">
@@ -570,10 +569,30 @@ $regions = [
       'Faculty',
       'Admin',
     ];
-    const ROLES = [
+    const CONFERENCE_ROLES = [
+      'Presentor',
+      'Participant',
+    ];
+    const SCHOOL_ROLES = [
       'Exhibitor',
       'Participant',
     ];
+
+    function isConferenceEvent(eventData) {
+      return String(eventData?.type || '').trim() === 'Conference Event';
+    }
+
+    function rolesForEvent(eventData) {
+      return isConferenceEvent(eventData) ? CONFERENCE_ROLES : SCHOOL_ROLES;
+    }
+
+    function isPresenterRole(role) {
+      return String(role || '').trim().toLowerCase() === 'presentor';
+    }
+
+    function requiresPaperUpload(eventData, role) {
+      return isConferenceEvent(eventData) && isPresenterRole(role);
+    }
     const REGISTER_SEND_URL = @json(route('registration.send-verification'));
     const REGISTER_RESEND_URL = @json(route('registration.resend-code'));
     const REGISTER_VERIFY_URL = @json(route('registration.verify-code'));
@@ -703,7 +722,7 @@ $regions = [
     }
 
     function renderFormStep() {
-      const showUpload = selectedEvent.type === 'Conference Event';
+      const eventRoles = rolesForEvent(selectedEvent);
       const attendanceFormat = escapeHtml(getAttendanceFormat(selectedEvent));
       modalContent.innerHTML = `
                 <div class="event-head">
@@ -761,13 +780,13 @@ $regions = [
                             <div class="field"><label>Email Address *</label><input type="email" name="email" required></div>
                             <div class="field"><label>School / University *</label><input name="schoolUniversity" placeholder="Enter school / university" required></div>
                             <div class="field"><label>User Type *</label><select name="userType" required>${USER_TYPES.map(u => `<option value="${u}">${u}</option>`).join('')}</select></div>
-                            <div class="field"><label>Role *</label><select name="role" required>${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
+                            <div class="field"><label>Role *</label><select name="role" id="registrationRole" required>${eventRoles.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
                         </div>
-                        <div class="upload-wrap" style="display:${showUpload ? 'block' : 'none'}">
+                        <div class="upload-wrap" id="paperUploadWrap" style="display:none">
                             <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
                             <div class="upload-note">Your paper will be subject to admin review before your registration is fully confirmed.</div>
                           <label class="upload-drop" id="paperUploadDrop">
-                            <input class="upload-file-input" type="file" name="paperFile" accept=".pdf" ${showUpload ? 'required' : ''}>
+                            <input class="upload-file-input" type="file" name="paperFile" accept=".pdf">
                                 <span class="upload-drop-icon" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
                                         <path d="M12 16V6"></path>
@@ -788,11 +807,29 @@ $regions = [
             `;
       const registrationForm = document.getElementById('registrationForm');
       const submitButton = document.getElementById('continueRegistrationBtn');
+      const roleSelect = document.getElementById('registrationRole');
+      const paperUploadWrap = document.getElementById('paperUploadWrap');
       const paperInput = registrationForm.querySelector('.upload-file-input');
       const paperUploadDrop = document.getElementById('paperUploadDrop');
       const paperUploadReady = document.getElementById('paperUploadReady');
       const paperUploadMeta = document.getElementById('paperUploadMeta');
       const uploadDropMain = registrationForm.querySelector('.upload-drop-main');
+
+      function syncPaperUploadVisibility() {
+        const showPaper = requiresPaperUpload(selectedEvent, roleSelect?.value || '');
+
+        if (paperUploadWrap) {
+          paperUploadWrap.style.display = showPaper ? 'block' : 'none';
+        }
+
+        if (paperInput) {
+          paperInput.required = showPaper;
+          if (!showPaper) {
+            paperInput.value = '';
+            setUploadUi(null);
+          }
+        }
+      }
 
       function formatBytes(bytes) {
         if (!Number.isFinite(bytes) || bytes <= 0) {
@@ -819,7 +856,7 @@ $regions = [
       }
 
       function setUploadUi(file) {
-        if (!showUpload || !paperUploadDrop || !paperUploadReady || !paperUploadMeta || !uploadDropMain) {
+        if (!requiresPaperUpload(selectedEvent, roleSelect?.value || '') || !paperUploadDrop || !paperUploadReady || !paperUploadMeta || !uploadDropMain) {
           return;
         }
 
@@ -847,12 +884,18 @@ $regions = [
         submitButton.textContent = 'Continue Registration (PDF Ready)';
       }
 
-      if (showUpload && paperInput) {
+      if (roleSelect) {
+        roleSelect.addEventListener('change', syncPaperUploadVisibility);
+      }
+
+      if (paperInput) {
         paperInput.addEventListener('change', () => {
           const selectedFile = paperInput.files && paperInput.files.length > 0 ? paperInput.files[0] : null;
           setUploadUi(selectedFile);
         });
       }
+
+      syncPaperUploadVisibility();
 
       registrationForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -868,8 +911,9 @@ $regions = [
         payload.append('school_from', String(formData.get('userType') || '').trim());
         payload.append('school_level', String(formData.get('role') || '').trim());
 
+        const selectedRole = String(formData.get('role') || '').trim();
         const paperFile = formData.get('paperFile');
-        if (paperFile instanceof File && paperFile.size > 0) {
+        if (requiresPaperUpload(selectedEvent, selectedRole) && paperFile instanceof File && paperFile.size > 0) {
           payload.append('paper_file', paperFile);
         }
 
@@ -903,7 +947,7 @@ $regions = [
           message.textContent = error instanceof Error ? error.message : 'Unable to continue registration.';
         } finally {
           submitButton.disabled = false;
-          if (showUpload && paperInput) {
+          if (requiresPaperUpload(selectedEvent, roleSelect?.value || '') && paperInput) {
             const selectedFile = paperInput.files && paperInput.files.length > 0 ? paperInput.files[0] : null;
             setUploadUi(selectedFile);
           } else {

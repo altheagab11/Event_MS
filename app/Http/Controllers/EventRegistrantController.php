@@ -35,7 +35,7 @@ class EventRegistrantController extends Controller
 
             if ($activeEventRegistrant) {
                 throw ValidationException::withMessages([
-                    'email' => 'You are already registered for this event.',
+                    'email' => 'Email address already registered for this event.',
                 ]);
             }
 
@@ -50,7 +50,7 @@ class EventRegistrantController extends Controller
 
             if ($legacyActiveRegistration) {
                 throw ValidationException::withMessages([
-                    'email' => 'You are already registered for this event.',
+                    'email' => 'Email address already registered for this event.',
                 ]);
             }
 
@@ -78,7 +78,9 @@ class EventRegistrantController extends Controller
                 'status' => 'pending',
             ], 'registration_id');
 
-            if ($isConferenceEvent) {
+            $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
+
+            if ($requiresPaper) {
                 $finalPaperPath = $this->movePendingPaperToFinalPath(
                     (string) $verification->paper_temp_path,
                     $event->event_id,
