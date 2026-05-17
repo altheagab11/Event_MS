@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attendance;
 use App\Models\Evaluation;
 use App\Models\Event;
 use App\Models\Paper;
@@ -13,15 +12,24 @@ class AdminDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $totalParticipants = Registration::query()
+        $participantRegistrations = Registration::query()
             ->where(function ($query) {
                 $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', 'participant'))
                     ->orWhereNotNull('event_registrant_id');
-            })
+            });
+
+        $totalParticipants = (clone $participantRegistrations)->count();
+
+        $pendingParticipants = (clone $participantRegistrations)
+            ->where('status', 'pending')
             ->count();
 
         $pendingPapers = Paper::query()
             ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
+
+        $approvedPapers = Paper::query()
+            ->where('status', 'accepted')
             ->count();
 
         $activeEvents = Event::query()
@@ -32,20 +40,17 @@ class AdminDashboardController extends Controller
             ->whereDate('event_date', '>=', now()->startOfDay())
             ->count();
 
-        $totalCheckedIn = Attendance::query()
-            ->whereNotNull('check_in_time')
-            ->count();
-
         $papersSubmitted = Paper::query()->count();
 
         $evaluationsCount = Evaluation::query()->count();
         $avgScore = (float) number_format((float) (Evaluation::query()->avg('score') ?? 0), 1);
 
         return view('admin.dashboard', compact(
-            'totalParticipants',
-            'pendingPapers',
             'activeEvents',
-            'totalCheckedIn',
+            'totalParticipants',
+            'pendingParticipants',
+            'approvedPapers',
+            'pendingPapers',
             'papersSubmitted',
             'evaluationsCount',
             'avgScore'

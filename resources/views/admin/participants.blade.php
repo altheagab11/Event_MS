@@ -2,20 +2,16 @@
 
 @section('content')
 @php
-    $eventFilterList = $participants
-        ->map(fn ($participant) => [
-            'id' => $participant['event_id'] ?? null,
-            'name' => $participant['event_name'] ?? '',
-        ])
-        ->filter(fn ($event) => ! empty($event['id']) && $event['name'] !== '')
-        ->unique('id')
-        ->sortBy('name')
-        ->values();
     $statusBadgeClasses = [
         'green' => 'border-[#22C55E]/40 bg-[#22C55E]/15 text-[#86EFAC]',
         'gold'  => 'border-[#FACC15]/40 bg-[#FACC15]/15 text-[#FACC15]',
         'red'   => 'border-[#EF4444]/40 bg-[#EF4444]/15 text-[#FCA5A5]',
     ];
+    $formatEventTypeLabel = static function (?string $eventType): string {
+        return str_contains(strtolower(trim((string) $eventType)), 'conference')
+            ? 'Conference Event'
+            : 'School Event';
+    };
 @endphp
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
@@ -65,16 +61,34 @@
                             </span>
                         </div>
 
-                        <select id="participantEventFilter" class="h-11 w-full rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-5 text-sm font-black text-[#F8FAFC] outline-none transition focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30 md:w-[260px]" aria-label="Filter by event">
-                            <option value="all" class="bg-[#0D1B31] text-[#F8FAFC]">All Events</option>
-                            @foreach ($eventFilterList as $event)
-                                <option value="{{ $event['id'] }}" class="bg-[#0D1B31] text-[#F8FAFC]">{{ $event['name'] }}</option>
-                            @endforeach
-                        </select>
+                        <div class="flex w-full min-w-0 flex-row flex-nowrap items-center gap-3 lg:w-auto lg:justify-end">
+                            <div class="relative min-w-0 flex-1 lg:w-[240px] lg:flex-none">
+                                <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#64748B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input
+                                    id="participantSearchInput"
+                                    type="search"
+                                    placeholder="Search participants..."
+                                    class="h-11 w-full rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 pl-12 pr-4 text-sm font-medium text-[#F8FAFC] outline-none transition placeholder:text-[#64748B] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30"
+                                    aria-label="Search participants"
+                                >
+                            </div>
+                            <select id="participantStatusFilter" class="h-11 w-[150px] shrink-0 rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-4 text-sm font-black text-[#F8FAFC] outline-none transition focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30" aria-label="Filter by approval status">
+                                <option value="all" class="bg-[#0D1B31] text-[#F8FAFC]">All Status</option>
+                                <option value="pending" class="bg-[#0D1B31] text-[#F8FAFC]">Pending</option>
+                                <option value="approved" class="bg-[#0D1B31] text-[#F8FAFC]">Approved</option>
+                            </select>
+                            <select id="participantEventTypeFilter" class="h-11 w-[175px] shrink-0 rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-4 text-sm font-black text-[#F8FAFC] outline-none transition focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30" aria-label="Filter by event type">
+                                <option value="all" class="bg-[#0D1B31] text-[#F8FAFC]">All Event Types</option>
+                                <option value="school" class="bg-[#0D1B31] text-[#F8FAFC]">School Event</option>
+                                <option value="conference" class="bg-[#0D1B31] text-[#F8FAFC]">Conference Event</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full min-w-[900px] border-collapse">
+                        <table class="w-full min-w-[1050px] border-collapse">
                             <thead>
                                 <tr class="border-b border-[#1E3357] bg-[#0D1B31]/70">
                                     <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
@@ -82,6 +96,9 @@
                                     </th>
                                     <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Registered Event
+                                    </th>
+                                    <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
+                                        Event Type
                                     </th>
                                     <th class="px-5 py-5 text-left text-xs font-black uppercase tracking-widest text-[#94A3B8]">
                                         Status
@@ -97,8 +114,22 @@
                                         $name = trim($participant['name'] ?? '');
                                         $initial = $name !== '' ? \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($name, 0, 1)) : '?';
                                         $badgeClass = $statusBadgeClasses[$participant['status_class'] ?? ''] ?? $statusBadgeClasses['gold'];
+                                        $eventTypeLabel = $formatEventTypeLabel($participant['event_type'] ?? '');
+                                        $isConferenceEvent = $eventTypeLabel === 'Conference Event';
+                                        $eventTypeKey = $isConferenceEvent ? 'conference' : 'school';
+                                        $searchText = strtolower(trim(implode(' ', [
+                                            $participant['name'] ?? '',
+                                            $participant['email'] ?? '',
+                                            $participant['event_name'] ?? '',
+                                        ])));
                                     @endphp
-                                    <tr class="border-b border-[#1E3357]/60 transition last:border-b-0 hover:bg-[#13284A]/60" data-participant-row data-event-id="{{ $participant['event_id'] }}">
+                                    <tr
+                                        class="border-b border-[#1E3357]/60 transition last:border-b-0 hover:bg-[#13284A]/60"
+                                        data-participant-row
+                                        data-registration-status="{{ $participant['registration_status'] ?? '' }}"
+                                        data-event-type="{{ $eventTypeKey }}"
+                                        data-search-text="{{ $searchText }}"
+                                    >
                                         <td class="px-5 py-5">
                                             <div class="flex items-center gap-4">
                                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3B82F6] text-sm font-black text-white">
@@ -120,6 +151,11 @@
                                             </p>
                                         </td>
                                         <td class="px-5 py-5">
+                                            <span class="inline-flex rounded-full border px-3 py-1.5 text-xs font-black {{ $isConferenceEvent ? 'border-[#60A5FA]/40 bg-[#60A5FA]/15 text-[#93C5FD]' : 'border-[#94A3B8]/30 bg-[#94A3B8]/10 text-[#CBD5E1]' }}">
+                                                {{ $eventTypeLabel }}
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-5">
                                             <span class="inline-flex rounded-full border px-4 py-2 text-xs font-black {{ $badgeClass }}">
                                                 {{ $participant['status_label'] }}
                                             </span>
@@ -137,7 +173,7 @@
                                 @empty
                                 @endforelse
                                 <tr id="participantsEmptyState" class="{{ $participants->isEmpty() ? '' : 'hidden' }}">
-                                    <td id="participantsEmptyMessage" colspan="4" class="px-5 py-10 text-center text-sm font-medium text-[#94A3B8]">
+                                    <td id="participantsEmptyMessage" colspan="5" class="px-5 py-10 text-center text-sm font-medium text-[#94A3B8]">
                                         No participant registrations found yet.
                                     </td>
                                 </tr>
@@ -340,7 +376,9 @@
         const participantRows = @json($participants->values());
         const participantMap = new Map(participantRows.map(row => [String(row.registration_id), row]));
         const participantTableRows = Array.from(document.querySelectorAll('[data-participant-row]'));
-        const participantEventFilter = document.getElementById('participantEventFilter');
+        const participantSearchInput = document.getElementById('participantSearchInput');
+        const participantStatusFilter = document.getElementById('participantStatusFilter');
+        const participantEventTypeFilter = document.getElementById('participantEventTypeFilter');
         const participantsCount = document.getElementById('participantsCount');
         const participantsEmptyState = document.getElementById('participantsEmptyState');
         const participantsEmptyMessage = document.getElementById('participantsEmptyMessage');
@@ -387,13 +425,23 @@
         };
 
         function applyParticipantFilter() {
-            const selectedEventId = participantEventFilter ? participantEventFilter.value : 'all';
+            const searchQuery = (participantSearchInput ? participantSearchInput.value : '').trim().toLowerCase();
+            const selectedStatus = participantStatusFilter ? participantStatusFilter.value : 'all';
+            const selectedEventType = participantEventTypeFilter ? participantEventTypeFilter.value : 'all';
             let visibleCount = 0;
 
             participantTableRows.forEach(row => {
-                const rowEventId = row.dataset.eventId || '';
-                const shouldShow = selectedEventId === 'all' || rowEventId === selectedEventId;
+                const registrationStatus = (row.dataset.registrationStatus || '').toLowerCase();
+                const eventType = (row.dataset.eventType || '').toLowerCase();
+                const searchText = (row.dataset.searchText || '').toLowerCase();
+
+                const matchesSearch = searchQuery === '' || searchText.includes(searchQuery);
+                const matchesStatus = selectedStatus === 'all' || registrationStatus === selectedStatus;
+                const matchesEventType = selectedEventType === 'all' || eventType === selectedEventType;
+                const shouldShow = matchesSearch && matchesStatus && matchesEventType;
+
                 row.classList.toggle('hidden', !shouldShow);
+
                 if (shouldShow) {
                     visibleCount += 1;
                 }
@@ -406,9 +454,14 @@
             if (participantsEmptyState && participantsEmptyMessage) {
                 const showEmpty = visibleCount === 0;
                 participantsEmptyState.classList.toggle('hidden', !showEmpty);
-                participantsEmptyMessage.textContent = selectedEventId === 'all'
-                    ? 'No participant registrations found yet.'
-                    : 'No participants found for this event.';
+
+                if (searchQuery !== '') {
+                    participantsEmptyMessage.textContent = 'No participants match your search.';
+                } else if (selectedStatus !== 'all' || selectedEventType !== 'all') {
+                    participantsEmptyMessage.textContent = 'No participants match the selected filters.';
+                } else {
+                    participantsEmptyMessage.textContent = 'No participant registrations found yet.';
+                }
             }
         }
 
@@ -448,10 +501,19 @@
 
         window.closeParticipantDetailsModal = closeModal;
 
-        if (participantEventFilter) {
-            participantEventFilter.addEventListener('change', applyParticipantFilter);
-            applyParticipantFilter();
+        if (participantSearchInput) {
+            participantSearchInput.addEventListener('input', applyParticipantFilter);
         }
+
+        if (participantStatusFilter) {
+            participantStatusFilter.addEventListener('change', applyParticipantFilter);
+        }
+
+        if (participantEventTypeFilter) {
+            participantEventTypeFilter.addEventListener('change', applyParticipantFilter);
+        }
+
+        applyParticipantFilter();
 
         function openDetails(registrationId) {
             const participant = participantMap.get(String(registrationId));

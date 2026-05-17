@@ -1,12 +1,23 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 @php
-    $totalParticipants = $totalParticipants ?? 0;
-    $pendingPapers = $pendingPapers ?? 0;
     $activeEvents = $activeEvents ?? 0;
-    $totalCheckedIn = $totalCheckedIn ?? 0;
+    $totalParticipants = $totalParticipants ?? 0;
+    $pendingParticipants = $pendingParticipants ?? 0;
+    $approvedPapers = $approvedPapers ?? 0;
+    $pendingPapers = $pendingPapers ?? 0;
 @endphp
+<style>
+    .dashboard-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    .dashboard-stat-grid > div {
+        min-width: 0;
+    }
+</style>
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
 
@@ -42,10 +53,26 @@
                 </div>
 
                 {{-- Stat Cards --}}
-                <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                <div class="dashboard-stat-grid mt-12">
+
+                    {{-- Active Events --}}
+                    <div class="group relative min-w-0 overflow-hidden rounded-2xl border border-[#60A5FA]/30 bg-gradient-to-br from-[#10213A] via-[#13284A] to-[#0D1B31] p-7 text-[#F8FAFC] shadow-sm transition hover:border-[#60A5FA]/45">
+                        <div class="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-[#60A5FA]/10 blur-2xl"></div>
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#60A5FA]/40 bg-[#60A5FA]/10 text-[#60A5FA]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#60A5FA]">↗</span>
+                        </div>
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Active Events</p>
+                        <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($activeEvents) }}</h3>
+                        <p class="mt-1 text-xs text-[#CBD5E1]">School &amp; Conference</p>
+                    </div>
 
                     {{-- Total Participants --}}
-                    <div class="group rounded-2xl border border-[#60A5FA]/20 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#60A5FA]/40">
+                    <div class="group min-w-0 rounded-2xl border border-[#60A5FA]/20 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#60A5FA]/40">
                         <div class="flex items-start justify-between">
                             <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#60A5FA]/25 bg-[#10213A] text-[#60A5FA]">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -62,8 +89,39 @@
                         <p class="mt-1 text-xs text-[#94A3B8]">Across all events</p>
                     </div>
 
-                    {{-- Pending Papers (warning accent) --}}
-                    <div class="group rounded-2xl border border-[#FACC15]/25 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#FACC15]/45">
+
+                    {{-- Pending Participants --}}
+                    <div class="group min-w-0 rounded-2xl border border-[#F97316]/25 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#F97316]/45">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F97316]/30 bg-[#10213A] text-[#F97316]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#F97316]">↗</span>
+                        </div>
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Pending Participants</p>
+                        <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($pendingParticipants) }}</h3>
+                        <p class="mt-1 text-xs text-[#F97316]">Awaiting approval</p>
+                    </div>
+
+                    {{-- Approved Papers --}}
+                    <div class="group min-w-0 rounded-2xl border border-[#22C55E]/25 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#22C55E]/45">
+                        <div class="flex items-start justify-between">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#22C55E]/30 bg-[#10213A] text-[#22C55E]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-[#22C55E]">↗</span>
+                        </div>
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Approved Papers</p>
+                        <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($approvedPapers) }}</h3>
+                        <p class="mt-1 text-xs text-[#22C55E]">Accepted submissions</p>
+                    </div>
+
+                    {{-- Pending Papers --}}
+                    <div class="group min-w-0 rounded-2xl border border-[#FACC15]/25 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#FACC15]/45">
                         <div class="flex items-start justify-between">
                             <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#FACC15]/30 bg-[#10213A] text-[#FACC15]">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -72,49 +130,9 @@
                             </div>
                             <span class="text-[#FACC15]">↗</span>
                         </div>
-
-                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">
-                            Pending Papers
-                        </p>
+                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Pending Papers</p>
                         <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($pendingPapers) }}</h3>
                         <p class="mt-1 text-xs text-[#FACC15]">Awaiting review</p>
-                    </div>
-
-                    {{-- Active Events (feature highlight) --}}
-                    <div class="group relative overflow-hidden rounded-2xl border border-[#60A5FA]/30 bg-gradient-to-br from-[#10213A] via-[#13284A] to-[#0D1B31] p-7 text-[#F8FAFC] shadow-sm transition hover:border-[#60A5FA]/45">
-                        <div class="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-[#60A5FA]/10 blur-2xl"></div>
-                        <div class="flex items-start justify-between">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#60A5FA]/40 bg-[#60A5FA]/10 text-[#60A5FA]">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
-                                </svg>
-                            </div>
-                            <span class="text-[#60A5FA]">↗</span>
-                        </div>
-
-                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">
-                            Active Events
-                        </p>
-                        <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($activeEvents) }}</h3>
-                        <p class="mt-1 text-xs text-[#CBD5E1]">School &amp; Conference</p>
-                    </div>
-
-                    {{-- Total Checked-In (success accent) --}}
-                    <div class="group rounded-2xl border border-[#22C55E]/25 bg-[#1E375A]/65 p-7 shadow-lg shadow-black/20 backdrop-blur-md transition hover:border-[#22C55E]/45">
-                        <div class="flex items-start justify-between">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#22C55E]/30 bg-[#10213A] text-[#22C55E]">
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <span class="text-[#22C55E]">↗</span>
-                        </div>
-
-                        <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">
-                            Total Checked-In
-                        </p>
-                        <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($totalCheckedIn) }}</h3>
-                        <p class="mt-1 text-xs text-[#22C55E]">Attendance recorded</p>
                     </div>
                 </div>
 
