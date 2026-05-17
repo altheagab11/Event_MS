@@ -32,8 +32,8 @@ class Event extends Model
     {
         return [
             'event_date' => 'date',
-            'start_date' => 'date',
-            'end_date' => 'date',
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
         ];
     }
 

@@ -36,37 +36,8 @@
         ->unique()
         ->sort()
         ->values();
-    // Ensure newest-created events appear first in the grid (upper-left)
-    // Robust sort: prefer `created_at`, then `event_date`/`start_date`, then `id` as fallback.
-    $events = $events->sortByDesc(function ($event) {
-        $ts = 0;
-        if (! empty($event->created_at)) {
-            if ($event->created_at instanceof \DateTimeInterface) {
-                $ts = (int) $event->created_at->getTimestamp();
-            } else {
-                $t = strtotime((string) $event->created_at);
-                $ts = $t === false ? 0 : (int) $t;
-            }
-        } elseif (! empty($event->event_date)) {
-            if ($event->event_date instanceof \DateTimeInterface) {
-                $ts = (int) $event->event_date->getTimestamp();
-            } else {
-                $t = strtotime((string) $event->event_date);
-                $ts = $t === false ? 0 : (int) $t;
-            }
-        } elseif (! empty($event->start_date)) {
-            if ($event->start_date instanceof \DateTimeInterface) {
-                $ts = (int) $event->start_date->getTimestamp();
-            } else {
-                $t = strtotime((string) $event->start_date);
-                $ts = $t === false ? 0 : (int) $t;
-            }
-        } elseif (! empty($event->event_id) || ! empty($event->id)) {
-            $ts = (int) ($event->event_id ?? $event->id ?? 0);
-        }
-
-        return $ts;
-    })->values();
+    // Newest-created first (event_id is auto-increment).
+    $events = $events->sortByDesc('event_id')->values();
 @endphp
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
@@ -195,11 +166,12 @@
         <section id="eventsContainer" class="mt-7 grid grid-cols-1 gap-7 lg:grid-cols-2 2xl:grid-cols-3">
             @foreach ($events as $event)
                 @php
-                    $eventDate = $event->event_date
-                        ? $event->event_date->format('F j, Y')
+                    $displaySchedule = $event->start_date ?? $event->event_date;
+                    $eventDate = $displaySchedule
+                        ? $displaySchedule->format('F j, Y g:i A')
                         : 'Date TBA';
-                    $eventStartDateValue = $event->start_date ? $event->start_date->format('Y-m-d') : '';
-                    $eventEndDateValue = $event->end_date ? $event->end_date->format('Y-m-d') : '';
+                    $eventStartDateValue = $event->start_date ? $event->start_date->format('Y-m-d\TH:i') : '';
+                    $eventEndDateValue = $event->end_date ? $event->end_date->format('Y-m-d\TH:i') : '';
                     $eventTypeRaw = strtolower((string) ($event->event_type ?? ''));
                     $isConference = str_contains($eventTypeRaw, 'conference');
                     $eventTypeLabel = $isConference ? 'Conference Event' : 'School Event';
@@ -489,16 +461,17 @@
                         </h3>
 
                         <div class="mt-4 border-t border-[#1E3357] pt-5">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                                 <div>
                                     <label class="mb-3 flex items-center gap-1 text-sm font-black uppercase tracking-widest text-[#94A3B8]">
                                         <span class="text-[#60A5FA]">□</span>
-                                        Start Date
+                                        Start Date & Time
                                     </label>
 
                                     <input
-                                        type="date"
+                                        type="datetime-local"
+                                        id="createStartDateInput"
                                         name="start_date"
                                         value="{{ old('start_date') }}"
                                         class="h-14 w-full rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-5 text-base text-[#F8FAFC] outline-none transition [color-scheme:dark] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30"
@@ -509,11 +482,12 @@
                                 <div>
                                     <label class="mb-3 flex items-center gap-1 text-sm font-black uppercase tracking-widest text-[#94A3B8]">
                                         <span class="text-[#60A5FA]">□</span>
-                                        End Date
+                                        End Date & Time
                                     </label>
 
                                     <input
-                                        type="date"
+                                        type="datetime-local"
+                                        id="createEndDateInput"
                                         name="end_date"
                                         value="{{ old('end_date') }}"
                                         class="h-14 w-full rounded-2xl border border-[#60A5FA]/20 bg-[#0D1B31]/70 px-5 text-base text-[#F8FAFC] outline-none transition [color-scheme:dark] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/30"
@@ -521,7 +495,7 @@
                                     @error('end_date') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
                                 </div>
 
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label class="mb-3 flex items-center gap-1 text-sm font-black uppercase tracking-widest text-[#94A3B8]">
                                         <span class="text-[#60A5FA]">⌖</span>
                                         Location
@@ -946,17 +920,17 @@
                         </h3>
 
                         <div class="mt-4 border-t border-[#1E3357] pt-5">
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="mb-3 flex items-center gap-1 text-sm font-black uppercase tracking-widest text-[#94A3B8]">
                                         <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                                         </svg>
-                                        Start Date
+                                        Start Date & Time
                                     </label>
 
                                     <input
-                                        type="date"
+                                        type="datetime-local"
                                         id="editStartDateInput"
                                         name="start_date"
                                         value="{{ old('start_date') }}"
@@ -970,11 +944,11 @@
                                         <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                                         </svg>
-                                        End Date
+                                        End Date & Time
                                     </label>
 
                                     <input
-                                        type="date"
+                                        type="datetime-local"
                                         id="editEndDateInput"
                                         name="end_date"
                                         value="{{ old('end_date') }}"
@@ -983,7 +957,7 @@
                                     @error('end_date', 'editEvent') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
                                 </div>
 
-                                <div>
+                                <div class="sm:col-span-2">
                                     <label class="mb-3 flex items-center gap-1 text-sm font-black uppercase tracking-widest text-[#94A3B8]">
                                         <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.438 7-11a7 7 0 10-14 0c0 6.562 7 11 7 11z"/>
@@ -1755,20 +1729,23 @@
         }
     });
 
-    // Prevent selecting past dates: set `min` on start/end date inputs to today
+    // Prevent selecting past schedule: set `min` on datetime-local inputs to now
     (function() {
         const pad = (n) => String(n).padStart(2, '0');
-        const now = new Date();
-        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        const nowStr = () => {
+            const now = new Date();
+            return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        };
 
         const setMins = () => {
-            const createStart = document.querySelector('#createEventModal input[name="start_date"]');
-            const createEnd = document.querySelector('#createEventModal input[name="end_date"]');
-            if (createStart) createStart.min = todayStr;
-            if (createEnd) createEnd.min = todayStr;
+            const minValue = nowStr();
+            const createStart = document.getElementById('createStartDateInput');
+            const createEnd = document.getElementById('createEndDateInput');
+            if (createStart) createStart.min = minValue;
+            if (createEnd) createEnd.min = minValue;
 
-            if (typeof editStartDateInput !== 'undefined' && editStartDateInput) editStartDateInput.min = todayStr;
-            if (typeof editEndDateInput !== 'undefined' && editEndDateInput) editEndDateInput.min = todayStr;
+            if (typeof editStartDateInput !== 'undefined' && editStartDateInput) editStartDateInput.min = minValue;
+            if (typeof editEndDateInput !== 'undefined' && editEndDateInput) editEndDateInput.min = minValue;
         };
 
         // Apply immediately on load

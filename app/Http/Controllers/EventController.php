@@ -46,7 +46,7 @@ class EventController extends Controller
           'location' => $event->location ?: 'TBA',
           'attendance_format' => $event->attendance_format ?: 'Not Specified',
           'description' => $event->description ?: 'No description available.',
-          'status' => $eventEndDate->copy()->endOfDay()->isPast() ? 'ended' : 'active',
+          'status' => $eventEndDate->isPast() ? 'ended' : 'active',
           'image' => $event->banner_url
             ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60',
         ];
@@ -61,18 +61,20 @@ class EventController extends Controller
   public function index()
   {
     $events = Event::query()
-      ->orderByDesc('event_date')
+      ->orderByDesc('event_id')
       ->get();
 
-    $today = Carbon::today();
-    $events->each(function (Event $event) use ($today): void {
+    $events->each(function (Event $event): void {
       $endDate = $event->end_date ?? $event->event_date;
       if ($endDate !== null && ! $endDate instanceof Carbon) {
         $endDate = Carbon::parse((string) $endDate);
       }
+      if ($endDate instanceof Carbon && ! $event->end_date && $event->event_date) {
+        $endDate = $endDate->copy()->endOfDay();
+      }
 
       $isArchived = (string) $event->status === 'archived';
-      $isDone = ! $isArchived && $endDate instanceof Carbon && $endDate->lt($today);
+      $isDone = ! $isArchived && $endDate instanceof Carbon && $endDate->isPast();
 
       $event->setAttribute('computed_status', $isArchived ? 'archived' : ($isDone ? 'done' : 'active'));
       $event->setAttribute('computed_status_label', $isArchived ? 'Archived' : ($isDone ? 'Done' : 'Active'));
@@ -120,7 +122,7 @@ class EventController extends Controller
   public function store(StoreEventRequest $request)
   {
     $payload = $request->safe()->except('banner_image');
-    $payload['event_date'] = $payload['start_date'];
+    $payload = $this->normalizeSchedulePayload($payload);
 
     if ($request->hasFile('banner_image')) {
       $this->ensurePublicStorageLinkExists();
@@ -137,7 +139,7 @@ class EventController extends Controller
   public function update(UpdateEventRequest $request, Event $event): RedirectResponse
   {
     $payload = $request->safe()->except(['banner_image', 'editing_event_id']);
-    $payload['event_date'] = $payload['start_date'];
+    $payload = $this->normalizeSchedulePayload($payload);
 
     if ($request->hasFile('banner_image')) {
       $this->ensurePublicStorageLinkExists();
@@ -184,7 +186,7 @@ class EventController extends Controller
       ? $event->end_date
       : Carbon::parse((string) ($event->end_date ?: $event->event_date));
 
-    if ($eventEndDate->copy()->endOfDay()->isFuture()) {
+    if ($eventEndDate->isFuture()) {
       return redirect()
         ->route('admin.events')
         ->with('status_type', 'warning')
@@ -245,6 +247,22 @@ class EventController extends Controller
       ->route('admin.events')
       ->with('status_type', $statusType)
       ->with('status', $statusMessage);
+  }
+
+  /**
+   * @param  array<string, mixed>  $payload
+   * @return array<string, mixed>
+   */
+  private function normalizeSchedulePayload(array $payload): array
+  {
+    $startAt = Carbon::parse((string) $payload['start_date']);
+    $endAt = Carbon::parse((string) $payload['end_date']);
+
+    $payload['start_date'] = $startAt->format('Y-m-d H:i:s');
+    $payload['end_date'] = $endAt->format('Y-m-d H:i:s');
+    $payload['event_date'] = $startAt->toDateString();
+
+    return $payload;
   }
 
   private function deleteStoredBannerIfLocal(?string $bannerImage): void
