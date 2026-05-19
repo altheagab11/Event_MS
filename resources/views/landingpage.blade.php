@@ -6,39 +6,6 @@ $months = [
 ['value' => 9, 'label' => 'Oct'], ['value' => 10, 'label' => 'Nov'], ['value' => 11, 'label' => 'Dec'],
 ];
 
-$announcements = [
-[
-'id' => 1,
-'emoji' => '📢',
-'title' => 'Call for Papers: Tech Innovations Summit',
-'description' => 'Call for Papers for the Tech Innovations Summit is now open! Register and submit your PDF manuscripts until May 1, 2026.',
-'type' => 'important',
-'eventId' => 2,
-'buttonText' => 'Register & Submit Paper',
-'cta' => 'register',
-],
-[
-'id' => 2,
-'emoji' => '🏀',
-'title' => 'Intramurals 2026 Team Registration',
-'description' => 'Team registrations for Basketball and Volleyball are now ongoing at the Student Council Office.',
-'type' => 'info',
-'eventId' => 4,
-'buttonText' => 'View Intramurals',
-'cta' => 'events',
-],
-[
-'id' => 3,
-'emoji' => '📝',
-'title' => 'Foundation Day Reminders',
-'description' => 'Attendance is mandatory for all freshmen and sophomores. Please register early to secure your event kit.',
-'type' => 'info',
-'eventId' => 1,
-'buttonText' => 'Register Now',
-'cta' => 'register',
-],
-];
-
 $regions = [
 'NCR (National Capital Region)', 'CAR (Cordillera Administrative Region)', 'Region I (Ilocos Region)', 'Region II (Cagayan Valley)',
 'Region III (Central Luzon)', 'Region IV-A (CALABARZON)', 'MIMAROPA Region', 'Region V (Bicol Region)', 'Region VI (Western Visayas)',
@@ -196,7 +163,7 @@ $regions = [
           </div>
 
           <div class="announce-grid">
-            @foreach ($announcements as $item)
+            @forelse ($announcements ?? [] as $item)
               @php $isImportant = ($item['type'] ?? '') === 'important'; @endphp
               <article class="announce-card {{ $isImportant ? 'important' : '' }} reveal">
                 <div class="announce-card-head">
@@ -207,13 +174,21 @@ $regions = [
                   <h3>{{ $item['title'] }}</h3>
                   <p>{{ $item['description'] }}</p>
                 </div>
-                @if (($item['cta'] ?? 'register') === 'events')
+                @if (($item['cta'] ?? 'register') === 'events' || empty($item['can_register']))
                   <a href="#events" class="announce-btn ghost">{{ $item['buttonText'] }}</a>
                 @else
                   <button type="button" class="announce-btn gold open-register" data-event-id="{{ $item['eventId'] }}">{{ $item['buttonText'] }}</button>
                 @endif
               </article>
-            @endforeach
+            @empty
+              <article class="announce-card reveal" style="grid-column: 1 / -1;">
+                <div class="announce-card-body">
+                  <h3>No announcements yet</h3>
+                  <p>Published events will appear here with registration updates and reminders.</p>
+                </div>
+                <a href="#events" class="announce-btn ghost">Browse Events</a>
+              </article>
+            @endforelse
           </div>
         </div>
       </section>
@@ -335,9 +310,9 @@ $regions = [
                   </p>
                   <p class="desc">{{ $event['description'] }}</p>
                   <div class="event-actions">
-                    @if ($event['status'] === 'active')
+                    @if ($event['can_register'])
                       <button class="event-btn open-register" data-event-id="{{ $event['id'] }}" type="button">
-                        <span>Register Now</span>
+                        <span>{{ $event['card_label'] }}</span>
                         <span class="cta-icon" aria-hidden="true">
                           <svg viewBox="0 0 24 24" role="img" focusable="false">
                             <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -346,13 +321,13 @@ $regions = [
                         </span>
                       </button>
                     @else
-                      <button class="event-btn outline open-evaluate" data-event-id="{{ $event['id'] }}" type="button">
-                        <span class="eval-icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" role="img" focusable="false">
-                            <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                          </svg>
-                        </span>
-                        <span>Evaluate Event</span>
+                      <button
+                        class="event-btn outline{{ $event['card_state'] === 'completed' ? ' event-btn-completed' : '' }}"
+                        type="button"
+                        disabled
+                        aria-disabled="true"
+                      >
+                        <span>{{ $event['card_label'] }}</span>
                       </button>
                     @endif
                   </div>
@@ -1226,7 +1201,7 @@ $regions = [
 
     function openRegister(eventId) {
       selectedEvent = EVENTS.find(e => e.id === Number(eventId));
-      if (!selectedEvent) return;
+      if (!selectedEvent || !selectedEvent.can_register) return;
       registrationData = {
         firstName: '',
         lastName: '',
@@ -1405,20 +1380,6 @@ $regions = [
     document.querySelectorAll('.open-register').forEach(btn => {
       btn.addEventListener('click', () => openRegister(btn.dataset.eventId));
     });
-    document.querySelectorAll('.open-evaluate').forEach(btn => {
-      btn.addEventListener('click', () => openEvaluate(btn.dataset.eventId));
-    });
-
-    const evaluateEventParam = new URLSearchParams(window.location.search).get('evaluate_event');
-    if (evaluateEventParam !== null) {
-      const targetEventId = Number(evaluateEventParam);
-      if (Number.isInteger(targetEventId) && targetEventId > 0) {
-        const targetEvent = EVENTS.find(event => event.id === targetEventId);
-        if (targetEvent && targetEvent.status === 'ended') {
-          openEvaluate(String(targetEventId));
-        }
-      }
-    }
 
     document.getElementById('closeModal').addEventListener('click', closeModal);
     eventModal.addEventListener('click', (e) => {

@@ -90,4 +90,47 @@ class Event extends Model
     {
         return $this->hasMany(EventRegistrant::class, 'event_id', 'event_id');
     }
+
+    /**
+     * @return array{label: string, state: string, can_register: bool}
+     */
+    public function publicRegistrationCardState(?Carbon $now = null): array
+    {
+        $now = $now ?? now();
+
+        $start = $this->start_date ?? $this->event_date;
+        if ($start !== null && ! $start instanceof Carbon) {
+            $start = Carbon::parse((string) $start);
+        }
+
+        $end = $this->end_date ?? $this->event_date;
+        if ($end !== null && ! $end instanceof Carbon) {
+            $end = Carbon::parse((string) $end);
+        }
+        if ($end instanceof Carbon && ! $this->end_date && $this->event_date) {
+            $end = $end->copy()->endOfDay();
+        }
+
+        if ($start instanceof Carbon && $now->lt($start)) {
+            return [
+                'label' => 'Register Now',
+                'state' => 'register',
+                'can_register' => true,
+            ];
+        }
+
+        if ($end instanceof Carbon && $now->lt($end)) {
+            return [
+                'label' => 'Registration Closed',
+                'state' => 'closed',
+                'can_register' => false,
+            ];
+        }
+
+        return [
+            'label' => 'Event Completed',
+            'state' => 'completed',
+            'can_register' => false,
+        ];
+    }
 }

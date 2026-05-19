@@ -6,6 +6,7 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\LandingAnnouncementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -20,22 +21,23 @@ class EventController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $events = Event::query()
+        $eventModels = Event::query()
             ->where(function ($query) {
                 $query->whereNull('status')
                     ->orWhere('status', '!=', 'archived');
             })
             ->orderByRaw('COALESCE(start_date, event_date) ASC')
-            ->get()
-            ->map(function (Event $event): array {
+            ->get();
+
+        $announcements = app(LandingAnnouncementService::class)->buildFromEvents($eventModels);
+
+        $events = $eventModels->map(function (Event $event): array {
                 $scheduleStart = $event->start_date ?? $event->event_date;
                 if ($scheduleStart !== null && ! $scheduleStart instanceof Carbon) {
                     $scheduleStart = Carbon::parse((string) $scheduleStart);
                 }
 
-                $eventEndDate = $event->end_date instanceof Carbon
-                  ? $event->end_date
-                  : Carbon::parse((string) ($event->end_date ?: $event->event_date));
+                $cardState = $event->publicRegistrationCardState();
 
                 return [
                     'id' => $event->event_id,
@@ -47,7 +49,9 @@ class EventController extends Controller
                     'location' => $event->location ?: 'TBA',
                     'attendance_format' => $event->attendance_format ?: 'Not Specified',
                     'description' => $event->description ?: 'No description available.',
-                    'status' => $eventEndDate->isPast() ? 'ended' : 'active',
+                    'card_label' => $cardState['label'],
+                    'card_state' => $cardState['state'],
+                    'can_register' => $cardState['can_register'],
                     'image' => $event->banner_url
                       ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60',
                 ];
@@ -56,6 +60,7 @@ class EventController extends Controller
 
         return view('landingpage', [
             'events' => $events,
+            'announcements' => $announcements,
         ]);
     }
 

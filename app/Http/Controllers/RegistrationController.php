@@ -108,11 +108,7 @@ class RegistrationController extends Controller
         $event = Event::query()->findOrFail($request->integer('event_id'));
         $isConferenceEvent = (string) $event->event_type === 'Conference';
 
-        if (Carbon::parse($event->event_date)->isPast()) {
-            throw ValidationException::withMessages([
-                'event_id' => 'Registration for this event is already closed.',
-            ]);
-        }
+        $this->ensureRegistrationAllowed($event);
 
         $email = Str::lower(trim((string) $request->input('email')));
 
@@ -288,6 +284,7 @@ class RegistrationController extends Controller
 
         $payload = (array) $verification->payload;
         $event = Event::query()->findOrFail($verification->event_id);
+        $this->ensureRegistrationAllowed($event);
         $isConferenceEvent = (string) $event->event_type === 'Conference';
         $participantRole = trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
         $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
@@ -329,6 +326,21 @@ class RegistrationController extends Controller
         }
 
         return substr($localPart, 0, 2).str_repeat('*', max(strlen($localPart) - 2, 1)).'@'.$domainPart;
+    }
+
+    private function ensureRegistrationAllowed(Event $event): void
+    {
+        $cardState = $event->publicRegistrationCardState();
+
+        if ($cardState['can_register']) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'event_id' => $cardState['state'] === 'completed'
+                ? 'This event has already ended.'
+                : 'Registration for this event is closed.',
+        ]);
     }
 
     private function assertRealMailerConfiguration(): void
