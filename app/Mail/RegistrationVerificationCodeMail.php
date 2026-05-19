@@ -23,7 +23,7 @@ class RegistrationVerificationCodeMail extends Mailable
   public function envelope(): Envelope
   {
     return new Envelope(
-      subject: 'NU Lipa EMS Registration Verification Code'
+      subject: 'EMS Registration Verification Code'
     );
   }
 
