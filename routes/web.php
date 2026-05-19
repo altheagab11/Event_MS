@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AdminEvaluationsController;
 use App\Http\Controllers\AdminParticipantsController;
 use App\Http\Controllers\EventEvaluationController;
+use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\RegistrationController;
@@ -51,6 +52,8 @@ Route::middleware('auth')->group(function () {
   Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
   Route::put('/admin/events/{event:event_id}', [EventController::class, 'update'])->name('admin.events.update');
   Route::patch('/admin/events/{event:event_id}/archive', [EventController::class, 'archive'])->name('admin.events.archive');
+  Route::get('/admin/events/{event:event_id}/attendance', [EventAttendanceController::class, 'modal'])
+    ->name('admin.events.attendance');
   Route::post('/admin/events/{event:event_id}/send-evaluation-reminder', [EventController::class, 'sendEvaluationReminder'])->name('admin.events.send-evaluation-reminder');
 
   Route::get('/admin/participants', [AdminParticipantsController::class, 'index'])

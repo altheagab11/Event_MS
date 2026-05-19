@@ -1,6 +1,196 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .attendance-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 24px;
+    }
+
+    .attendance-modal-overlay.hidden {
+        display: none;
+    }
+
+    .attendance-modal {
+        width: 90%;
+        max-width: 1100px;
+        max-height: 85vh;
+        background: #0b1b31;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .attendance-modal-header {
+        padding: 22px 28px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        background: #0d1b31;
+    }
+
+    .attendance-modal-body {
+        padding: 24px 28px;
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        background: #0b1b31;
+    }
+
+    .attendance-event-info {
+        border: 1px solid rgba(96, 165, 250, 0.2);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        background: rgba(13, 27, 49, 0.7);
+    }
+
+    .attendance-summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .attendance-summary-card {
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .attendance-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .attendance-search {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+    }
+
+    .attendance-search input {
+        width: 100%;
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid rgba(96, 165, 250, 0.2);
+        background: rgba(13, 27, 49, 0.7);
+        padding: 0 16px 0 44px;
+        color: #f8fafc;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .attendance-search input:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+    }
+
+    .attendance-search svg {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: #64748b;
+        pointer-events: none;
+    }
+
+    .attendance-filter select {
+        height: 44px;
+        min-width: 200px;
+        border-radius: 14px;
+        border: 1px solid rgba(96, 165, 250, 0.2);
+        background: rgba(13, 27, 49, 0.7);
+        padding: 0 16px;
+        color: #f8fafc;
+        font-size: 14px;
+        font-weight: 700;
+        outline: none;
+    }
+
+    .attendance-table-wrapper {
+        max-height: 320px;
+        overflow: auto;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        border-radius: 14px;
+        background: rgba(13, 27, 49, 0.4);
+    }
+
+    .attendance-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+    }
+
+    .attendance-table thead {
+        position: sticky;
+        top: 0;
+        background: #0b1b31;
+        z-index: 2;
+    }
+
+    .attendance-table th {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        border-bottom: 1px solid rgba(30, 51, 87, 1);
+    }
+
+    .attendance-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(30, 51, 87, 0.6);
+        font-size: 14px;
+        color: #cbd5e1;
+    }
+
+    .attendance-table tbody tr:hover {
+        background: rgba(19, 40, 74, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .attendance-modal-overlay {
+            padding: 16px;
+        }
+
+        .attendance-modal {
+            width: 95%;
+            max-height: 90vh;
+        }
+
+        .attendance-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .attendance-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .attendance-filter select {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>
 @php
     $eventCategoryList = $events
         ->map(function ($event) {
@@ -281,6 +471,7 @@
                                     data-send-evaluation-url="{{ route('admin.events.send-evaluation-reminder', ['event' => $event->event_id]) }}"
                                     data-evaluation-recipient-count="{{ $evaluationRecipientCount }}"
                                     data-evaluation-already-sent="{{ $evaluationAlreadySent ? 1 : 0 }}"
+                                    data-event-attendance-url="{{ route('admin.events.attendance', ['event' => $event->event_id]) }}"
                                 >
                                     Manage Event ->
                                 </button>
@@ -681,8 +872,18 @@
                         </div>
                     </div>
 
-                    {{-- EDIT DETAILS BUTTON --}}
-                    <div class="mt-7 flex justify-end">
+                    {{-- ACTION BUTTONS --}}
+                    <div class="mt-7 flex flex-wrap justify-end gap-3">
+                        <button
+                            id="openEventAttendanceModal"
+                            type="button"
+                            class="flex items-center gap-3 rounded-2xl border border-[#60A5FA]/25 bg-[#13284A]/70 px-7 py-3 text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:border-[#60A5FA]/50 hover:bg-[#13284A]"
+                        >
+                            <svg class="h-5 w-5 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            Attendance List
+                        </button>
                         <button
                             id="openEditEventModalFromManage"
                             type="button"
@@ -759,6 +960,45 @@
                     >
                         Close
                     </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- EVENT ATTENDANCE MODAL --}}
+        <div
+            id="eventAttendanceModal"
+            class="attendance-modal-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="eventAttendanceModalTitle"
+            aria-hidden="true"
+        >
+            <div class="attendance-modal" onclick="event.stopPropagation()">
+                <div class="attendance-modal-header">
+                    <div class="flex items-center gap-3">
+                        <svg class="h-6 w-6 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <h2 id="eventAttendanceModalTitle" class="text-xl font-black uppercase tracking-wide text-[#F8FAFC]">
+                            Attendance List
+                        </h2>
+                    </div>
+                    <button
+                        type="button"
+                        id="closeEventAttendanceModal"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-[#60A5FA]/20 bg-[#13284A]/70 text-[#F8FAFC] transition hover:border-[#60A5FA]/50 hover:bg-[#13284A]"
+                        aria-label="Close attendance list"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="eventAttendanceModalBody" class="attendance-modal-body">
+                    <div class="flex items-center justify-center py-12 text-sm font-bold text-[#94A3B8]">
+                        Loading attendance...
+                    </div>
                 </div>
             </div>
         </div>
@@ -1249,6 +1489,11 @@
     const manageEvaluationStatusMessage = document.getElementById('manageEvaluationStatusMessage');
     const managePostEventSection = document.getElementById('managePostEventSection');
     const openEditEventModalFromManageButton = document.getElementById('openEditEventModalFromManage');
+    const openEventAttendanceModalButton = document.getElementById('openEventAttendanceModal');
+    const eventAttendanceModal = document.getElementById('eventAttendanceModal');
+    const eventAttendanceModalBody = document.getElementById('eventAttendanceModalBody');
+    const closeEventAttendanceModalButton = document.getElementById('closeEventAttendanceModal');
+    let eventAttendanceLoadToken = 0;
     const certificationLogicModal = document.getElementById('certificationLogicModal');
     const certificationConfirmForm = document.getElementById('certificationConfirmForm');
     const certificationRecipientCount = document.getElementById('certificationRecipientCount');
@@ -1302,7 +1547,8 @@
         if (
             (!manageEventModal || manageEventModal.classList.contains('hidden')) &&
             (!certificationLogicModal || certificationLogicModal.classList.contains('hidden')) &&
-            (!editEventModal || editEventModal.classList.contains('hidden'))
+            (!editEventModal || editEventModal.classList.contains('hidden')) &&
+            (!eventAttendanceModal || eventAttendanceModal.classList.contains('hidden'))
         ) {
             document.body.classList.remove('overflow-hidden');
         }
@@ -1370,10 +1616,65 @@
         if (
             (!createEventModal || createEventModal.classList.contains('hidden')) &&
             (!certificationLogicModal || certificationLogicModal.classList.contains('hidden')) &&
+            (!editEventModal || editEventModal.classList.contains('hidden')) &&
+            (!eventAttendanceModal || eventAttendanceModal.classList.contains('hidden'))
+        ) {
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
+    function closeEventAttendanceModal() {
+        if (!eventAttendanceModal) return;
+        eventAttendanceModal.classList.add('hidden');
+        eventAttendanceModal.setAttribute('aria-hidden', 'true');
+        if (eventAttendanceModalBody) {
+            eventAttendanceModalBody.innerHTML = '<div class="flex items-center justify-center py-16 text-sm font-bold text-[#94A3B8]">Loading attendance...</div>';
+        }
+        if (
+            (!createEventModal || createEventModal.classList.contains('hidden')) &&
+            (!manageEventModal || manageEventModal.classList.contains('hidden')) &&
+            (!certificationLogicModal || certificationLogicModal.classList.contains('hidden')) &&
             (!editEventModal || editEventModal.classList.contains('hidden'))
         ) {
             document.body.classList.remove('overflow-hidden');
         }
+    }
+
+    async function openEventAttendanceModal() {
+        if (!eventAttendanceModal || !eventAttendanceModalBody || !currentManageEventData?.id) return;
+
+        const attendanceUrl = currentManageEventData.attendanceUrl;
+        if (!attendanceUrl) {
+            eventAttendanceModalBody.innerHTML = '<div class="rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/10 px-5 py-4 text-sm font-bold text-[#FCA5A5]">Unable to load attendance for this event.</div>';
+        } else {
+            eventAttendanceModalBody.innerHTML = '<div class="flex items-center justify-center py-16 text-sm font-bold text-[#94A3B8]">Loading attendance...</div>';
+            const loadToken = ++eventAttendanceLoadToken;
+
+            try {
+                const response = await fetch(attendanceUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'text/html',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if (loadToken !== eventAttendanceLoadToken) return;
+
+                if (!response.ok) {
+                    throw new Error(`Request failed (${response.status})`);
+                }
+
+                eventAttendanceModalBody.innerHTML = await response.text();
+            } catch (error) {
+                if (loadToken !== eventAttendanceLoadToken) return;
+                eventAttendanceModalBody.innerHTML = '<div class="rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/10 px-5 py-4 text-sm font-bold text-[#FCA5A5]">Failed to load attendance list. Please try again.</div>';
+            }
+        }
+
+        eventAttendanceModal.classList.remove('hidden');
+        eventAttendanceModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('overflow-hidden');
     }
 
     function openCertificationLogicModal() {
@@ -1399,7 +1700,8 @@
         if (
             (!createEventModal || createEventModal.classList.contains('hidden')) &&
             (!manageEventModal || manageEventModal.classList.contains('hidden')) &&
-            (!editEventModal || editEventModal.classList.contains('hidden'))
+            (!editEventModal || editEventModal.classList.contains('hidden')) &&
+            (!eventAttendanceModal || eventAttendanceModal.classList.contains('hidden'))
         ) {
             document.body.classList.remove('overflow-hidden');
         }
@@ -1520,7 +1822,8 @@
         editEventModal.classList.remove('flex');
         if (
             (!createEventModal || createEventModal.classList.contains('hidden')) &&
-            (!manageEventModal || manageEventModal.classList.contains('hidden'))
+            (!manageEventModal || manageEventModal.classList.contains('hidden')) &&
+            (!eventAttendanceModal || eventAttendanceModal.classList.contains('hidden'))
         ) {
             document.body.classList.remove('overflow-hidden');
         }
@@ -1598,6 +1901,7 @@
                 sendEvaluationUrl: trigger.dataset.sendEvaluationUrl,
                 evaluationRecipientCount: trigger.dataset.evaluationRecipientCount,
                 evaluationAlreadySent: trigger.dataset.evaluationAlreadySent,
+                attendanceUrl: trigger.dataset.eventAttendanceUrl,
             };
             openManageEventModal(currentManageEventData);
         });
@@ -1665,6 +1969,24 @@
         });
     }
 
+    if (openEventAttendanceModalButton) {
+        openEventAttendanceModalButton.addEventListener('click', () => {
+            openEventAttendanceModal();
+        });
+    }
+
+    if (closeEventAttendanceModalButton) {
+        closeEventAttendanceModalButton.addEventListener('click', closeEventAttendanceModal);
+    }
+
+    if (eventAttendanceModal) {
+        eventAttendanceModal.addEventListener('click', (event) => {
+            if (event.target === eventAttendanceModal) {
+                closeEventAttendanceModal();
+            }
+        });
+    }
+
     if (manageSendEvaluationButton) {
         manageSendEvaluationButton.addEventListener('click', () => {
             if (manageSendEvaluationButton.disabled) return;
@@ -1725,6 +2047,9 @@
             }
             if (editEventModal && editEventModal.classList.contains('flex')) {
                 closeEditEventModal();
+            }
+            if (eventAttendanceModal && !eventAttendanceModal.classList.contains('hidden')) {
+                closeEventAttendanceModal();
             }
         }
     });
