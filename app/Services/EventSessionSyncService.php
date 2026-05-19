@@ -94,17 +94,21 @@ class EventSessionSyncService
             $rangeEnd = $rangeStart->copy();
         }
 
+        $dailyStartTime = $startAt->format('H:i:s');
+        $dailyEndTime = $endAt->format('H:i:s');
+
+        if (! $event->start_date && $event->event_date && ! $event->end_date) {
+            $dailyEndTime = '23:59:59';
+        }
+
         $payloads = collect();
         $dayNumber = 1;
 
         for ($date = $rangeStart->copy(); $date->lte($rangeEnd); $date->addDay()) {
-            $isFirst = $dayNumber === 1;
-            $isLast = $date->toDateString() === $rangeEnd->toDateString();
-
             $payloads->push([
                 'session_date' => $date->toDateString(),
-                'start_time' => $isFirst ? $startAt->format('H:i:s') : '00:00:00',
-                'end_time' => $isLast ? $endAt->format('H:i:s') : '23:59:59',
+                'start_time' => $dailyStartTime,
+                'end_time' => $dailyEndTime,
                 'session_label' => 'Day '.$dayNumber.' - '.$date->format('M j'),
             ]);
 
