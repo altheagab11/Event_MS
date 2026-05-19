@@ -27,8 +27,16 @@ class Attendance extends Model
     ];
   }
 
+  /**
+   * registration_id column stores event_registrants.event_registrant_id.
+   */
+  public function eventRegistrant(): BelongsTo
+  {
+    return $this->belongsTo(EventRegistrant::class, 'registration_id', 'event_registrant_id');
+  }
+
   public function registration(): BelongsTo
   {
-    return $this->belongsTo(Registration::class, 'registration_id', 'registration_id');
+    return $this->belongsTo(Registration::class, 'registration_id', 'event_registrant_id');
   }
 }

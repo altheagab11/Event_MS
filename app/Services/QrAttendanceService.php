@@ -2,85 +2,124 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class QrAttendanceService
 {
-    public function validateAndRecord(string $qrCode): string
+    /**
+     * @return array<string, mixed>
+     */
+    public function validateAndRecord(string $qrCode): array
     {
         $qrCode = trim($qrCode);
 
         if ($qrCode === '') {
-            return 'Invalid';
+            return $this->invalid('Invalid QR Code.');
         }
 
-        return DB::transaction(function () use ($qrCode): string {
+        return DB::transaction(function () use ($qrCode): array {
             $digitalIds = DB::table('digital_ids')
-                ->select(['digital_id', 'user_id', 'event_registrant_id', 'event_id'])
+                ->select(['digital_id', 'event_registrant_id', 'event_id'])
                 ->where('qr_code', $qrCode)
                 ->limit(2)
                 ->get();
 
-            // Ambiguous or missing QR values are treated as invalid.
             if ($digitalIds->count() !== 1) {
-                return 'Invalid';
+                return $this->invalid('Invalid QR Code.');
             }
 
             $digitalId = $digitalIds->first();
 
-            $registration = DB::table('registrations')
+            if ($digitalId->event_registrant_id === null) {
+                return $this->invalid('Invalid QR Code.');
+            }
+
+            $registrant = DB::table('event_registrants')
+                ->where('event_registrant_id', $digitalId->event_registrant_id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($registrant === null) {
+                return $this->invalid('Invalid QR Code.');
+            }
+
+            if ((int) $registrant->event_id !== (int) $digitalId->event_id) {
+                return $this->invalid('Invalid QR Code.');
+            }
+
+            $participantStatus = strtolower((string) $registrant->status);
+            if (! in_array($participantStatus, ['approved', 'registered'], true)) {
+                return $this->invalid('Participant is not approved for check-in.');
+            }
+
+            $event = DB::table('events')
                 ->where('event_id', $digitalId->event_id)
-                ->where('status', 'approved')
-                ->where(function ($query) use ($digitalId) {
-                    if ($digitalId->user_id !== null) {
-                        $query->where('user_id', $digitalId->user_id);
-                    } elseif ($digitalId->event_registrant_id !== null) {
-                        $query->where('event_registrant_id', $digitalId->event_registrant_id);
-                    }
-                })
-                ->orderByDesc('registration_id')
+                ->first();
+
+            if ($event === null) {
+                return $this->invalid('Invalid QR Code.');
+            }
+
+            $eventRegistrantId = (int) $digitalId->event_registrant_id;
+
+            $existingAttendance = DB::table('attendance')
+                ->where('registration_id', $eventRegistrantId)
                 ->lockForUpdate()
                 ->first();
 
-            if (! $registration) {
-                return 'Invalid';
+            if ($existingAttendance !== null) {
+                return [
+                    'status' => 'duplicate',
+                    'message' => 'Participant already checked in.',
+                ];
             }
 
-            $alreadyCheckedIn = DB::table('attendance')
-                ->where('registration_id', $registration->registration_id)
-                ->whereNotNull('check_in_time')
-                ->lockForUpdate()
-                ->exists();
-
-            if ($alreadyCheckedIn) {
-                return 'Already used';
-            }
-
-            $pendingAttendance = DB::table('attendance')
-                ->where('registration_id', $registration->registration_id)
-                ->whereNull('check_in_time')
-                ->orderBy('attendance_id')
-                ->lockForUpdate()
-                ->first();
-
-            if ($pendingAttendance) {
-                DB::table('attendance')
-                    ->where('attendance_id', $pendingAttendance->attendance_id)
-                    ->update([
-                        'check_in_time' => now(),
-                        'check_out_time' => null,
-                    ]);
-
-                return 'Valid';
-            }
+            $checkInTime = now();
 
             DB::table('attendance')->insert([
-                'registration_id' => $registration->registration_id,
-                'check_in_time' => now(),
+                'registration_id' => $eventRegistrantId,
+                'check_in_time' => $checkInTime,
                 'check_out_time' => null,
             ]);
 
-            return 'Valid';
+            $name = trim((string) $registrant->first_name.' '.(string) $registrant->last_name);
+            $formattedCheckIn = $checkInTime instanceof Carbon
+                ? $checkInTime->format('M j, Y g:i A')
+                : Carbon::parse((string) $checkInTime)->format('M j, Y g:i A');
+
+            return [
+                'status' => 'success',
+                'message' => $name !== ''
+                    ? "Check-in recorded for {$name}."
+                    : 'Check-in recorded successfully.',
+                'participant' => [
+                    'name' => $name !== '' ? $name : 'Participant',
+                    'email' => (string) ($registrant->email ?? ''),
+                    'event_name' => (string) ($event->event_name ?? ''),
+                    'event_type' => $this->formatEventTypeLabel((string) ($event->event_type ?? '')),
+                    'check_in_time' => $formattedCheckIn,
+                    'attendance_status' => 'Attended',
+                ],
+            ];
         }, 3);
+    }
+
+    private function formatEventTypeLabel(string $eventType): string
+    {
+        return str_contains(strtolower($eventType), 'conference')
+            ? 'Conference Event'
+            : 'School Event';
+    }
+
+    /**
+     * @return array{status: string, message: string}
+     */
+    private function invalid(string $message): array
+    {
+        return [
+            'status' => 'invalid',
+            'message' => $message,
+        ];
     }
 }

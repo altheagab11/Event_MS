@@ -49,6 +49,6 @@ class Registration extends Model
 
     public function attendance(): HasOne
     {
-        return $this->hasOne(Attendance::class, 'registration_id', 'registration_id');
+        return $this->hasOne(Attendance::class, 'registration_id', 'event_registrant_id');
     }
 }

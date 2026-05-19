@@ -26,11 +26,11 @@ class EventAttendanceController extends Controller
 
         $rows = DB::table('event_registrants as er')
             ->where('er.event_id', $event->event_id)
+            ->leftJoin('attendance as a', 'a.registration_id', '=', 'er.event_registrant_id')
             ->leftJoin('registrations as r', function ($join) use ($event) {
                 $join->on('r.event_registrant_id', '=', 'er.event_registrant_id')
                     ->where('r.event_id', '=', $event->event_id);
             })
-            ->leftJoin('attendance as a', 'a.registration_id', '=', 'r.registration_id')
             ->select([
                 'er.event_registrant_id',
                 'er.first_name',
@@ -48,7 +48,7 @@ class EventAttendanceController extends Controller
 
         $participants = $rows->map(function ($row): array {
             $name = trim((string) $row->first_name.' '.(string) $row->last_name);
-            $registrationStatus = (string) ($row->registration_status ?: $row->registrant_status ?: 'pending');
+            $registrationStatus = (string) ($row->registrant_status ?: $row->registration_status ?: 'pending');
             $checkIn = $row->check_in_time ? Carbon::parse((string) $row->check_in_time) : null;
             $hasAttended = $checkIn !== null;
 

@@ -17,6 +17,140 @@
     .dashboard-stat-grid > div {
         min-width: 0;
     }
+
+    .qr-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 24px;
+    }
+
+    .qr-modal-overlay.hidden {
+        display: none;
+    }
+
+    .qr-modal {
+        width: 90%;
+        max-width: 720px;
+        max-height: 85vh;
+        background: #0b1b31;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .qr-modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        background: #0d1b31;
+    }
+
+    .qr-modal-body {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .qr-tab-btn {
+        flex: 1;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #94a3b8;
+        background: transparent;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .qr-tab-btn.active {
+        color: #f8fafc;
+        background: rgba(59, 130, 246, 0.2);
+        border-color: rgba(96, 165, 250, 0.35);
+    }
+
+    .qr-tab-panel.hidden {
+        display: none;
+    }
+
+    .qr-camera-box {
+        width: 100%;
+        max-height: 420px;
+        aspect-ratio: 4 / 3;
+        background: #020617;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        border-radius: 18px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .qr-camera-box #qrReader,
+    .qr-camera-box #qrReader > div {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+    }
+
+    .qr-camera-box video,
+    .qr-camera-box canvas,
+    .qr-camera-box img {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
+
+    .qr-scan-frame {
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border: 3px solid white;
+        border-radius: 12px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 2;
+        box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.45);
+    }
+
+    @media (max-width: 768px) {
+        .qr-modal-overlay {
+            padding: 16px;
+        }
+
+        .qr-modal {
+            width: 95%;
+            max-height: 90vh;
+        }
+
+        .qr-camera-box {
+            max-height: 340px;
+        }
+
+        .qr-scan-frame {
+            width: 140px;
+            height: 140px;
+        }
+    }
 </style>
 <div class="min-h-screen bg-gradient-to-br from-[#0F1E36] via-[#132B4A] to-[#0F1E36] font-sans text-[#F8FAFC]">
     <div class="flex">
@@ -44,7 +178,11 @@
                         </p>
                     </div>
 
-                    <button class="inline-flex items-center gap-3 rounded-2xl bg-[#3B82F6] px-7 py-4 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB]">
+                    <button
+                        type="button"
+                        id="openQrScannerButton"
+                        class="inline-flex items-center gap-3 rounded-2xl bg-[#3B82F6] px-7 py-4 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB]"
+                    >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
                         </svg>
@@ -64,7 +202,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                                 </svg>
                             </div>
-                            <span class="text-[#60A5FA]">↗</span>
+                            <span class="text-[#60A5FA]">?</span>
                         </div>
                         <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Active Events</p>
                         <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($activeEvents) }}</h3>
@@ -79,7 +217,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m8-4a4 4 0 10-8 0m8 0a4 4 0 01-8 0"/>
                                 </svg>
                             </div>
-                            <span class="text-[#60A5FA]">↗</span>
+                            <span class="text-[#60A5FA]">?</span>
                         </div>
 
                         <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">
@@ -98,7 +236,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
-                            <span class="text-[#F97316]">↗</span>
+                            <span class="text-[#F97316]">?</span>
                         </div>
                         <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Pending Participants</p>
                         <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($pendingParticipants) }}</h3>
@@ -113,7 +251,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
-                            <span class="text-[#22C55E]">↗</span>
+                            <span class="text-[#22C55E]">?</span>
                         </div>
                         <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Approved Papers</p>
                         <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($approvedPapers) }}</h3>
@@ -128,7 +266,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 4h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
                                 </svg>
                             </div>
-                            <span class="text-[#FACC15]">↗</span>
+                            <span class="text-[#FACC15]">?</span>
                         </div>
                         <p class="mt-5 text-xs font-black uppercase tracking-widest text-[#94A3B8]">Pending Papers</p>
                         <h3 class="mt-2 text-3xl font-black text-[#F8FAFC]">{{ number_format($pendingPapers) }}</h3>
@@ -258,4 +396,7 @@
         </main>
     </div>
 </div>
+
+
+@include('admin.partials.qr-scanner-modal')
 @endsection
