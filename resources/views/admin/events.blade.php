@@ -123,6 +123,38 @@
         outline: none;
     }
 
+    .attendance-session-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .attendance-session-tab {
+        border-radius: 999px;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        background: rgba(13, 27, 49, 0.65);
+        color: #cbd5e1;
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .attendance-session-tab:hover {
+        border-color: rgba(96, 165, 250, 0.45);
+        color: #f8fafc;
+    }
+
+    .attendance-session-tab.is-active {
+        border-color: rgba(96, 165, 250, 0.55);
+        background: rgba(59, 130, 246, 0.25);
+        color: #f8fafc;
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2);
+    }
+
     .attendance-table-wrapper {
         max-height: 320px;
         overflow: auto;
@@ -1640,6 +1672,145 @@
         }
     }
 
+    function initEventAttendanceModalFilters(root) {
+        const contentRoot = root?.querySelector('#eventAttendanceContent');
+        if (!contentRoot) return;
+
+        let summaryBySession = {};
+        try {
+            summaryBySession = JSON.parse(contentRoot.dataset.attendanceSummary || '{}');
+        } catch (error) {
+            summaryBySession = {};
+        }
+
+        const searchInput = contentRoot.querySelector('#eventAttendanceSearchInput');
+        const statusFilter = contentRoot.querySelector('#eventAttendanceStatusFilter');
+        const rows = Array.from(contentRoot.querySelectorAll('[data-attendance-row]'));
+        const filterEmptyRow = contentRoot.querySelector('#eventAttendanceFilterEmptyRow');
+        const sessionTabs = Array.from(contentRoot.querySelectorAll('[data-session-filter]'));
+        let selectedSession = 'all';
+
+        const attendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#22C55E]/40 bg-[#22C55E]/15 px-2.5 py-1 text-xs font-black text-[#86EFAC]">Attended</span>';
+        const notAttendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-2.5 py-1 text-xs font-black text-[#FACC15]">Not Yet Attended</span>';
+
+        const parseSessionAttendance = (row) => {
+            try {
+                return JSON.parse(row.dataset.sessionAttendance || '[]');
+            } catch (error) {
+                return [];
+            }
+        };
+
+        const resolveAttendanceForSession = (sessionAttendance, sessionKey) => {
+            if (sessionKey === 'all') {
+                const attendedSessions = sessionAttendance.filter((item) => item.attendance_status === 'attended');
+                if (attendedSessions.length === 0) {
+                    return {
+                        attendance_status: 'not_attended',
+                        check_in_time: '—',
+                    };
+                }
+
+                const checkIns = attendedSessions
+                    .map((item) => item.check_in_time)
+                    .filter((value) => value && value !== '—');
+
+                return {
+                    attendance_status: 'attended',
+                    check_in_time: checkIns.length > 0 ? checkIns.join(', ') : '—',
+                };
+            }
+
+            const sessionRow = sessionAttendance.find((item) => String(item.session_id) === String(sessionKey));
+            return sessionRow || {
+                attendance_status: 'not_attended',
+                check_in_time: '—',
+            };
+        };
+
+        const updateSummaryCards = () => {
+            const summary = summaryBySession[selectedSession] || summaryBySession.all || {
+                registered: 0,
+                attended: 0,
+                not_attended: 0,
+            };
+
+            const registeredEl = contentRoot.querySelector('#attendanceSummaryRegistered');
+            const attendedEl = contentRoot.querySelector('#attendanceSummaryAttended');
+            const notAttendedEl = contentRoot.querySelector('#attendanceSummaryNotAttended');
+
+            if (registeredEl) registeredEl.textContent = String(summary.registered ?? 0);
+            if (attendedEl) attendedEl.textContent = String(summary.attended ?? 0);
+            if (notAttendedEl) notAttendedEl.textContent = String(summary.not_attended ?? 0);
+        };
+
+        const updateRowForSession = (row) => {
+            const sessionAttendance = parseSessionAttendance(row);
+            const resolved = resolveAttendanceForSession(sessionAttendance, selectedSession);
+            const statusCell = row.querySelector('[data-attendance-status-cell]');
+            const checkInCell = row.querySelector('[data-attendance-checkin-cell]');
+
+            row.dataset.attendanceStatus = resolved.attendance_status;
+
+            if (statusCell) {
+                statusCell.innerHTML = resolved.attendance_status === 'attended'
+                    ? attendedBadgeHtml
+                    : notAttendedBadgeHtml;
+            }
+
+            if (checkInCell) {
+                checkInCell.textContent = resolved.check_in_time || '—';
+            }
+        };
+
+        const applyAttendanceFilters = () => {
+            const searchValue = String(searchInput?.value || '').trim().toLowerCase();
+            const statusValue = String(statusFilter?.value || 'all');
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                updateRowForSession(row);
+
+                const searchText = String(row.dataset.searchText || '');
+                const attendanceStatus = String(row.dataset.attendanceStatus || '');
+                const matchesSearch = searchValue === '' || searchText.includes(searchValue);
+                const matchesStatus = statusValue === 'all' || attendanceStatus === statusValue;
+                const shouldShow = matchesSearch && matchesStatus;
+
+                row.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (filterEmptyRow) {
+                const showFilterEmpty = rows.length > 0 && visibleCount === 0;
+                filterEmptyRow.classList.toggle('hidden', !showFilterEmpty);
+            }
+        };
+
+        sessionTabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                selectedSession = String(tab.dataset.sessionFilter || 'all');
+
+                sessionTabs.forEach((button) => {
+                    const isActive = button === tab;
+                    button.classList.toggle('is-active', isActive);
+                    button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                });
+
+                updateSummaryCards();
+                applyAttendanceFilters();
+            });
+        });
+
+        searchInput?.addEventListener('input', applyAttendanceFilters);
+        statusFilter?.addEventListener('change', applyAttendanceFilters);
+
+        updateSummaryCards();
+        applyAttendanceFilters();
+    }
+
     async function openEventAttendanceModal() {
         if (!eventAttendanceModal || !eventAttendanceModalBody || !currentManageEventData?.id) return;
 
@@ -1666,6 +1837,7 @@
                 }
 
                 eventAttendanceModalBody.innerHTML = await response.text();
+                initEventAttendanceModalFilters(eventAttendanceModalBody);
             } catch (error) {
                 if (loadToken !== eventAttendanceLoadToken) return;
                 eventAttendanceModalBody.innerHTML = '<div class="rounded-2xl border border-[#EF4444]/30 bg-[#EF4444]/10 px-5 py-4 text-sm font-bold text-[#FCA5A5]">Failed to load attendance list. Please try again.</div>';

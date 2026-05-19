@@ -91,6 +91,12 @@ class Event extends Model
         return $this->hasMany(EventRegistrant::class, 'event_id', 'event_id');
     }
 
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(EventSession::class, 'event_id', 'event_id')
+            ->orderBy('session_date');
+    }
+
     /**
      * @return array{label: string, state: string, can_register: bool}
      */

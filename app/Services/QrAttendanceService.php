@@ -62,16 +62,37 @@ class QrAttendanceService
             }
 
             $eventRegistrantId = (int) $digitalId->event_registrant_id;
+            $eventId = (int) $digitalId->event_id;
+
+            $session = DB::table('event_sessions')
+                ->where('event_id', $eventId)
+                ->whereDate('session_date', now()->toDateString())
+                ->lockForUpdate()
+                ->first();
+
+            if ($session === null) {
+                return $this->invalid('No event session is scheduled for today. Check the event schedule.');
+            }
+
+            $sessionStart = $this->resolveSessionStartAt($session);
+            if ($sessionStart !== null && now()->lt($sessionStart)) {
+                return $this->invalid(
+                    'Check-in is not available yet. This event starts at '.$sessionStart->format('M j, Y g:i A').'.'
+                );
+            }
+
+            $sessionId = (int) $session->session_id;
 
             $existingAttendance = DB::table('attendance')
                 ->where('registration_id', $eventRegistrantId)
+                ->where('session_id', $sessionId)
                 ->lockForUpdate()
                 ->first();
 
             if ($existingAttendance !== null) {
                 return [
                     'status' => 'duplicate',
-                    'message' => 'Participant already checked in.',
+                    'message' => 'Participant already checked in for '.$session->session_label.'.',
                 ];
             }
 
@@ -79,6 +100,7 @@ class QrAttendanceService
 
             DB::table('attendance')->insert([
                 'registration_id' => $eventRegistrantId,
+                'session_id' => $sessionId,
                 'check_in_time' => $checkInTime,
                 'check_out_time' => null,
             ]);
@@ -98,11 +120,27 @@ class QrAttendanceService
                     'email' => (string) ($registrant->email ?? ''),
                     'event_name' => (string) ($event->event_name ?? ''),
                     'event_type' => $this->formatEventTypeLabel((string) ($event->event_type ?? '')),
+                    'session_label' => (string) ($session->session_label ?? ''),
                     'check_in_time' => $formattedCheckIn,
                     'attendance_status' => 'Attended',
                 ],
             ];
         }, 3);
+    }
+
+    private function resolveSessionStartAt(object $session): ?Carbon
+    {
+        $sessionDate = $session->session_date ?? null;
+        if ($sessionDate === null) {
+            return null;
+        }
+
+        $time = (string) ($session->start_time ?? '00:00:00');
+        if ($time === '') {
+            $time = '00:00:00';
+        }
+
+        return Carbon::parse(Carbon::parse((string) $sessionDate)->format('Y-m-d').' '.$time);
     }
 
     private function formatEventTypeLabel(string $eventType): string

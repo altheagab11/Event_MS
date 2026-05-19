@@ -1,4 +1,4 @@
-@php
+﻿@php
     $registrationBadgeClasses = [
         'approved' => 'border-[#22C55E]/40 bg-[#22C55E]/15 text-[#86EFAC]',
         'pending' => 'border-[#FACC15]/40 bg-[#FACC15]/15 text-[#FACC15]',
@@ -12,6 +12,8 @@
     };
 @endphp
 
+<div id="eventAttendanceContent" data-attendance-summary='@json($summaryBySession)'>
+
 <section class="attendance-event-info">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
@@ -21,7 +23,7 @@
             <p class="mt-1 text-sm font-bold text-[#60A5FA]">{{ $eventTypeLabel }}</p>
         </div>
         <span class="shrink-0 rounded-xl {{ $statusBadgeClass }} px-3 py-1.5 text-xs font-black text-white">
-            • {{ $statusLabel }}
+            â€¢ {{ $statusLabel }}
         </span>
     </div>
     <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -39,6 +41,29 @@
         </div>
     </div>
 </section>
+
+@if ($sessions->isNotEmpty())
+    <div class="attendance-session-tabs" role="tablist" aria-label="Filter by event day">
+        <button
+            type="button"
+            class="attendance-session-tab is-active"
+            data-session-filter="all"
+            aria-selected="true"
+        >
+            All Days
+        </button>
+        @foreach ($sessions as $session)
+            <button
+                type="button"
+                class="attendance-session-tab"
+                data-session-filter="{{ $session->session_id }}"
+                aria-selected="false"
+            >
+                {{ $session->session_label }}
+            </button>
+        @endforeach
+    </div>
+@endif
 
 <div class="attendance-summary">
     <div class="attendance-summary-card border border-[#60A5FA]/20 bg-[#13284A]/60">
@@ -101,6 +126,7 @@
                     data-attendance-row
                     data-attendance-status="{{ $participant['attendance_status'] }}"
                     data-search-text="{{ $participant['search_text'] }}"
+                    data-session-attendance='@json($participant['session_attendance'])'
                 >
                     <td>
                         <div class="flex items-center gap-3">
@@ -118,7 +144,7 @@
                             {{ $participant['registration_status_label'] }}
                         </span>
                     </td>
-                    <td>
+                    <td data-attendance-status-cell>
                         @if ($participant['attendance_status'] === 'attended')
                             <span class="inline-flex rounded-full border border-[#22C55E]/40 bg-[#22C55E]/15 px-2.5 py-1 text-xs font-black text-[#86EFAC]">
                                 Attended
@@ -129,7 +155,7 @@
                             </span>
                         @endif
                     </td>
-                    <td>{{ $participant['check_in_time'] ?? '—' }}</td>
+                    <td data-attendance-checkin-cell>{{ $participant['check_in_time'] ?? 'â€”' }}</td>
                     <td style="text-align: right;">
                         @if ($participant['registration_id'])
                             <a
@@ -139,7 +165,7 @@
                                 View
                             </a>
                         @else
-                            <span class="text-xs text-[#64748B]">—</span>
+                            <span class="text-xs text-[#64748B]">â€”</span>
                         @endif
                     </td>
                 </tr>
@@ -159,38 +185,4 @@
     </table>
 </div>
 
-<script>
-    (function () {
-        const searchInput = document.getElementById('eventAttendanceSearchInput');
-        const statusFilter = document.getElementById('eventAttendanceStatusFilter');
-        const rows = Array.from(document.querySelectorAll('[data-attendance-row]'));
-        const filterEmptyRow = document.getElementById('eventAttendanceFilterEmptyRow');
-
-        const applyAttendanceFilters = () => {
-            const searchValue = String(searchInput?.value || '').trim().toLowerCase();
-            const statusValue = String(statusFilter?.value || 'all');
-            let visibleCount = 0;
-
-            rows.forEach((row) => {
-                const searchText = String(row.dataset.searchText || '');
-                const attendanceStatus = String(row.dataset.attendanceStatus || '');
-                const matchesSearch = searchValue === '' || searchText.includes(searchValue);
-                const matchesStatus = statusValue === 'all' || attendanceStatus === statusValue;
-                const shouldShow = matchesSearch && matchesStatus;
-
-                row.style.display = shouldShow ? '' : 'none';
-                if (shouldShow) {
-                    visibleCount += 1;
-                }
-            });
-
-            if (filterEmptyRow) {
-                const showFilterEmpty = rows.length > 0 && visibleCount === 0;
-                filterEmptyRow.classList.toggle('hidden', !showFilterEmpty);
-            }
-        };
-
-        searchInput?.addEventListener('input', applyAttendanceFilters);
-        statusFilter?.addEventListener('change', applyAttendanceFilters);
-    })();
-</script>
+</div>

@@ -15,6 +15,7 @@ class Attendance extends Model
 
   protected $fillable = [
     'registration_id',
+    'session_id',
     'check_in_time',
     'check_out_time',
   ];
@@ -38,5 +39,10 @@ class Attendance extends Model
   public function registration(): BelongsTo
   {
     return $this->belongsTo(Registration::class, 'registration_id', 'event_registrant_id');
+  }
+
+  public function session(): BelongsTo
+  {
+    return $this->belongsTo(EventSession::class, 'session_id', 'session_id');
   }
 }

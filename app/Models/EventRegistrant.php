@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class EventRegistrant extends Model
 {
@@ -42,8 +41,8 @@ class EventRegistrant extends Model
         return $this->hasMany(Registration::class, 'event_registrant_id', 'event_registrant_id');
     }
 
-    public function attendance(): HasOne
+    public function attendances(): HasMany
     {
-        return $this->hasOne(Attendance::class, 'registration_id', 'event_registrant_id');
+        return $this->hasMany(Attendance::class, 'registration_id', 'event_registrant_id');
     }
 }

@@ -113,6 +113,10 @@
                             <dd id="qrSuccessEventType" class="text-right font-medium text-[#60A5FA]">—</dd>
                         </div>
                         <div class="flex justify-between gap-4 border-b border-[#22C55E]/15 pb-3">
+                            <dt class="font-bold text-[#94A3B8]">Session</dt>
+                            <dd id="qrSuccessSession" class="text-right font-medium text-[#CBD5E1]">—</dd>
+                        </div>
+                        <div class="flex justify-between gap-4 border-b border-[#22C55E]/15 pb-3">
                             <dt class="font-bold text-[#94A3B8]">Check-in Time</dt>
                             <dd id="qrSuccessCheckIn" class="text-right font-medium text-[#CBD5E1]">—</dd>
                         </div>
@@ -178,6 +182,7 @@
             document.getElementById('qrSuccessEmail').textContent = participant.email || '—';
             document.getElementById('qrSuccessEvent').textContent = participant.event_name || '—';
             document.getElementById('qrSuccessEventType').textContent = participant.event_type || '—';
+            document.getElementById('qrSuccessSession').textContent = participant.session_label || '—';
             document.getElementById('qrSuccessCheckIn').textContent = participant.check_in_time || '—';
             document.getElementById('qrSuccessAttendance').textContent = participant.attendance_status || 'Attended';
             manualSuccessCard.classList.remove('hidden');
