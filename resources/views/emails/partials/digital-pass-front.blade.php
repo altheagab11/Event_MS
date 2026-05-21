@@ -34,6 +34,20 @@
             {{ $profileLine }}
           </td>
         </tr>
+        @if (! empty($passData['attendance_mode_label']))
+        <tr>
+          <td colspan="2" style="padding-top:14px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-radius:14px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14);">
+              <tr>
+                <td style="padding:12px 14px; font-size:13px; line-height:1.5; color:rgba(255,255,255,0.92); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+                  <strong style="color:rgba(255,255,255,0.72);">Attendance Mode:</strong> {{ $passData['attendance_mode_label'] }}<br>
+                  <strong style="color:rgba(255,255,255,0.72);">Check-in Method:</strong> {{ $passData['checkin_method_label'] ?? '—' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        @endif
         <tr>
           <td colspan="2" style="padding-top:28px;">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
@@ -48,7 +62,7 @@
                 </td>
                 <td width="20%" style="vertical-align:bottom; text-align:center;">
                   <span style="display:block; width:42px; height:42px; border-radius:50%; border:2px solid rgba(255,255,255,0.28); margin:0 auto 8px; line-height:42px; text-align:center; color:rgba(255,255,255,0.75); font-size:20px; font-weight:300;">+</span>
-                  <span style="font-size:12px; color:rgba(255,255,255,0.55); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">Tap to scan</span>
+                  <span style="font-size:12px; color:rgba(255,255,255,0.55); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">{{ $passData['qr_scan_hint'] ?? 'Tap to scan' }}</span>
                 </td>
               </tr>
             </table>

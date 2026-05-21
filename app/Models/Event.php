@@ -20,6 +20,7 @@ class Event extends Model
         'hosted_by',
         'event_type',
         'attendance_format',
+        'online_attendance_token',
         'description',
         'location',
         'banner_image',
@@ -235,5 +236,10 @@ class Event extends Model
         }
 
         return 'Face-to-Face';
+    }
+
+    public function supportsOnlineAttendance(): bool
+    {
+        return in_array(trim((string) $this->attendance_format), ['Online', 'Hybrid'], true);
     }
 }

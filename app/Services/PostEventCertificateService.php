@@ -17,6 +17,11 @@ class PostEventCertificateService
 {
     public function hasCheckedIn(Registration $registration): bool
     {
+        if (Schema::hasColumn('registrations', 'attendance_status')
+            && strcasecmp((string) ($registration->attendance_status ?? ''), 'Present') === 0) {
+            return true;
+        }
+
         if ($registration->event_registrant_id === null) {
             return false;
         }

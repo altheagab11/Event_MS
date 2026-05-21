@@ -666,6 +666,7 @@ $regions = [
       verificationId: null,
       registrationStatus: '',
       passCode: '',
+      attendanceMode: '',
       registrationId: null,
       mailSent: false,
     };
@@ -707,6 +708,32 @@ $regions = [
 
     function isHybridAttendanceFormat(eventData) {
       return getAttendanceFormat(eventData) === 'Hybrid';
+    }
+
+    function resolvePassPreviewContext(eventData, selectedAttendanceMode = '') {
+      const format = getAttendanceFormat(eventData);
+      let mode = 'Face-to-Face';
+
+      if (format === 'Online') {
+        mode = 'Online';
+      } else if (format === 'Hybrid') {
+        const selected = String(selectedAttendanceMode || '').trim();
+        mode = selected !== '' ? selected : 'Face-to-Face';
+      }
+
+      const usesVenueScan = mode.toLowerCase() === 'face-to-face';
+
+      return {
+        attendanceMode: mode,
+        checkinMethod: usesVenueScan ? 'Venue QR Scan' : 'Online Attendance Link',
+        qrTitle: usesVenueScan ? 'SCAN AT VENUE' : 'ONLINE CHECK-IN',
+        qrNotePending: usesVenueScan
+          ? 'Your digital pass with venue QR code will be emailed after admin approval.'
+          : 'Your digital pass with online check-in access will be emailed after admin approval.',
+        qrNoteApproved: usesVenueScan
+          ? 'Present your pass QR at the venue for staff to scan and record attendance.'
+          : 'Use your pass QR or online check-in link to confirm attendance during the session.',
+      };
     }
 
     function renderAttendanceModeField() {
@@ -977,8 +1004,12 @@ $regions = [
         payload.append('school_from', String(formData.get('userType') || '').trim());
         payload.append('school_level', String(formData.get('role') || '').trim());
 
+        const selectedAttendanceMode = isHybridAttendanceFormat(selectedEvent)
+          ? String(formData.get('attendance_mode') || '').trim()
+          : (getAttendanceFormat(selectedEvent) === 'Online' ? 'Online' : 'Face-to-Face');
+
         if (isHybridAttendanceFormat(selectedEvent)) {
-          payload.append('attendance_mode', String(formData.get('attendance_mode') || '').trim());
+          payload.append('attendance_mode', selectedAttendanceMode);
         }
 
         const selectedRole = String(formData.get('role') || '').trim();
@@ -997,6 +1028,7 @@ $regions = [
           verificationId: null,
           registrationStatus: '',
           passCode: '',
+          attendanceMode: selectedAttendanceMode,
           registrationId: null,
           mailSent: false,
         };
@@ -1155,6 +1187,7 @@ $regions = [
           registrationData.registrationId = Number(serverData.registration_id || 0) || null;
           registrationData.registrationStatus = String(serverData.registration_status || '');
           registrationData.passCode = String(serverData.pass_code || '');
+          registrationData.attendanceMode = String(serverData.attendance_mode || registrationData.attendanceMode || '');
           registrationData.mailSent = Boolean(serverData.mail_sent);
 
           renderSuccessStep(serverData);
@@ -1176,6 +1209,10 @@ $regions = [
         : String(serverData.pass_code || registrationData.passCode || 'N/A');
       const displayEventName = String(serverData.event_name || selectedEvent.title || 'Event');
       const displayLocation = String(serverData.location || selectedEvent.location || 'TBA');
+      const passPreview = resolvePassPreviewContext(
+        selectedEvent,
+        String(serverData.attendance_mode || registrationData.attendanceMode || '')
+      );
       modalCard.classList.add('success-mode');
       modalContent.innerHTML = `
                 <div class="registration-success">
@@ -1222,6 +1259,26 @@ $regions = [
                                     </span>
                                         <span>${escapeHtml(displayLocation)}</span>
                                 </div>
+                                <div class="pass-meta-row">
+                                    <span class="pass-meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <path d="M4 6h16v4H4z"></path>
+                                            <path d="M4 14h10v4H4z"></path>
+                                            <path d="M18 14h2v4h-2z"></path>
+                                        </svg>
+                                    </span>
+                                    <span>Attendance Mode: ${escapeHtml(passPreview.attendanceMode)}</span>
+                                </div>
+                                <div class="pass-meta-row">
+                                    <span class="pass-meta-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                            <path d="M12 3v7"></path>
+                                            <path d="M8 7h8"></path>
+                                            <path d="M5 12h14v8H5z"></path>
+                                        </svg>
+                                    </span>
+                                    <span>Check-in Method: ${escapeHtml(passPreview.checkinMethod)}</span>
+                                </div>
                             </div>
                             <div class="pass-divider"></div>
                             <div class="pass-footer">
@@ -1237,7 +1294,7 @@ $regions = [
                         </div>
 
                         <div class="qr-card">
-                            <div class="qr-top">SCAN AT REGISTRATION</div>
+                            <div class="qr-top">${escapeHtml(passPreview.qrTitle)}</div>
                             <div class="qr-body">
                                 <div class="qr-box" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -1260,7 +1317,7 @@ $regions = [
                                         <rect x="20" y="9" width="2" height="2" rx=".5"></rect>
                                     </svg>
                                 </div>
-                                    <p class="qr-note">${isPending ? 'Digital ID details will be generated and emailed after admin approval.' : 'Your digital pass with QR code will be emailed after admin approval.'}</p>
+                                    <p class="qr-note">${isPending ? escapeHtml(passPreview.qrNotePending) : escapeHtml(passPreview.qrNoteApproved)}</p>
                             </div>
                         </div>
                     </div>

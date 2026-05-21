@@ -6,6 +6,7 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\EventOnlineAttendanceTokenService;
 use App\Services\LandingAnnouncementService;
 use App\Services\PostEventCertificateService;
 use Illuminate\Http\RedirectResponse;
@@ -126,7 +127,8 @@ class EventController extends Controller
             $payload['paper_format_file'] = $request->file('paper_format_file')->store('event-paper-formats', 'public');
         }
 
-        Event::query()->create($payload);
+        $event = Event::query()->create($payload);
+        app(EventOnlineAttendanceTokenService::class)->ensureToken($event);
 
         return redirect()
             ->route('admin.events')
@@ -156,6 +158,7 @@ class EventController extends Controller
         }
 
         $event->fill($payload)->save();
+        app(EventOnlineAttendanceTokenService::class)->ensureToken($event);
 
         return redirect()
             ->route('admin.events')

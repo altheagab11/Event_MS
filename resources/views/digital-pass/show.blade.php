@@ -173,7 +173,11 @@
 <body>
     <div class="page-header">
         <h1>Hi {{ $passData['full_name'] }},</h1>
-        <p>Your digital event pass is ready. Tap the card to flip between front and back, or download a copy for offline use.</p>
+        @if (! empty($passData['uses_venue_qr_scan']))
+            <p>Your digital event pass is ready. Present the QR code on the back at the venue for staff to scan and record your attendance.</p>
+        @else
+            <p>Your digital event pass is ready. Use the QR code or the online check-in button to confirm attendance during the online session.</p>
+        @endif
     </div>
 
     <div class="flip-scene" id="passFlipScene" role="button" tabindex="0" aria-label="Flip event pass card">
@@ -192,6 +196,9 @@
 
     <div class="actions">
         <button type="button" class="btn btn-secondary" id="flipPassBtn">Flip Card</button>
+        @if (! empty($passData['online_attendance_url']) && empty($passData['uses_venue_qr_scan']))
+            <a href="{{ $passData['online_attendance_url'] }}" class="btn btn-primary">Check In Online</a>
+        @endif
         <a href="{{ $passData['download_url'] }}" class="btn btn-primary">Download Pass</a>
         <button type="button" class="btn btn-secondary" onclick="window.print()">Print</button>
     </div>

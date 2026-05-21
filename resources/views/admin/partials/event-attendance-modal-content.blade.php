@@ -1,4 +1,5 @@
 ﻿@php
+    $attendanceTableColspan = ($showAttendanceModeColumn ?? false) ? 10 : 8;
     $registrationBadgeClasses = [
         'approved' => 'border-[#22C55E]/40 bg-[#22C55E]/15 text-[#86EFAC]',
         'pending' => 'border-[#FACC15]/40 bg-[#FACC15]/15 text-[#FACC15]',
@@ -15,30 +16,69 @@
 <div id="eventAttendanceContent" data-attendance-summary='@json($summaryBySession)'>
 
 <section class="attendance-event-info">
-    <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0 flex-1">
-            <h3 class="text-lg font-black uppercase tracking-wide text-[#F8FAFC]">
-                {{ $event->event_name }}
-            </h3>
-            <p class="mt-1 text-sm font-bold text-[#60A5FA]">{{ $eventTypeLabel }}</p>
+    <div class="attendance-event-info-layout">
+        <div class="attendance-event-info-main">
+            <div class="attendance-event-info-header">
+                <div class="min-w-0">
+                    <h3 class="text-lg font-black uppercase tracking-wide text-[#F8FAFC]">
+                        {{ $event->event_name }}
+                    </h3>
+                    <p class="mt-1 text-sm font-bold text-[#60A5FA]">{{ $eventTypeLabel }}</p>
+                </div>
+                <span class="shrink-0 rounded-xl {{ $statusBadgeClass }} px-3 py-1.5 text-xs font-black text-white">
+                    • {{ $statusLabel }}
+                </span>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Start</p>
+                    <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $formattedStart }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">End</p>
+                    <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $formattedEnd }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Venue</p>
+                    <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $event->location ?: 'Location TBA' }}</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Attendance Format</p>
+                <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $attendanceFormat }}</p>
+            </div>
         </div>
-        <span class="shrink-0 rounded-xl {{ $statusBadgeClass }} px-3 py-1.5 text-xs font-black text-white">
-            â€¢ {{ $statusLabel }}
-        </span>
-    </div>
-    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div>
-            <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Start</p>
-            <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $formattedStart }}</p>
-        </div>
-        <div>
-            <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">End</p>
-            <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $formattedEnd }}</p>
-        </div>
-        <div>
-            <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Venue</p>
-            <p class="mt-1 text-sm font-bold text-[#F8FAFC]">{{ $event->location ?: 'Location TBA' }}</p>
-        </div>
+
+        @if (! empty($onlineAttendanceUrl))
+            <aside class="attendance-online-panel">
+                <h4 class="attendance-online-panel-title">Online Attendance Link</h4>
+                <p class="attendance-online-panel-hint">
+                    Share during the online meeting. Participants check in with their registered email.
+                </p>
+                @if (! empty($onlineAttendanceQrSvg))
+                    <div class="attendance-online-qr">
+                        {!! $onlineAttendanceQrSvg !!}
+                    </div>
+                @endif
+                <label class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Attendance URL</label>
+                <div class="attendance-online-url-row">
+                    <input
+                        type="text"
+                        readonly
+                        value="{{ $onlineAttendanceUrl }}"
+                        id="onlineAttendanceUrlInput"
+                        class="attendance-online-url-input"
+                    >
+                    <button
+                        type="button"
+                        class="attendance-online-copy-btn"
+                        data-copy-online-attendance-url
+                    >
+                        Copy Link
+                    </button>
+                </div>
+            </aside>
+        @endif
     </div>
 </section>
 
@@ -95,8 +135,8 @@
     <div class="attendance-filter">
         <select id="eventAttendanceStatusFilter" aria-label="Filter by attendance status">
             <option value="all">All</option>
-            <option value="attended">Attended</option>
-            <option value="not_attended">Not Yet Attended</option>
+            <option value="attended">Present</option>
+            <option value="not_attended">Absent</option>
         </select>
     </div>
 </div>
@@ -110,8 +150,14 @@
                 <th>User Type</th>
                 <th>Role</th>
                 <th>Registration Status</th>
+                @if ($showAttendanceModeColumn)
+                    <th>Attendance Mode</th>
+                @endif
                 <th>Attendance Status</th>
                 <th>Check-in Time</th>
+                @if ($showAttendanceModeColumn)
+                    <th>Check-in Method</th>
+                @endif
                 <th style="text-align: right;">Action</th>
             </tr>
         </thead>
@@ -144,18 +190,24 @@
                             {{ $participant['registration_status_label'] }}
                         </span>
                     </td>
+                    @if ($showAttendanceModeColumn)
+                        <td>{{ $participant['attendance_mode'] }}</td>
+                    @endif
                     <td data-attendance-status-cell>
                         @if ($participant['attendance_status'] === 'attended')
                             <span class="inline-flex rounded-full border border-[#22C55E]/40 bg-[#22C55E]/15 px-2.5 py-1 text-xs font-black text-[#86EFAC]">
-                                Attended
+                                Present
                             </span>
                         @else
                             <span class="inline-flex rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-2.5 py-1 text-xs font-black text-[#FACC15]">
-                                Not Yet Attended
+                                Absent
                             </span>
                         @endif
                     </td>
-                    <td data-attendance-checkin-cell>{{ $participant['check_in_time'] ?? 'â€”' }}</td>
+                    <td data-attendance-checkin-cell>{{ $participant['check_in_time'] ?? '—' }}</td>
+                    @if ($showAttendanceModeColumn)
+                        <td>{{ $participant['checkin_method'] }}</td>
+                    @endif
                     <td style="text-align: right;">
                         @if ($participant['registration_id'])
                             <a
@@ -171,13 +223,13 @@
                 </tr>
             @empty
                 <tr id="eventAttendanceEmptyRow">
-                    <td colspan="8" style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                    <td colspan="{{ $attendanceTableColspan }}" style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
                         No participants registered for this event yet.
                     </td>
                 </tr>
             @endforelse
             <tr id="eventAttendanceFilterEmptyRow" class="hidden">
-                <td colspan="8" style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                <td colspan="{{ $attendanceTableColspan }}" style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
                     No participants match your search or filter.
                 </td>
             </tr>

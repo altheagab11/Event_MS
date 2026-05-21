@@ -20,6 +20,19 @@
             <div class="front-profile">{{ $passData['profile_line'] }}</div>
         @endif
 
+        @if (! empty($passData['attendance_mode_label']))
+            <div class="front-attendance">
+                <div class="front-attendance-row">
+                    <span class="front-attendance-label">Attendance Mode:</span>
+                    <span class="front-attendance-value">{{ $passData['attendance_mode_label'] }}</span>
+                </div>
+                <div class="front-attendance-row">
+                    <span class="front-attendance-label">Check-in Method:</span>
+                    <span class="front-attendance-value">{{ $passData['checkin_method_label'] ?? '—' }}</span>
+                </div>
+            </div>
+        @endif
+
         <div class="front-footer">
             <div class="front-footer-block">
                 <div class="front-footer-label">VALID THRU</div>
@@ -33,7 +46,7 @@
 
             <div class="front-scan-hint" aria-hidden="true">
                 <span class="front-scan-icon"></span>
-                <span>Tap to scan</span>
+                <span>{{ $passData['qr_scan_hint'] ?? 'Tap to scan' }}</span>
             </div>
         </div>
     </div>

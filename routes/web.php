@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\DigitalPassController;
 use App\Http\Controllers\QrAttendanceController;
+use App\Http\Controllers\ParticipantOnlineAttendanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [EventController::class, 'landing']);
@@ -40,6 +41,13 @@ Route::get('/pass/{pass}', [DigitalPassController::class, 'show'])
 Route::get('/pass/{pass}/download', [DigitalPassController::class, 'download'])
   ->middleware('signed')
   ->name('digital-pass.download');
+
+Route::get('/attend/{token}', [ParticipantOnlineAttendanceController::class, 'show'])
+  ->name('events.online-attendance.show');
+
+Route::post('/attend/{token}', [ParticipantOnlineAttendanceController::class, 'store'])
+  ->middleware('throttle:30,1')
+  ->name('events.online-attendance.store');
 
 Route::get('/admin-login', [LoginController::class, 'create'])->name('admin.login.page');
 Route::get('/login', [LoginController::class, 'create'])->name('admin.login');

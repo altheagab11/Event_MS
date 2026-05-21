@@ -56,6 +56,112 @@
         background: rgba(13, 27, 49, 0.7);
     }
 
+    .attendance-event-info-layout {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 20px 24px;
+    }
+
+    .attendance-event-info-main {
+        flex: 1 1 280px;
+        min-width: 0;
+    }
+
+    .attendance-event-info-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .attendance-online-panel {
+        flex: 0 1 300px;
+        width: 100%;
+        max-width: 320px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        background: rgba(19, 40, 74, 0.75);
+    }
+
+    .attendance-online-panel-title {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #f8fafc;
+    }
+
+    .attendance-online-panel-hint {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #cbd5e1;
+    }
+
+    .attendance-online-qr {
+        margin: 12px auto 10px;
+        width: fit-content;
+        padding: 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(96, 165, 250, 0.2);
+        background: #fff;
+    }
+
+    .attendance-online-qr svg {
+        display: block;
+        width: 120px;
+        height: 120px;
+    }
+
+    .attendance-online-url-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .attendance-online-url-input {
+        flex: 1 1 140px;
+        min-width: 0;
+        border-radius: 10px;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        background: rgba(13, 27, 49, 0.8);
+        padding: 8px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #f8fafc;
+    }
+
+    .attendance-online-copy-btn {
+        flex-shrink: 0;
+        border-radius: 10px;
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        background: #3b82f6;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .attendance-online-copy-btn:hover {
+        background: #2563eb;
+    }
+
+    @media (max-width: 720px) {
+        .attendance-online-panel {
+            flex: 1 1 100%;
+            max-width: none;
+        }
+    }
+
     .attendance-summary {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -416,6 +522,7 @@
                         $event->description,
                         $eventTypeLabel,
                     ])));
+                    $attendanceFormatLabel = $event->attendance_format ?: 'Face-to-Face';
                     $bannerImage = $event->banner_url ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60';
                     $reminderSummary = $eventReminderSummary[$event->event_id] ?? null;
                     $evaluationRecipientCount = (int) ($reminderSummary['attended_eligible_count'] ?? 0);
@@ -475,13 +582,27 @@
                             </div>
 
                             <div class="flex items-center gap-3">
-                                <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 shrink-0 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.438 7-11a7 7 0 10-14 0c0 6.562 7 11 7 11z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10a2 2 0 100-4 2 2 0 000 4z"/>
                                 </svg>
                                 {{ $event->location ?: 'Location TBA' }}
                             </div>
+
+                            <div class="flex items-center gap-3">
+                                <svg class="h-4 w-4 shrink-0 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <rect x="3.5" y="5.5" width="17" height="13" rx="2"></rect>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 10h17M8 14h2M12 14h2M16 14h2"/>
+                                </svg>
+                                {{ $attendanceFormatLabel }}
+                            </div>
                         </div>
+
+                        @if (filled($event->description))
+                            <p class="mt-4 line-clamp-3 text-sm font-medium leading-relaxed text-[#94A3B8]">
+                                {{ $event->description }}
+                            </p>
+                        @endif
 
                         <div class="mt-5 border-t border-[#1E3357] pt-5">
                             <div class="flex justify-end">
@@ -1794,8 +1915,8 @@
         const sessionTabs = Array.from(contentRoot.querySelectorAll('[data-session-filter]'));
         let selectedSession = 'all';
 
-        const attendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#22C55E]/40 bg-[#22C55E]/15 px-2.5 py-1 text-xs font-black text-[#86EFAC]">Attended</span>';
-        const notAttendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-2.5 py-1 text-xs font-black text-[#FACC15]">Not Yet Attended</span>';
+        const attendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#22C55E]/40 bg-[#22C55E]/15 px-2.5 py-1 text-xs font-black text-[#86EFAC]">Present</span>';
+        const notAttendedBadgeHtml = '<span class="inline-flex rounded-full border border-[#FACC15]/40 bg-[#FACC15]/15 px-2.5 py-1 text-xs font-black text-[#FACC15]">Absent</span>';
 
         const parseSessionAttendance = (row) => {
             try {
@@ -1910,6 +2031,24 @@
 
         searchInput?.addEventListener('input', applyAttendanceFilters);
         statusFilter?.addEventListener('change', applyAttendanceFilters);
+
+        const copyOnlineUrlButton = contentRoot.querySelector('[data-copy-online-attendance-url]');
+        const onlineUrlInput = contentRoot.querySelector('#onlineAttendanceUrlInput');
+        copyOnlineUrlButton?.addEventListener('click', async () => {
+            const url = String(onlineUrlInput?.value || '').trim();
+            if (!url) return;
+
+            try {
+                await navigator.clipboard.writeText(url);
+                copyOnlineUrlButton.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyOnlineUrlButton.textContent = 'Copy Link';
+                }, 2000);
+            } catch (error) {
+                onlineUrlInput?.select();
+                document.execCommand?.('copy');
+            }
+        });
 
         updateSummaryCards();
         applyAttendanceFilters();

@@ -3,15 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Services\EventOnlineAttendanceTokenService;
 use App\Services\EventSessionSyncService;
+use App\Services\DigitalPassQrService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class EventAttendanceController extends Controller
 {
     public function __construct(
         private readonly EventSessionSyncService $eventSessionSync,
+        private readonly EventOnlineAttendanceTokenService $onlineTokenService,
+        private readonly DigitalPassQrService $qrService,
     ) {}
 
     public function modal(Event $event): View
@@ -20,6 +25,26 @@ class EventAttendanceController extends Controller
 
         $event->syncStatusIfEnded();
         $event->applyComputedStatusAttributes();
+
+        $attendanceFormat = trim((string) ($event->attendance_format ?: 'Face-to-Face'));
+        $showAttendanceModeColumn = $attendanceFormat === 'Hybrid';
+
+        $registrationColumns = [
+            'r.registration_id',
+            'r.status as registration_status',
+        ];
+        if (Schema::hasColumn('registrations', 'attendance_mode')) {
+            $registrationColumns[] = 'r.attendance_mode';
+        }
+        if (Schema::hasColumn('registrations', 'attendance_status')) {
+            $registrationColumns[] = 'r.attendance_status';
+        }
+        if (Schema::hasColumn('registrations', 'checkin_method')) {
+            $registrationColumns[] = 'r.checkin_method';
+        }
+        if (Schema::hasColumn('registrations', 'checked_in_at')) {
+            $registrationColumns[] = 'r.checked_in_at';
+        }
 
         $sessions = DB::table('event_sessions')
             ->where('event_id', $event->event_id)
@@ -32,7 +57,7 @@ class EventAttendanceController extends Controller
                 $join->on('r.event_registrant_id', '=', 'er.event_registrant_id')
                     ->where('r.event_id', '=', $event->event_id);
             })
-            ->select([
+            ->select(array_merge([
                 'er.event_registrant_id',
                 'er.first_name',
                 'er.last_name',
@@ -40,9 +65,7 @@ class EventAttendanceController extends Controller
                 'er.user_type',
                 'er.participant_role',
                 'er.status as registrant_status',
-                'r.registration_id',
-                'r.status as registration_status',
-            ])
+            ], $registrationColumns))
             ->orderByDesc('er.registration_date')
             ->get();
 
@@ -62,22 +85,27 @@ class EventAttendanceController extends Controller
             $attendanceMap[$registrantId][$sessionId] = Carbon::parse((string) $attendanceRow->check_in_time);
         }
 
-        $participants = $rows->map(function ($row) use ($sessions, $attendanceMap): array {
+        $participants = $rows->map(function ($row) use ($sessions, $attendanceMap, $showAttendanceModeColumn): array {
             $name = trim((string) $row->first_name.' '.(string) $row->last_name);
             $registrationStatus = (string) ($row->registrant_status ?: $row->registration_status ?: 'pending');
             $registrantId = (int) $row->event_registrant_id;
             $registrantAttendance = $attendanceMap[$registrantId] ?? [];
 
+            $registrationAttendanceStatus = trim((string) ($row->attendance_status ?? ''));
+            $isPresentOnRegistration = strcasecmp($registrationAttendanceStatus, 'Present') === 0;
+
             $sessionAttendance = [];
-            $hasAnyAttendance = false;
-            $latestCheckIn = null;
+            $hasAnyAttendance = $isPresentOnRegistration;
+            $latestCheckIn = isset($row->checked_in_at) && $row->checked_in_at !== null
+                ? Carbon::parse((string) $row->checked_in_at)
+                : null;
 
             foreach ($sessions as $session) {
                 $sessionId = (int) $session->session_id;
                 $checkIn = $registrantAttendance[$sessionId] ?? null;
-                $hasAttended = $checkIn !== null;
+                $hasAttended = $checkIn !== null || $isPresentOnRegistration;
 
-                if ($hasAttended) {
+                if ($checkIn !== null) {
                     $hasAnyAttendance = true;
                     if ($latestCheckIn === null || $checkIn->gt($latestCheckIn)) {
                         $latestCheckIn = $checkIn;
@@ -92,6 +120,11 @@ class EventAttendanceController extends Controller
                 ];
             }
 
+            $attendanceMode = trim((string) ($row->attendance_mode ?? ''));
+            if ($attendanceMode === '' && $showAttendanceModeColumn) {
+                $attendanceMode = '—';
+            }
+
             return [
                 'event_registrant_id' => $registrantId,
                 'registration_id' => $row->registration_id !== null ? (int) $row->registration_id : null,
@@ -101,13 +134,16 @@ class EventAttendanceController extends Controller
                 'role' => trim((string) ($row->participant_role ?? '')) ?: '—',
                 'registration_status' => $registrationStatus,
                 'registration_status_label' => ucfirst($registrationStatus),
+                'attendance_mode' => $attendanceMode,
+                'checkin_method' => trim((string) ($row->checkin_method ?? '')) ?: '—',
                 'session_attendance' => $sessionAttendance,
                 'attendance_status' => $hasAnyAttendance ? 'attended' : 'not_attended',
-                'attendance_status_label' => $hasAnyAttendance ? 'Attended' : 'Not Yet Attended',
+                'attendance_status_label' => $hasAnyAttendance ? 'Present' : 'Absent',
                 'check_in_time' => $latestCheckIn?->format('M j, Y g:i A'),
                 'search_text' => strtolower(trim(implode(' ', [
                     $name,
                     (string) ($row->email ?? ''),
+                    $attendanceMode,
                 ]))),
             ];
         });
@@ -166,6 +202,15 @@ class EventAttendanceController extends Controller
             ? $endDate->format('F j, Y g:i A')
             : 'TBA';
 
+        $onlineAttendanceUrl = null;
+        $onlineAttendanceQrSvg = null;
+        if ($this->onlineTokenService->supportsOnlineAttendance($event)) {
+            $onlineAttendanceUrl = $this->onlineTokenService->checkInUrl($event);
+            if ($onlineAttendanceUrl !== null) {
+                $onlineAttendanceQrSvg = $this->qrService->asSvgString($onlineAttendanceUrl, 120);
+            }
+        }
+
         return view('admin.partials.event-attendance-modal-content', [
             'event' => $event,
             'eventTypeLabel' => $eventTypeLabel,
@@ -180,6 +225,10 @@ class EventAttendanceController extends Controller
             'totalAttended' => $summaryBySession['all']['attended'],
             'totalNotAttended' => $summaryBySession['all']['not_attended'],
             'participantsUrl' => route('admin.participants'),
+            'attendanceFormat' => $attendanceFormat,
+            'showAttendanceModeColumn' => $showAttendanceModeColumn,
+            'onlineAttendanceUrl' => $onlineAttendanceUrl,
+            'onlineAttendanceQrSvg' => $onlineAttendanceQrSvg,
         ]);
     }
 }

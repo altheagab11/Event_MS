@@ -87,6 +87,10 @@ class EventRegistrantController extends Controller
                 $registrationRow['attendance_mode'] = $attendanceMode;
             }
 
+            if (Schema::hasColumn('registrations', 'attendance_status')) {
+                $registrationRow['attendance_status'] = 'Absent';
+            }
+
             $registrationId = DB::table('registrations')->insertGetId(
                 $registrationRow,
                 'registration_id',

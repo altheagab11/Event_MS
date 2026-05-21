@@ -1,6 +1,5 @@
 @php
-  $displayCode = preg_replace('/^EMS-/i', '', (string) ($passData['pass_code'] ?? ''));
-  $displayCode = $displayCode !== '' ? strtoupper($displayCode) : strtoupper((string) ($passData['pass_code'] ?? ''));
+  $qrCode = strtoupper(trim((string) ($passData['qr_code'] ?? $passData['pass_code'] ?? '')));
 @endphp
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:760px; border-collapse:separate; border-spacing:0; border-radius:22px; border:1px solid rgba(100,160,255,0.55); background-color:#123768; background-image:linear-gradient(135deg,#0b1f3f 0%,#123768 48%,#1d4f9c 100%); box-shadow:0 24px 60px rgba(0,0,0,0.22);">
   <tr>
@@ -26,9 +25,24 @@
         </tr>
         <tr>
           <td align="center" style="padding-bottom:22px;">
-            <span style="display:inline-block; padding:10px 20px; border-radius:999px; background:rgba(255,255,255,0.38); border:1px solid rgba(255,255,255,0.55); color:#ffffff; font-size:15px; font-weight:800; letter-spacing:2px; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">{{ $displayCode }}</span>
+            <span style="display:inline-block; padding:10px 20px; border-radius:999px; background:rgba(255,255,255,0.38); border:1px solid rgba(255,255,255,0.55); color:#ffffff; font-size:15px; font-weight:800; letter-spacing:2px; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">{{ $qrCode }}</span>
           </td>
         </tr>
+        @if (! empty($passData['attendance_mode_label']))
+        <tr>
+          <td align="center" style="padding:0 0 16px; font-size:12px; line-height:1.5; color:rgba(255,255,255,0.88); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+            <strong style="color:rgba(255,255,255,0.68);">Attendance Mode:</strong> {{ $passData['attendance_mode_label'] }}<br>
+            <strong style="color:rgba(255,255,255,0.68);">Check-in Method:</strong> {{ $passData['checkin_method_label'] ?? '—' }}
+          </td>
+        </tr>
+        @endif
+        @if (! empty($passData['online_attendance_url']) && empty($passData['uses_venue_qr_scan']))
+        <tr>
+          <td align="center" style="padding-bottom:18px;">
+            <a href="{{ $passData['online_attendance_url'] }}" style="display:inline-block; padding:10px 18px; border-radius:999px; background:linear-gradient(135deg,#27c6ff,#0052c9); color:#ffffff; font-size:12px; font-weight:800; letter-spacing:0.6px; text-decoration:none; text-transform:uppercase; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">Check In Online</a>
+          </td>
+        </tr>
+        @endif
         <tr>
           <td>
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">

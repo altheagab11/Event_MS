@@ -27,6 +27,9 @@ class Registration extends Model
         'evaluation_token',
         'evaluation_submitted_at',
         'attendance_mode',
+        'attendance_status',
+        'checkin_method',
+        'checked_in_at',
     ];
 
     protected function casts(): array
@@ -37,6 +40,7 @@ class Registration extends Model
             'attendance_certificate_sent_at' => 'datetime',
             'participation_certificate_sent_at' => 'datetime',
             'evaluation_submitted_at' => 'datetime',
+            'checked_in_at' => 'datetime',
         ];
     }
 

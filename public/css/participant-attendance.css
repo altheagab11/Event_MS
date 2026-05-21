@@ -1,0 +1,27 @@
+.eval-text-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 1px solid #dde6f3;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    color: #2e4672;
+}
+
+.eval-text-input:focus {
+    outline: none;
+    border-color: #173b74;
+    box-shadow: 0 0 0 3px rgba(23, 59, 116, 0.12);
+}
+
+.attend-mode-note {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #eef4fb;
+    border: 1px solid #dde6f3;
+    color: #2e4672;
+    font-size: 14px;
+    line-height: 1.5;
+}

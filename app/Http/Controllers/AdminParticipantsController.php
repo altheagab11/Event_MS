@@ -330,6 +330,8 @@ class AdminParticipantsController extends Controller
         });
 
         $passCode = (string) $result['pass_code'];
+        $registration->refresh();
+        $registration->loadMissing(['event', 'eventRegistrant']);
         $passData = app(DigitalPassService::class)->buildFromRegistration($registration, $passCode);
 
         $mailSent = true;

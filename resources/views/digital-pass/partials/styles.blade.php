@@ -149,6 +149,36 @@
         word-break: break-word;
     }
 
+    .front-attendance {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .front-attendance-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .front-attendance-row + .front-attendance-row {
+        margin-top: 6px;
+    }
+
+    .front-attendance-label {
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
+    .front-attendance-value {
+        font-weight: 600;
+    }
+
     .front-footer {
         margin-top: auto;
         padding-top: 28px;
@@ -432,6 +462,45 @@
         letter-spacing: 2px;
         color: rgba(255, 255, 255, 0.98);
         text-shadow: 0 1px 8px rgba(90, 140, 200, 0.25);
+    }
+
+    .back-attendance-meta {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .back-attendance-meta div + div {
+        margin-top: 4px;
+    }
+
+    .back-attendance-label {
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.68);
+    }
+
+    .back-checkin-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #27c6ff, #0052c9);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        text-decoration: none;
+        text-transform: uppercase;
+        box-shadow: 0 8px 20px rgba(0, 82, 201, 0.28);
+        flex-shrink: 0;
+    }
+
+    .back-checkin-link:hover {
+        color: #ffffff;
+        filter: brightness(1.05);
     }
 
     .flip-face .event-card--front,

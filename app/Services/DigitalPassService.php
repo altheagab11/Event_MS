@@ -13,6 +13,7 @@ class DigitalPassService
 {
     public function __construct(
         private readonly DigitalPassQrService $qrService,
+        private readonly DigitalPassAttendanceContextService $attendanceContext,
     ) {}
 
     /**
@@ -121,17 +122,28 @@ class DigitalPassService
         string $email,
         ?Registration $registration = null,
     ): array {
+        $attendance = $this->attendanceContext->resolve($event, $registration);
+
         return [
             'event_name' => (string) ($event->event_name ?? 'Event'),
             'event_date' => $this->formatEventDate($event->event_date ?? null),
             'event_start' => $this->formatEventDateTime($event->start_date ?? $event->event_date ?? null),
             'event_end' => $this->formatEventDateTime($event->end_date ?? $event->start_date ?? $event->event_date ?? null),
             'location' => (string) ($event->location ?? 'TBA'),
+            'attendance_format' => trim((string) ($event->attendance_format ?? 'Face-to-Face')),
             'full_name' => $fullName,
             'email' => $email,
             'profile_line' => $this->buildProfileLine($registration, $email, (int) ($event->event_id ?? 0)),
             'valid_thru' => $this->formatValidThru($event),
             'pass_code' => $passCode,
+            'attendance_mode' => $attendance['attendance_mode'],
+            'attendance_mode_label' => $attendance['attendance_mode_label'],
+            'checkin_method_label' => $attendance['checkin_method_label'],
+            'qr_purpose' => $attendance['qr_purpose'],
+            'qr_scan_hint' => $attendance['qr_scan_hint'],
+            'uses_venue_qr_scan' => $attendance['uses_venue_qr_scan'],
+            'online_attendance_url' => $attendance['online_attendance_url'],
+            'qr_code' => $passCode,
             'qr_embed' => $this->qrService->forEmailEmbed($passCode),
             'qr_svg' => $this->qrService->asSvgString($passCode, 220),
             'view_url' => $this->signedViewUrl($passCode),
