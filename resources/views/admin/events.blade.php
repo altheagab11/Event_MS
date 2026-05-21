@@ -2334,6 +2334,68 @@
         document.head.appendChild(listStyle);
     })();
 
+    // Prevent selecting today's date: set `min` to tomorrow 00:00 local time
+    function setDateInputsMinToTomorrow() {
+        const ids = ['createStartDateInput', 'createEndDateInput', 'editStartDateInput', 'editEndDateInput'];
+        const t = new Date();
+        t.setDate(t.getDate() + 1);
+        t.setHours(0,0,0,0);
+        const y = t.getFullYear();
+        const m = String(t.getMonth() + 1).padStart(2, '0');
+        const d = String(t.getDate()).padStart(2, '0');
+        const hh = String(t.getHours()).padStart(2, '0');
+        const mm = String(t.getMinutes()).padStart(2, '0');
+        const minVal = `${y}-${m}-${d}T${hh}:${mm}`;
+
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            try {
+                el.min = minVal;
+            } catch (e) {
+                // ignore if not supported
+            }
+
+            if (el.value && el.value < minVal) {
+                el.value = '';
+            }
+
+            function ensureSwal(cb) {
+                if (window.Swal) return cb();
+                const s = document.createElement('script');
+                s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+                s.onload = cb;
+                document.head.appendChild(s);
+            }
+
+            el.addEventListener('change', function () {
+                const input = this;
+                if (input.value && input.value < minVal) {
+                    const msg = 'Please choose a date starting tomorrow or later. Today is not allowed.';
+                    ensureSwal(() => {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid date',
+                                text: msg,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                input.value = '';
+                                input.focus();
+                            });
+                        } else {
+                            alert(msg);
+                            input.value = '';
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', setDateInputsMinToTomorrow);
+    setDateInputsMinToTomorrow();
+
     @if ($errors->any())
         openCreateEventModal();
     @endif
