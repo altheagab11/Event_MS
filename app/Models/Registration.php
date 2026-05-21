@@ -22,6 +22,10 @@ class Registration extends Model
         'status',
         'evaluation_reminder_sent_at',
         'evaluation_reminder_status',
+        'attendance_certificate_sent_at',
+        'participation_certificate_sent_at',
+        'evaluation_token',
+        'evaluation_submitted_at',
     ];
 
     protected function casts(): array
@@ -29,7 +33,15 @@ class Registration extends Model
         return [
             'registration_date' => 'datetime',
             'evaluation_reminder_sent_at' => 'datetime',
+            'attendance_certificate_sent_at' => 'datetime',
+            'participation_certificate_sent_at' => 'datetime',
+            'evaluation_submitted_at' => 'datetime',
         ];
+    }
+
+    public function evaluation(): HasOne
+    {
+        return $this->hasOne(Evaluation::class, 'registration_id', 'registration_id');
     }
 
     public function user(): BelongsTo

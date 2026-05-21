@@ -8,6 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('events:send-evaluation-reminders')
-    ->dailyAt('09:00')
-    ->withoutOverlapping();
+// Evaluation links are sent manually from admin Post-Event Controls only.
+Schedule::command('events:sync-ended-status')->everyMinute();

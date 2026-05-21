@@ -418,8 +418,8 @@
                     ])));
                     $bannerImage = $event->banner_url ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60';
                     $reminderSummary = $eventReminderSummary[$event->event_id] ?? null;
-                    $evaluationRecipientCount = (int) ($reminderSummary['total_recipients'] ?? 0);
-                    $evaluationAlreadySent = (bool) ($reminderSummary['any_sent'] ?? false);
+                    $evaluationRecipientCount = (int) ($reminderSummary['attended_eligible_count'] ?? 0);
+                    $evaluationAlreadySent = (bool) ($reminderSummary['evaluation_links_sent'] ?? false);
                 @endphp
                 <article
                     class="group overflow-hidden rounded-2xl border border-[#60A5FA]/20 bg-[#1E375A]/65 shadow-sm transition hover:border-[#60A5FA]/40"
@@ -450,7 +450,12 @@
                         </span>
 
                         {{-- Status --}}
-                        <span class="absolute bottom-4 right-4 rounded-xl {{ $statusStyleClass }} px-4 py-2 text-xs font-black text-white shadow-md">
+                        <span
+                            class="absolute bottom-4 right-4 rounded-xl {{ $statusStyleClass }} px-4 py-2 text-xs font-black text-white shadow-md"
+                            data-event-status-badge
+                            data-event-status-key="{{ $eventStatusKey }}"
+                            data-event-end-at="{{ $eventEndDateValue }}"
+                        >
                             • {{ $eventStatusLabel }}
                         </span>
                     </div>
@@ -498,6 +503,7 @@
                                     data-event-start-date="{{ $eventStartDateValue }}"
                                     data-event-end-date="{{ $eventEndDateValue }}"
                                     data-event-description="{{ $event->description ?: '' }}"
+                                    data-event-paper-format-url="{{ $event->paper_format_url ?: '' }}"
                                     data-event-update-url="{{ route('admin.events.update', ['event' => $event->event_id]) }}"
                                     data-event-archive-url="{{ route('admin.events.archive', ['event' => $event->event_id]) }}"
                                     data-send-evaluation-url="{{ route('admin.events.send-evaluation-reminder', ['event' => $event->event_id]) }}"
@@ -670,6 +676,41 @@
                                     </label>
                                 </div>
                                 @error('attendance_format') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
+                            </div>
+
+                            {{-- Paper format (Conference only) --}}
+                            <div id="createPaperFormatWrap" class="mt-5 {{ old('event_type', 'Conference') === 'Conference' ? '' : 'hidden' }}">
+                                <label class="mb-3 block text-sm font-black uppercase tracking-widest text-[#94A3B8]">
+                                    Paper Format File (for registrants)
+                                </label>
+                                <p class="mb-3 text-sm text-[#94A3B8]">
+                                    Upload the template or format that presenters must follow when submitting their research paper.
+                                </p>
+
+                                <label id="createPaperFormatUploadBox" class="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#60A5FA]/35 bg-[#0D1B31]/70 px-6 py-6 text-center transition hover:border-[#60A5FA]/60 hover:bg-[#60A5FA]/10">
+                                    <input
+                                        type="file"
+                                        id="createPaperFormatInput"
+                                        name="paper_format_file"
+                                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                        class="hidden"
+                                    >
+
+                                    <svg id="createPaperFormatUploadIcon" class="h-10 w-10 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01.88-7.903A5 5 0 1117.9 9H18a4 4 0 010 8h-1m-5-4v8m0 0l-3-3m3 3l3-3"/>
+                                    </svg>
+
+                                    <p id="createPaperFormatUploadTitle" class="mt-3 text-base font-black text-[#F8FAFC]">
+                                        Upload paper format
+                                    </p>
+
+                                    <p id="createPaperFormatUploadHint" class="mt-2 text-sm text-[#94A3B8]">
+                                        PDF, DOC, or DOCX up to 10MB
+                                    </p>
+
+                                    <p id="createPaperFormatFileName" class="mt-2 hidden max-w-full truncate text-xs font-bold text-[#F8FAFC]"></p>
+                                </label>
+                                @error('paper_format_file') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
                             </div>
                         </div>
                     </section>
@@ -958,26 +999,28 @@
                             </h4>
 
                             <p class="mt-3 max-w-[520px] text-sm leading-6 text-[#CBD5E1]">
-                                Initiate the evaluation process and generate certificates automatically based on attendance and feedback completion.
+                                Click once after the event ends to email evaluation links and Certificates of Attendance to all checked-in participants. Certificates of Participation are emailed automatically when a checked-in participant submits their evaluation.
                             </p>
 
-                            <button
-                                id="manageSendEvaluationButton"
-                                type="button"
-                                class="mt-7 flex items-center gap-3 rounded-2xl bg-[#3B82F6] px-10 py-4 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB]"
-                            >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
-                                </svg>
-                                Send Evaluation Links
-                            </button>
+                            <div class="mt-7 flex w-full max-w-[520px] flex-col items-stretch gap-4">
+                                <button
+                                    id="manageSendEvaluationButton"
+                                    type="button"
+                                    class="flex items-center justify-center gap-3 rounded-2xl bg-[#3B82F6] px-10 py-4 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#2563EB]"
+                                >
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
+                                    </svg>
+                                    Send Evaluation Links
+                                </button>
 
-                            <p
-                                id="manageEvaluationStatusMessage"
-                                class="mt-6 hidden rounded-2xl border border-[#FACC15]/30 bg-[#FACC15]/10 px-5 py-3 text-sm font-bold text-[#FACC15]"
-                            >
-                                Evaluation links already sent.
-                            </p>
+                                <p
+                                    id="manageEvaluationStatusMessage"
+                                    class="hidden rounded-2xl border border-[#FACC15]/30 bg-[#FACC15]/10 px-5 py-3 text-sm font-bold text-[#FACC15]"
+                                >
+                                    Evaluation links already sent.
+                                </p>
+                            </div>
                         </div>
                     </section>
 
@@ -1179,6 +1222,53 @@
                                 </div>
                                 @error('attendance_format', 'editEvent') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
                             </div>
+
+                            <div id="editPaperFormatWrap" class="mt-5 hidden">
+                                <label class="mb-3 block text-sm font-black uppercase tracking-widest text-[#94A3B8]">
+                                    Paper Format File (for registrants)
+                                </label>
+                                <p class="mb-3 text-sm text-[#94A3B8]">
+                                    Upload or replace the template that presenters must follow when submitting their research paper.
+                                </p>
+
+                                <div id="editPaperFormatCurrentWrap" class="mb-3 hidden rounded-2xl border border-[#60A5FA]/25 bg-[#0D1B31]/70 px-4 py-3">
+                                    <p class="text-xs font-black uppercase tracking-widest text-[#94A3B8]">Current file</p>
+                                    <a
+                                        id="editPaperFormatCurrentLink"
+                                        href="#"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="mt-1 inline-block text-sm font-semibold text-[#60A5FA] hover:text-[#93C5FD]"
+                                    >
+                                        Download current paper format
+                                    </a>
+                                </div>
+
+                                <label id="editPaperFormatUploadBox" class="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#60A5FA]/35 bg-[#0D1B31]/70 px-6 py-6 text-center transition hover:border-[#60A5FA]/60 hover:bg-[#60A5FA]/10">
+                                    <input
+                                        type="file"
+                                        id="editPaperFormatInput"
+                                        name="paper_format_file"
+                                        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                        class="hidden"
+                                    >
+
+                                    <svg id="editPaperFormatUploadIcon" class="h-10 w-10 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01.88-7.903A5 5 0 1117.9 9H18a4 4 0 010 8h-1m-5-4v8m0 0l-3-3m3 3l3-3"/>
+                                    </svg>
+
+                                    <p id="editPaperFormatUploadTitle" class="mt-3 text-base font-black text-[#F8FAFC]">
+                                        Upload paper format
+                                    </p>
+
+                                    <p id="editPaperFormatUploadHint" class="mt-2 text-sm text-[#94A3B8]">
+                                        PDF, DOC, or DOCX up to 10MB
+                                    </p>
+
+                                    <p id="editPaperFormatFileName" class="mt-2 hidden max-w-full truncate text-xs font-bold text-[#F8FAFC]"></p>
+                                </label>
+                                @error('paper_format_file', 'editEvent') <p class="mt-2 text-xs font-semibold text-[#EF4444]">{{ $message }}</p> @enderror
+                            </div>
                         </div>
                     </section>
 
@@ -1369,7 +1459,7 @@
                             </div>
 
                             <p class="mt-2 text-sm text-[#CBD5E1]">
-                                Review the automated certificate distribution flow
+                                Review certificate rules before sending evaluation links
                             </p>
                         </div>
 
@@ -1388,7 +1478,7 @@
                 {{-- BODY --}}
                 <div class="overflow-y-auto bg-[#10213A] px-7 py-7">
                     <p class="text-center text-sm font-black text-[#F8FAFC]">
-                        Based on system rules, certificates will be issued dynamically:
+                        One admin action sends evaluation links and attendance certificates to checked-in participants. Participation certificates follow evaluation submission:
                     </p>
 
                     <div class="relative mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -1468,8 +1558,8 @@
                         </svg>
 
                         <p class="text-sm font-bold leading-6 text-[#F8FAFC]">
-                            Clicking confirm will send an email blast with evaluation links to
-                            <span id="certificationRecipientCount" class="font-black text-[#FACC15]">0</span> checked-in participants.
+                            Clicking confirm will email evaluation links and Certificates of Attendance to
+                            <span id="certificationRecipientCount" class="font-black text-[#FACC15]">0</span> checked-in participants. This can only be done once per event.
                         </p>
                     </div>
                 </div>
@@ -1555,6 +1645,22 @@
     const editBannerUploadTitle = document.getElementById('editBannerUploadTitle');
     const editBannerUploadHint = document.getElementById('editBannerUploadHint');
     const editBannerFileName = document.getElementById('editBannerFileName');
+    const createPaperFormatWrap = document.getElementById('createPaperFormatWrap');
+    const createPaperFormatInput = document.getElementById('createPaperFormatInput');
+    const createPaperFormatUploadBox = document.getElementById('createPaperFormatUploadBox');
+    const createPaperFormatUploadIcon = document.getElementById('createPaperFormatUploadIcon');
+    const createPaperFormatUploadTitle = document.getElementById('createPaperFormatUploadTitle');
+    const createPaperFormatUploadHint = document.getElementById('createPaperFormatUploadHint');
+    const createPaperFormatFileName = document.getElementById('createPaperFormatFileName');
+    const editPaperFormatWrap = document.getElementById('editPaperFormatWrap');
+    const editPaperFormatInput = document.getElementById('editPaperFormatInput');
+    const editPaperFormatUploadBox = document.getElementById('editPaperFormatUploadBox');
+    const editPaperFormatUploadIcon = document.getElementById('editPaperFormatUploadIcon');
+    const editPaperFormatUploadTitle = document.getElementById('editPaperFormatUploadTitle');
+    const editPaperFormatUploadHint = document.getElementById('editPaperFormatUploadHint');
+    const editPaperFormatFileName = document.getElementById('editPaperFormatFileName');
+    const editPaperFormatCurrentWrap = document.getElementById('editPaperFormatCurrentWrap');
+    const editPaperFormatCurrentLink = document.getElementById('editPaperFormatCurrentLink');
     const editEventTitleLabel = document.getElementById('editEventTitleLabel');
     const eventsSearchInput = document.getElementById('eventsSearchInput');
     const eventsCategoryFilter = document.getElementById('eventsCategoryFilter');
@@ -1627,7 +1733,6 @@
             manageSendEvaluationButton.disabled = !isDone || alreadySent;
             manageSendEvaluationButton.classList.toggle('opacity-50', !isDone || alreadySent);
             manageSendEvaluationButton.classList.toggle('cursor-not-allowed', !isDone || alreadySent);
-            manageSendEvaluationButton.classList.toggle('hidden', alreadySent);
             manageSendEvaluationButton.title = alreadySent
                 ? 'Evaluation links already sent.'
                 : (isDone ? '' : 'Post-event actions are available after the event is done.');
@@ -1635,7 +1740,6 @@
         if (manageEvaluationStatusMessage) {
             manageEvaluationStatusMessage.classList.toggle('hidden', !alreadySent);
         }
-
         manageEventModal.classList.remove('hidden');
         manageEventModal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
@@ -1885,6 +1989,116 @@
         editEventTitleLabel.textContent = selectedEventType === 'School Event'
             ? 'School Event Title'
             : 'Conference Event Title';
+        syncEditPaperFormatVisibility();
+    }
+
+    function syncCreatePaperFormatVisibility() {
+        if (!createPaperFormatWrap || !createPaperFormatInput) return;
+        const selectedEventType = document.querySelector('input[name="event_type"]:checked')?.value;
+        const isConference = selectedEventType === 'Conference';
+        createPaperFormatWrap.classList.toggle('hidden', !isConference);
+        createPaperFormatInput.required = isConference;
+        if (!isConference) {
+            createPaperFormatInput.value = '';
+            syncPaperFormatPreview({
+                input: createPaperFormatInput,
+                uploadBox: createPaperFormatUploadBox,
+                uploadIcon: createPaperFormatUploadIcon,
+                uploadTitle: createPaperFormatUploadTitle,
+                uploadHint: createPaperFormatUploadHint,
+                fileNameLabel: createPaperFormatFileName,
+                filledTitle: 'Format file selected',
+                defaultTitle: 'Upload paper format',
+                defaultHint: 'PDF, DOC, or DOCX up to 10MB',
+            });
+        }
+    }
+
+    function syncEditPaperFormatVisibility(paperFormatUrl = '') {
+        if (!editPaperFormatWrap || !editPaperFormatInput) return;
+        const selectedEventType = document.querySelector('#editEventForm input[name="event_type"]:checked')?.value;
+        const isConference = selectedEventType === 'Conference';
+        const hasCurrentFile = String(paperFormatUrl || editPaperFormatCurrentLink?.href || '').trim() !== '' && editPaperFormatCurrentLink?.href !== '#';
+        editPaperFormatWrap.classList.toggle('hidden', !isConference);
+        editPaperFormatInput.required = isConference && !hasCurrentFile;
+        if (editPaperFormatCurrentWrap && editPaperFormatCurrentLink) {
+            if (isConference && paperFormatUrl) {
+                editPaperFormatCurrentWrap.classList.remove('hidden');
+                editPaperFormatCurrentLink.href = paperFormatUrl;
+            } else if (!isConference) {
+                editPaperFormatCurrentWrap.classList.add('hidden');
+                editPaperFormatCurrentLink.href = '#';
+            }
+        }
+        if (!isConference) {
+            editPaperFormatInput.value = '';
+            if (editPaperFormatCurrentWrap) {
+                editPaperFormatCurrentWrap.classList.add('hidden');
+            }
+            syncPaperFormatPreview({
+                input: editPaperFormatInput,
+                uploadBox: editPaperFormatUploadBox,
+                uploadIcon: editPaperFormatUploadIcon,
+                uploadTitle: editPaperFormatUploadTitle,
+                uploadHint: editPaperFormatUploadHint,
+                fileNameLabel: editPaperFormatFileName,
+                filledTitle: 'New format file selected',
+                defaultTitle: 'Upload paper format',
+                defaultHint: 'PDF, DOC, or DOCX up to 10MB',
+            });
+        }
+    }
+
+    function syncPaperFormatPreview({
+        input,
+        uploadBox,
+        uploadIcon,
+        uploadTitle,
+        uploadHint,
+        fileNameLabel,
+        filledTitle,
+        defaultTitle,
+        defaultHint,
+    }) {
+        if (!input) return;
+
+        const selectedFile = input.files && input.files[0] ? input.files[0] : null;
+        if (!selectedFile) {
+            if (fileNameLabel) {
+                fileNameLabel.textContent = '';
+                fileNameLabel.classList.add('hidden');
+            }
+            if (uploadTitle) {
+                uploadTitle.textContent = defaultTitle;
+            }
+            if (uploadHint) {
+                uploadHint.textContent = defaultHint;
+            }
+            if (uploadIcon) {
+                uploadIcon.classList.remove('hidden');
+            }
+            if (uploadBox) {
+                uploadBox.classList.remove('border-[#60A5FA]');
+            }
+            return;
+        }
+
+        if (fileNameLabel) {
+            fileNameLabel.textContent = selectedFile.name;
+            fileNameLabel.classList.remove('hidden');
+        }
+        if (uploadTitle) {
+            uploadTitle.textContent = filledTitle;
+        }
+        if (uploadHint) {
+            uploadHint.textContent = 'File selected. Ready to upload.';
+        }
+        if (uploadIcon) {
+            uploadIcon.classList.add('hidden');
+        }
+        if (uploadBox) {
+            uploadBox.classList.add('border-[#60A5FA]');
+        }
     }
 
     function syncBannerPreview({
@@ -1981,6 +2195,31 @@
             editAttendanceInput.checked = true;
         }
         syncEditEventTitleLabel();
+        if (editPaperFormatCurrentWrap && editPaperFormatCurrentLink) {
+            const formatUrl = String(eventData.paperFormatUrl || '').trim();
+            if (formatUrl) {
+                editPaperFormatCurrentWrap.classList.remove('hidden');
+                editPaperFormatCurrentLink.href = formatUrl;
+            } else {
+                editPaperFormatCurrentWrap.classList.add('hidden');
+                editPaperFormatCurrentLink.href = '#';
+            }
+        }
+        if (editPaperFormatInput) {
+            editPaperFormatInput.value = '';
+        }
+        syncEditPaperFormatVisibility(eventData.paperFormatUrl || '');
+        syncPaperFormatPreview({
+            input: editPaperFormatInput,
+            uploadBox: editPaperFormatUploadBox,
+            uploadIcon: editPaperFormatUploadIcon,
+            uploadTitle: editPaperFormatUploadTitle,
+            uploadHint: editPaperFormatUploadHint,
+            fileNameLabel: editPaperFormatFileName,
+            filledTitle: 'New format file selected',
+            defaultTitle: 'Upload paper format',
+            defaultHint: 'PDF, DOC, or DOCX up to 10MB',
+        });
 
         closeManageEventModal();
         editEventModal.classList.remove('hidden');
@@ -2051,6 +2290,55 @@
     }
     applyEventFilters();
 
+    function parseEventEndAt(endAtValue) {
+        if (!endAtValue) return null;
+        const parsed = new Date(endAtValue);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function eventHasEnded(endAtValue) {
+        const endAt = parseEventEndAt(endAtValue);
+        if (!endAt) return false;
+        return endAt.getTime() <= Date.now();
+    }
+
+    function applyDoneStatusToTrigger(trigger) {
+        if (!trigger || trigger.dataset.eventStatusKey === 'archived') return;
+
+        const endAtValue = trigger.dataset.eventEndDate;
+        if (!eventHasEnded(endAtValue)) return;
+
+        trigger.dataset.eventStatusKey = 'done';
+        trigger.dataset.eventStatus = 'Done';
+
+        const card = trigger.closest('[data-event-card]');
+        const badge = card?.querySelector('[data-event-status-badge]');
+        if (badge) {
+            badge.dataset.eventStatusKey = 'done';
+            badge.textContent = '• Done';
+            badge.classList.remove('bg-[#22C55E]');
+            badge.classList.add('bg-[#64748B]');
+        }
+    }
+
+    function refreshEventDoneStates() {
+        manageEventTriggers.forEach((trigger) => applyDoneStatusToTrigger(trigger));
+
+        if (currentManageEventData && manageEventModal && !manageEventModal.classList.contains('hidden')) {
+            const activeTrigger = Array.from(manageEventTriggers).find(
+                (trigger) => String(trigger.dataset.eventId) === String(currentManageEventData.id)
+            );
+            if (activeTrigger) {
+                currentManageEventData.statusKey = activeTrigger.dataset.eventStatusKey;
+                currentManageEventData.status = activeTrigger.dataset.eventStatus;
+                openManageEventModal(currentManageEventData);
+            }
+        }
+    }
+
+    refreshEventDoneStates();
+    window.setInterval(refreshEventDoneStates, 30000);
+
     manageEventTriggers.forEach((trigger) => {
         trigger.addEventListener('click', () => {
             currentManageEventData = {
@@ -2074,6 +2362,7 @@
                 evaluationRecipientCount: trigger.dataset.evaluationRecipientCount,
                 evaluationAlreadySent: trigger.dataset.evaluationAlreadySent,
                 attendanceUrl: trigger.dataset.eventAttendanceUrl,
+                paperFormatUrl: trigger.dataset.eventPaperFormatUrl,
             };
             openManageEventModal(currentManageEventData);
         });
@@ -2088,12 +2377,14 @@
         eventTitleLabel.textContent = selectedEventType === 'School Event'
             ? 'School Event Title'
             : 'Conference Event Title';
+        syncCreatePaperFormatVisibility();
     };
 
     eventTypeInputs.forEach((input) => {
         input.addEventListener('change', syncEventTitleLabel);
     });
     syncEventTitleLabel();
+    syncCreatePaperFormatVisibility();
 
     const editEventTypeInputs = document.querySelectorAll('#editEventForm input[name="event_type"]');
     editEventTypeInputs.forEach((input) => {
@@ -2130,6 +2421,41 @@
                 filledTitle: 'New image selected',
                 defaultTitle: 'Replace image',
             });
+        });
+    }
+
+    if (createPaperFormatInput) {
+        createPaperFormatInput.addEventListener('change', () => {
+            syncPaperFormatPreview({
+                input: createPaperFormatInput,
+                uploadBox: createPaperFormatUploadBox,
+                uploadIcon: createPaperFormatUploadIcon,
+                uploadTitle: createPaperFormatUploadTitle,
+                uploadHint: createPaperFormatUploadHint,
+                fileNameLabel: createPaperFormatFileName,
+                filledTitle: 'Format file selected',
+                defaultTitle: 'Upload paper format',
+                defaultHint: 'PDF, DOC, or DOCX up to 10MB',
+            });
+        });
+    }
+
+    if (editPaperFormatInput) {
+        editPaperFormatInput.addEventListener('change', () => {
+            syncPaperFormatPreview({
+                input: editPaperFormatInput,
+                uploadBox: editPaperFormatUploadBox,
+                uploadIcon: editPaperFormatUploadIcon,
+                uploadTitle: editPaperFormatUploadTitle,
+                uploadHint: editPaperFormatUploadHint,
+                fileNameLabel: editPaperFormatFileName,
+                filledTitle: 'New format file selected',
+                defaultTitle: 'Upload paper format',
+                defaultHint: 'PDF, DOC, or DOCX up to 10MB',
+            });
+            if (editPaperFormatInput.required) {
+                editPaperFormatInput.required = false;
+            }
         });
     }
 

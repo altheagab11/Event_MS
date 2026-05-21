@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Mail\EventEvaluationReminderMail;
-use App\Models\Evaluation;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\EventEvaluationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +18,7 @@ class SendEventEvaluationRemindersCommand extends Command
 {
     protected $signature = 'events:send-evaluation-reminders {--event_id= : Send reminders only for this event_id} {--force : Ignore the one-day waiting window and process ended events immediately}';
 
-    protected $description = 'Send event evaluation reminders one day after events end';
+    protected $description = 'Send event evaluation reminders to checked-in participants (manual admin action only)';
 
     public function handle(): int
     {
@@ -31,29 +31,26 @@ class SendEventEvaluationRemindersCommand extends Command
             return self::FAILURE;
         }
 
-        $force = (bool) $this->option('force');
-        $eligibleEndDate = $force ? now()->toDateString() : now()->subDay()->toDateString();
+        if (! (bool) $this->option('force')) {
+            $this->error('This command must be run with --force from the admin Post-Event Controls action.');
+
+            return self::FAILURE;
+        }
+
         $eventFilter = $this->option('event_id');
 
         $eventsQuery = Event::query()
             ->where(function ($query) {
                 $query->whereNull('status')
                     ->orWhere('status', '!=', 'archived');
-            })
-            ->where(function ($query) use ($eligibleEndDate) {
-                $query
-                    ->where(function ($innerQuery) use ($eligibleEndDate) {
-                        $innerQuery->whereNotNull('end_date')
-                            ->whereDate('end_date', '<=', $eligibleEndDate);
-                    })
-                    ->orWhere(function ($innerQuery) use ($eligibleEndDate) {
-                        $innerQuery->whereNull('end_date')
-                            ->whereDate('event_date', '<=', $eligibleEndDate);
-                    });
             });
 
         if ($eventFilter !== null && $eventFilter !== '') {
             $eventsQuery->where('event_id', (int) $eventFilter);
+        } else {
+            $this->error('The --event_id option is required.');
+
+            return self::FAILURE;
         }
 
         $events = $eventsQuery->get();
@@ -71,8 +68,10 @@ class SendEventEvaluationRemindersCommand extends Command
         foreach ($events as $event) {
             Registration::query()
                 ->where('event_id', $event->event_id)
-                ->whereIn('status', ['approved', 'pending'])
+                ->where('status', 'approved')
+                ->whereNotNull('event_registrant_id')
                 ->whereNull('evaluation_reminder_sent_at')
+                ->whereHas('attendance')
                 ->where(function ($query) {
                     $query->whereHas('user', function ($userQuery) {
                         $userQuery->where('role', 'participant');
@@ -84,8 +83,17 @@ class SendEventEvaluationRemindersCommand extends Command
                 ])
                 ->orderBy('registration_id')
                 ->chunkById(100, function ($registrations) use ($event, &$sentCount, &$skippedCount, &$failedCount): void {
+                    $evaluationService = app(EventEvaluationService::class);
+
                     foreach ($registrations as $registration) {
-                        if ($this->hasAlreadyEvaluated($registration, $event->event_id)) {
+                        if (! $this->hasCheckedIn($registration, (int) $event->event_id)) {
+                            $this->markReminder($registration, status: 'skipped_not_attended', sentAt: now());
+                            $skippedCount++;
+
+                            continue;
+                        }
+
+                        if ($evaluationService->hasSubmittedEvaluation($registration)) {
                             $this->markReminder($registration, status: 'skipped_evaluated', sentAt: now());
                             $skippedCount++;
 
@@ -104,7 +112,7 @@ class SendEventEvaluationRemindersCommand extends Command
                           ? trim((string) ($registration->user->firstname ?? '').' '.(string) ($registration->user->lastname ?? ''))
                           : trim((string) ($registration->eventRegistrant?->first_name ?? '').' '.(string) ($registration->eventRegistrant?->last_name ?? ''));
                         $eventEndDate = $this->resolveEventEndDate($event);
-                        $evaluationUrl = $this->buildEvaluationUrl((int) $event->event_id);
+                        $evaluationUrl = $evaluationService->buildEvaluationUrl($registration);
 
                         try {
                             Mail::to($recipientEmail)->send(new EventEvaluationReminderMail(
@@ -136,44 +144,6 @@ class SendEventEvaluationRemindersCommand extends Command
         return self::SUCCESS;
     }
 
-    private function hasAlreadyEvaluated(Registration $registration, int $eventId): bool
-    {
-        $hasEventId = Schema::hasColumn('evaluations', 'event_id');
-        $hasRegistrationId = Schema::hasColumn('evaluations', 'registration_id');
-
-        if ($hasEventId && $hasRegistrationId) {
-            return Evaluation::query()
-                ->where('event_id', $eventId)
-                ->where('registration_id', $registration->registration_id)
-                ->exists();
-        }
-
-        $eventPaperId = DB::table('papers')
-            ->where('event_id', $eventId)
-            ->where(function ($query) use ($registration) {
-                if ($registration->user_id !== null) {
-                    $query->where('user_id', $registration->user_id);
-                } elseif ($registration->event_registrant_id !== null) {
-                    $query->where('event_registrant_id', $registration->event_registrant_id);
-                }
-            })
-            ->orderByDesc('paper_id')
-            ->value('paper_id');
-
-        if ($eventPaperId === null) {
-            return false;
-        }
-
-        if ($registration->user_id === null) {
-            return false;
-        }
-
-        return Evaluation::query()
-            ->where('paper_id', $eventPaperId)
-            ->where('evaluator_id', $registration->user_id)
-            ->exists();
-    }
-
     private function markReminder(Registration $registration, string $status, ?Carbon $sentAt): void
     {
         Registration::query()
@@ -186,13 +156,19 @@ class SendEventEvaluationRemindersCommand extends Command
 
     private function resolveEventEndDate(Event $event): Carbon
     {
-        $endDate = $event->end_date ?: $event->event_date;
-
-        return Carbon::parse((string) $endDate);
+        return $event->resolveEndAt() ?? now();
     }
 
-    private function buildEvaluationUrl(int $eventId): string
+    private function hasCheckedIn(Registration $registration, int $eventId): bool
     {
-        return url('/?evaluate_event='.$eventId);
+        if ($registration->event_registrant_id === null) {
+            return false;
+        }
+
+        return DB::table('attendance')
+            ->join('event_sessions', 'event_sessions.session_id', '=', 'attendance.session_id')
+            ->where('attendance.registration_id', $registration->event_registrant_id)
+            ->where('event_sessions.event_id', $eventId)
+            ->exists();
     }
 }

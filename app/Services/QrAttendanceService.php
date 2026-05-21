@@ -74,10 +74,10 @@ class QrAttendanceService
                 return $this->invalid('No event session is scheduled for today. Check the event schedule.');
             }
 
-            $sessionStart = $this->resolveSessionStartAt($session);
-            if ($sessionStart !== null && now()->lt($sessionStart)) {
+            $sessionEnd = $this->resolveSessionEndAt($session);
+            if ($sessionEnd !== null && now()->gt($sessionEnd)) {
                 return $this->invalid(
-                    'Check-in is not available yet. This event starts at '.$sessionStart->format('M j, Y g:i A').'.'
+                    'Check-in is closed for today. This session ended at '.$sessionEnd->format('M j, Y g:i A').'.'
                 );
             }
 
@@ -138,6 +138,21 @@ class QrAttendanceService
         $time = (string) ($session->start_time ?? '00:00:00');
         if ($time === '') {
             $time = '00:00:00';
+        }
+
+        return Carbon::parse(Carbon::parse((string) $sessionDate)->format('Y-m-d').' '.$time);
+    }
+
+    private function resolveSessionEndAt(object $session): ?Carbon
+    {
+        $sessionDate = $session->session_date ?? null;
+        if ($sessionDate === null) {
+            return null;
+        }
+
+        $time = (string) ($session->end_time ?? '23:59:59');
+        if ($time === '') {
+            $time = '23:59:59';
         }
 
         return Carbon::parse(Carbon::parse((string) $sessionDate)->format('Y-m-d').' '.$time);

@@ -309,6 +309,32 @@ $regions = [
                     </span>
                   </p>
                   <p class="desc">{{ $event['description'] }}</p>
+                  @if ($event['type'] === 'Conference Event')
+                    <div class="sample-file-wrap">
+                      <p class="sample-file-label">Sample File</p>
+                      @if (! empty($event['paper_format_url']))
+                        <a
+                          href="{{ $event['paper_format_url'] }}"
+                          class="sample-file-btn"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          <span class="sample-file-btn-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14,2 14,8 20,8"></polyline>
+                              <line x1="12" y1="18" x2="12" y2="12"></line>
+                              <polyline points="9,15 12,18 15,15"></polyline>
+                            </svg>
+                          </span>
+                          <span>View / Download Sample File</span>
+                        </a>
+                      @else
+                        <p class="sample-file-unavailable">Sample file will be posted soon.</p>
+                      @endif
+                    </div>
+                  @endif
                   <div class="event-actions">
                     @if ($event['can_register'])
                       <button class="event-btn open-register" data-event-id="{{ $event['id'] }}" type="button">
@@ -666,6 +692,14 @@ $regions = [
         .replaceAll("'", '&#039;');
     }
 
+    function renderSelectOptions(options, placeholder) {
+      const safeOptions = Array.isArray(options) ? options : [];
+      return `
+        <option value="" selected disabled>${escapeHtml(placeholder)}</option>
+        ${safeOptions.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join('')}
+      `;
+    }
+
     function getAttendanceFormat(eventData) {
       const value = String(eventData?.attendance_format ?? '').trim();
       return value !== '' ? value : 'Not Specified';
@@ -754,8 +788,13 @@ $regions = [
                             <div class="field"><label>Last Name *</label><input name="lastName" required></div>
                             <div class="field"><label>Email Address *</label><input type="email" name="email" required></div>
                             <div class="field"><label>School / University *</label><input name="schoolUniversity" placeholder="Enter school / university" required></div>
-                            <div class="field"><label>User Type *</label><select name="userType" required>${USER_TYPES.map(u => `<option value="${u}">${u}</option>`).join('')}</select></div>
-                            <div class="field"><label>Role *</label><select name="role" id="registrationRole" required>${eventRoles.map(r => `<option value="${r}">${r}</option>`).join('')}</select></div>
+                            <div class="field"><label>User Type *</label><select name="userType" required>${renderSelectOptions(USER_TYPES, 'Select user type')}</select></div>
+                            <div class="field"><label>Role *</label><select name="role" id="registrationRole" required>${renderSelectOptions(eventRoles, 'Select role')}</select></div>
+                        </div>
+                        <div class="upload-wrap" id="paperFormatDownloadWrap" style="display:none">
+                            <div class="upload-title">Required Paper Format</div>
+                            <div class="upload-note">Download the official format below, then upload your completed research paper as PDF.</div>
+                            <a class="format-download-btn" id="paperFormatDownloadLink" href="#" target="_blank" rel="noopener noreferrer">Download paper format</a>
                         </div>
                         <div class="upload-wrap" id="paperUploadWrap" style="display:none">
                             <div class="upload-title">Upload 5-page Research Paper (PDF only)</div>
@@ -783,6 +822,8 @@ $regions = [
       const registrationForm = document.getElementById('registrationForm');
       const submitButton = document.getElementById('continueRegistrationBtn');
       const roleSelect = document.getElementById('registrationRole');
+      const paperFormatDownloadWrap = document.getElementById('paperFormatDownloadWrap');
+      const paperFormatDownloadLink = document.getElementById('paperFormatDownloadLink');
       const paperUploadWrap = document.getElementById('paperUploadWrap');
       const paperInput = registrationForm.querySelector('.upload-file-input');
       const paperUploadDrop = document.getElementById('paperUploadDrop');
@@ -792,6 +833,16 @@ $regions = [
 
       function syncPaperUploadVisibility() {
         const showPaper = requiresPaperUpload(selectedEvent, roleSelect?.value || '');
+        const formatUrl = String(selectedEvent?.paper_format_url || '').trim();
+        const showFormatDownload = showPaper && formatUrl !== '';
+
+        if (paperFormatDownloadWrap) {
+          paperFormatDownloadWrap.style.display = showFormatDownload ? 'block' : 'none';
+        }
+
+        if (paperFormatDownloadLink && showFormatDownload) {
+          paperFormatDownloadLink.href = formatUrl;
+        }
 
         if (paperUploadWrap) {
           paperUploadWrap.style.display = showPaper ? 'block' : 'none';
@@ -1387,6 +1438,7 @@ $regions = [
         e.preventDefault();
       }
     });
+
   </script>
 </body>
 

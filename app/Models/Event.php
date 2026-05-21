@@ -23,10 +23,13 @@ class Event extends Model
         'description',
         'location',
         'banner_image',
+        'paper_format_file',
         'event_date',
         'start_date',
         'end_date',
         'status',
+        'evaluation_links_sent_at',
+        'attendance_certificates_distributed_at',
     ];
 
     protected function casts(): array
@@ -35,6 +38,8 @@ class Event extends Model
             'event_date' => 'date',
             'start_date' => 'datetime',
             'end_date' => 'datetime',
+            'evaluation_links_sent_at' => 'datetime',
+            'attendance_certificates_distributed_at' => 'datetime',
         ];
     }
 
@@ -81,6 +86,84 @@ class Event extends Model
           : null;
     }
 
+    public function getPaperFormatUrlAttribute(): ?string
+    {
+        if (! $this->paper_format_file) {
+            return null;
+        }
+
+        $path = (string) $this->paper_format_file;
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        $relativePath = ltrim($path, '/');
+        $relativePath = preg_replace('#^storage/#', '', $relativePath) ?? $relativePath;
+        $relativePath = preg_replace('#^public/#', '', $relativePath) ?? $relativePath;
+
+        return Storage::disk('public')->exists($relativePath)
+            ? asset('storage/'.ltrim($relativePath, '/'))
+            : null;
+    }
+
+    public function resolveEndAt(): ?Carbon
+    {
+        $end = $this->end_date ?? $this->event_date;
+        if ($end === null) {
+            return null;
+        }
+
+        if (! $end instanceof Carbon) {
+            $end = Carbon::parse((string) $end);
+        }
+
+        if (! $this->end_date && $this->event_date) {
+            return $end->copy()->endOfDay();
+        }
+
+        return $end;
+    }
+
+    public function hasEnded(?Carbon $at = null): bool
+    {
+        if ((string) $this->status === 'archived') {
+            return false;
+        }
+
+        $end = $this->resolveEndAt();
+
+        return $end instanceof Carbon && $end->lte($at ?? now());
+    }
+
+    public function syncStatusIfEnded(): bool
+    {
+        if ((string) $this->status === 'archived') {
+            return false;
+        }
+
+        if (! $this->hasEnded()) {
+            return false;
+        }
+
+        if ((string) $this->status === 'done') {
+            return false;
+        }
+
+        $this->forceFill(['status' => 'done'])->save();
+
+        return true;
+    }
+
+    public function applyComputedStatusAttributes(): void
+    {
+        $isArchived = (string) $this->status === 'archived';
+        $isDone = ! $isArchived && $this->hasEnded();
+
+        $this->setAttribute('computed_status', $isArchived ? 'archived' : ($isDone ? 'done' : 'active'));
+        $this->setAttribute('computed_status_label', $isArchived ? 'Archived' : ($isDone ? 'Done' : 'Active'));
+    }
+
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class, 'event_id', 'event_id');
@@ -109,13 +192,7 @@ class Event extends Model
             $start = Carbon::parse((string) $start);
         }
 
-        $end = $this->end_date ?? $this->event_date;
-        if ($end !== null && ! $end instanceof Carbon) {
-            $end = Carbon::parse((string) $end);
-        }
-        if ($end instanceof Carbon && ! $this->end_date && $this->event_date) {
-            $end = $end->copy()->endOfDay();
-        }
+        $end = $this->resolveEndAt();
 
         if ($start instanceof Carbon && $now->lt($start)) {
             return [

@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Services\LandingAnnouncementService;
+use App\Services\PostEventCertificateService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -54,6 +55,7 @@ class EventController extends Controller
                     'can_register' => $cardState['can_register'],
                     'image' => $event->banner_url
                       ?: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=60',
+                    'paper_format_url' => $event->paper_format_url,
                 ];
             })
             ->values();
@@ -71,51 +73,35 @@ class EventController extends Controller
             ->get();
 
         $events->each(function (Event $event): void {
-            $endDate = $event->end_date ?? $event->event_date;
-            if ($endDate !== null && ! $endDate instanceof Carbon) {
-                $endDate = Carbon::parse((string) $endDate);
-            }
-            if ($endDate instanceof Carbon && ! $event->end_date && $event->event_date) {
-                $endDate = $endDate->copy()->endOfDay();
-            }
-
-            $isArchived = (string) $event->status === 'archived';
-            $isDone = ! $isArchived && $endDate instanceof Carbon && $endDate->isPast();
-
-            $event->setAttribute('computed_status', $isArchived ? 'archived' : ($isDone ? 'done' : 'active'));
-            $event->setAttribute('computed_status_label', $isArchived ? 'Archived' : ($isDone ? 'Done' : 'Active'));
+            $event->syncStatusIfEnded();
+            $event->applyComputedStatusAttributes();
         });
 
         $hasReminderTracking = Schema::hasColumn('registrations', 'evaluation_reminder_sent_at')
           && Schema::hasColumn('registrations', 'evaluation_reminder_status');
 
+        $certificateService = app(PostEventCertificateService::class);
+        $hasPostEventColumns = Schema::hasColumn('events', 'evaluation_links_sent_at');
+
         $eventReminderSummary = [];
         if ($hasReminderTracking) {
-            $eventReminderSummary = Registration::query()
-                ->selectRaw('event_id')
-                ->selectRaw("SUM(CASE WHEN status IN ('approved', 'pending') THEN 1 ELSE 0 END) as total_recipients")
-                ->selectRaw("SUM(CASE WHEN status IN ('approved', 'pending') AND evaluation_reminder_sent_at IS NOT NULL THEN 1 ELSE 0 END) as sent_count")
-                ->selectRaw('SUM(CASE WHEN evaluation_reminder_sent_at IS NOT NULL THEN 1 ELSE 0 END) as any_sent_count')
-                ->selectRaw('MAX(evaluation_reminder_sent_at) as last_sent_at')
-                ->groupBy('event_id')
-                ->get()
-                ->mapWithKeys(function ($row): array {
-                    $sentCount = (int) ($row->sent_count ?? 0);
-                    $totalRecipients = (int) ($row->total_recipients ?? 0);
-                    $anySentCount = (int) ($row->any_sent_count ?? 0);
-                    $lastSentRaw = $row->last_sent_at;
+            $events->each(function (Event $event) use ($certificateService, $hasPostEventColumns, &$eventReminderSummary): void {
+                $attendedEligible = $certificateService->countAttendedEligibleRegistrants((int) $event->event_id);
+                $evaluationLinksSent = $hasPostEventColumns && $event->evaluation_links_sent_at !== null;
 
-                    return [
-                        (int) $row->event_id => [
-                            'sent_count' => $sentCount,
-                            'total_recipients' => $totalRecipients,
-                            'fully_sent' => $totalRecipients > 0 && $sentCount >= $totalRecipients,
-                            'any_sent' => $anySentCount > 0,
-                            'last_sent_at' => $lastSentRaw ? Carbon::parse((string) $lastSentRaw)->format('M d, Y h:i A') : null,
-                        ],
-                    ];
-                })
-                ->all();
+                $event->setAttribute('attended_eligible_count', $attendedEligible);
+                $event->setAttribute('evaluation_links_sent', $evaluationLinksSent);
+                $event->setAttribute('attendance_certificates_distributed', $hasPostEventColumns && $event->attendance_certificates_distributed_at !== null);
+
+                $eventReminderSummary[(int) $event->event_id] = [
+                    'attended_eligible_count' => $attendedEligible,
+                    'evaluation_links_sent' => $evaluationLinksSent,
+                    'attendance_certificates_distributed' => $hasPostEventColumns && $event->attendance_certificates_distributed_at !== null,
+                    'evaluation_links_sent_at' => $evaluationLinksSent
+                        ? Carbon::parse((string) $event->evaluation_links_sent_at)->format('M d, Y h:i A')
+                        : null,
+                ];
+            });
         }
 
         return view('admin.events', [
@@ -127,12 +113,17 @@ class EventController extends Controller
 
     public function store(StoreEventRequest $request)
     {
-        $payload = $request->safe()->except('banner_image');
+        $payload = $request->safe()->except(['banner_image', 'paper_format_file']);
         $payload = $this->normalizeSchedulePayload($payload);
 
         if ($request->hasFile('banner_image')) {
             $this->ensurePublicStorageLinkExists();
             $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');
+        }
+
+        if ($request->input('event_type') === 'Conference' && $request->hasFile('paper_format_file')) {
+            $this->ensurePublicStorageLinkExists();
+            $payload['paper_format_file'] = $request->file('paper_format_file')->store('event-paper-formats', 'public');
         }
 
         Event::query()->create($payload);
@@ -144,13 +135,24 @@ class EventController extends Controller
 
     public function update(UpdateEventRequest $request, Event $event): RedirectResponse
     {
-        $payload = $request->safe()->except(['banner_image', 'editing_event_id']);
+        $payload = $request->safe()->except(['banner_image', 'paper_format_file', 'editing_event_id']);
         $payload = $this->normalizeSchedulePayload($payload);
 
         if ($request->hasFile('banner_image')) {
             $this->ensurePublicStorageLinkExists();
             $payload['banner_image'] = $request->file('banner_image')->store('event-banners', 'public');
             $this->deleteStoredBannerIfLocal($event->banner_image);
+        }
+
+        if ($request->input('event_type') === 'Conference') {
+            if ($request->hasFile('paper_format_file')) {
+                $this->ensurePublicStorageLinkExists();
+                $payload['paper_format_file'] = $request->file('paper_format_file')->store('event-paper-formats', 'public');
+                $this->deleteStoredPaperFormatIfLocal($event->paper_format_file);
+            }
+        } else {
+            $this->deleteStoredPaperFormatIfLocal($event->paper_format_file);
+            $payload['paper_format_file'] = null;
         }
 
         $event->fill($payload)->save();
@@ -181,6 +183,13 @@ class EventController extends Controller
                 ->with('status', 'Reminder tracking columns are missing. Run php artisan migrate first.');
         }
 
+        if (! Schema::hasColumn('events', 'evaluation_links_sent_at')) {
+            return redirect()
+                ->route('admin.events')
+                ->with('status_type', 'warning')
+                ->with('status', 'Post-event tracking columns are missing. Run php artisan migrate first.');
+        }
+
         if ((string) $event->status === 'archived') {
             return redirect()
                 ->route('admin.events')
@@ -188,43 +197,53 @@ class EventController extends Controller
                 ->with('status', 'Evaluation reminders are not available for archived events.');
         }
 
-        $eventEndDate = $event->end_date instanceof Carbon
-          ? $event->end_date
-          : Carbon::parse((string) ($event->end_date ?: $event->event_date));
+        $event->syncStatusIfEnded();
 
-        if ($eventEndDate->isFuture()) {
+        if (! $event->hasEnded()) {
             return redirect()
                 ->route('admin.events')
                 ->with('status_type', 'warning')
                 ->with('status', 'Evaluation reminders can only be sent after the event has ended.');
         }
 
-        $alreadyProcessed = Registration::query()
-            ->where('event_id', $event->event_id)
-            ->whereNotNull('evaluation_reminder_sent_at')
-            ->exists();
-
-        if ($alreadyProcessed) {
+        if ($event->evaluation_links_sent_at !== null) {
             return redirect()
                 ->route('admin.events')
                 ->with('status_type', 'warning')
-                ->with('status', 'Evaluation reminders were already processed for this event.');
+                ->with('status', 'Evaluation links were already sent for this event.');
+        }
+
+        $certificateService = app(PostEventCertificateService::class);
+        $attendedEligibleCount = $certificateService->countAttendedEligibleRegistrants((int) $event->event_id);
+
+        if ($attendedEligibleCount === 0) {
+            return redirect()
+                ->route('admin.events')
+                ->with('status_type', 'warning')
+                ->with('status', 'No checked-in participants are eligible for evaluation links.');
         }
 
         $hasPendingRecipients = Registration::query()
             ->where('event_id', $event->event_id)
-            ->whereIn('status', ['approved', 'pending'])
-            ->whereHas('user', function ($query) {
-                $query->where('role', 'participant');
-            })
+            ->where('status', 'approved')
+            ->whereNotNull('event_registrant_id')
+            ->whereHas('attendance')
             ->whereNull('evaluation_reminder_sent_at')
+            ->where(function ($query) {
+                $query->whereHas('user', function ($userQuery) {
+                    $userQuery->where('role', 'participant');
+                })->orWhereNotNull('event_registrant_id');
+            })
             ->exists();
 
         if (! $hasPendingRecipients) {
+            $event->forceFill(['evaluation_links_sent_at' => now()])->save();
+            $certificateCounts = $this->distributeAttendanceCertificatesIfNeeded($event, $certificateService);
+
             return redirect()
                 ->route('admin.events')
-                ->with('status_type', 'warning')
-                ->with('status', 'Evaluation reminders were already sent to all eligible registrants for this event.');
+                ->with('status_type', 'success')
+                ->with('status', $this->buildPostEventSendStatusMessage(0, $certificateCounts));
         }
 
         $exitCode = Artisan::call('events:send-evaluation-reminders', [
@@ -238,21 +257,59 @@ class EventController extends Controller
             return redirect()
                 ->route('admin.events')
                 ->with('status_type', 'warning')
-                ->with('status', 'Manual reminder run failed. Please check logs and try again.');
+                ->with('status', 'Sending evaluation links failed. Please check logs and try again.');
         }
+
+        $event->forceFill(['evaluation_links_sent_at' => now()])->save();
 
         $failedCount = 0;
         if (preg_match('/Failed:\s*(\d+)/', $output, $matches) === 1) {
             $failedCount = (int) ($matches[1] ?? 0);
         }
 
-        $statusType = $failedCount > 0 ? 'warning' : 'success';
-        $statusMessage = 'Evaluation reminders processed.';
+        $certificateCounts = $this->distributeAttendanceCertificatesIfNeeded($event, $certificateService);
+        $statusType = $failedCount > 0 || $certificateCounts['failed'] > 0 ? 'warning' : 'success';
 
         return redirect()
             ->route('admin.events')
             ->with('status_type', $statusType)
-            ->with('status', $statusMessage);
+            ->with('status', $this->buildPostEventSendStatusMessage($failedCount, $certificateCounts));
+    }
+
+    /**
+     * @return array{attendance: int, skipped: int, failed: int}
+     */
+    private function distributeAttendanceCertificatesIfNeeded(Event $event, PostEventCertificateService $certificateService): array
+    {
+        $emptyCounts = ['attendance' => 0, 'skipped' => 0, 'failed' => 0];
+
+        if (! Schema::hasColumn('registrations', 'attendance_certificate_sent_at')
+            || ! Schema::hasColumn('events', 'attendance_certificates_distributed_at')) {
+            return $emptyCounts;
+        }
+
+        if ($event->attendance_certificates_distributed_at !== null) {
+            return $emptyCounts;
+        }
+
+        $counts = $certificateService->distributeAttendanceCertificatesForEvent($event);
+        $event->forceFill(['attendance_certificates_distributed_at' => now()])->save();
+
+        return $counts;
+    }
+
+    /**
+     * @param  array{attendance: int, skipped: int, failed: int}  $certificateCounts
+     */
+    private function buildPostEventSendStatusMessage(int $evaluationLinkFailures, array $certificateCounts): string
+    {
+        $message = 'Evaluation links and attendance certificates sent to checked-in participants.';
+
+        if ($evaluationLinkFailures > 0 || $certificateCounts['failed'] > 0) {
+            $message = 'Post-event emails were processed with some failures. Please check logs.';
+        }
+
+        return $message;
     }
 
     /**
@@ -269,6 +326,25 @@ class EventController extends Controller
         $payload['event_date'] = $startAt->toDateString();
 
         return $payload;
+    }
+
+    private function deleteStoredPaperFormatIfLocal(?string $paperFormatFile): void
+    {
+        if (! $paperFormatFile) {
+            return;
+        }
+
+        if (filter_var($paperFormatFile, FILTER_VALIDATE_URL)) {
+            return;
+        }
+
+        $relativePath = ltrim($paperFormatFile, '/');
+        $relativePath = preg_replace('#^storage/#', '', $relativePath) ?? $relativePath;
+        $relativePath = preg_replace('#^public/#', '', $relativePath) ?? $relativePath;
+
+        if (Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
+        }
     }
 
     private function deleteStoredBannerIfLocal(?string $bannerImage): void

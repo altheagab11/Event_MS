@@ -3,7 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AdminEvaluationsController;
 use App\Http\Controllers\AdminParticipantsController;
-use App\Http\Controllers\EventEvaluationController;
+use App\Http\Controllers\ParticipantEvaluationController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AdminDashboardController;
@@ -26,9 +26,12 @@ Route::post('/register/verify-code', [RegistrationController::class, 'verifyCode
   ->middleware('throttle:12,1')
   ->name('registration.verify-code');
 
-Route::post('/events/{event}/evaluate', [EventEvaluationController::class, 'store'])
+Route::get('/evaluate/{token}', [ParticipantEvaluationController::class, 'show'])
+  ->name('events.evaluation.show');
+
+Route::post('/evaluate/{token}', [ParticipantEvaluationController::class, 'store'])
   ->middleware('throttle:20,1')
-  ->name('events.evaluate');
+  ->name('events.evaluation.store');
 
 Route::get('/pass/{pass}', [DigitalPassController::class, 'show'])
   ->middleware('signed')

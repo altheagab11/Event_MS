@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreEventRequest extends FormRequest
 {
@@ -31,6 +32,13 @@ class StoreEventRequest extends FormRequest
       'location' => ['nullable', 'string', 'max:255'],
       'description' => ['nullable', 'string', 'max:5000'],
       'banner_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+      'paper_format_file' => [
+        Rule::requiredIf(fn () => $this->input('event_type') === 'Conference'),
+        'nullable',
+        'file',
+        'mimes:pdf,doc,docx',
+        'max:10240',
+      ],
     ];
   }
 
@@ -54,6 +62,10 @@ class StoreEventRequest extends FormRequest
       'banner_image.image' => 'The event banner must be an image file.',
       'banner_image.mimes' => 'The event banner must be a JPG, JPEG, PNG, or WEBP file.',
       'banner_image.max' => 'The event banner must not be greater than 5 MB.',
+      'paper_format_file.required' => 'Please upload the paper format file for conference events.',
+      'paper_format_file.file' => 'The paper format must be a valid file.',
+      'paper_format_file.mimes' => 'The paper format must be a PDF, DOC, or DOCX file.',
+      'paper_format_file.max' => 'The paper format must not be greater than 10 MB.',
     ];
   }
 }

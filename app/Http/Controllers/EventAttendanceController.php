@@ -18,18 +18,8 @@ class EventAttendanceController extends Controller
     {
         $this->eventSessionSync->syncForEvent($event);
 
-        $endDate = $event->end_date ?? $event->event_date;
-        if ($endDate !== null && ! $endDate instanceof Carbon) {
-            $endDate = Carbon::parse((string) $endDate);
-        }
-        if ($endDate instanceof Carbon && ! $event->end_date && $event->event_date) {
-            $endDate = $endDate->copy()->endOfDay();
-        }
-
-        $isArchived = (string) $event->status === 'archived';
-        $isDone = ! $isArchived && $endDate instanceof Carbon && $endDate->isPast();
-        $event->setAttribute('computed_status', $isArchived ? 'archived' : ($isDone ? 'done' : 'active'));
-        $event->setAttribute('computed_status_label', $isArchived ? 'Archived' : ($isDone ? 'Done' : 'Active'));
+        $event->syncStatusIfEnded();
+        $event->applyComputedStatusAttributes();
 
         $sessions = DB::table('event_sessions')
             ->where('event_id', $event->event_id)
