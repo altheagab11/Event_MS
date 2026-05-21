@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\EventCertificateMail;
 use App\Models\Evaluation;
+use App\Services\ActivityLogger;
 use App\Models\Event;
 use App\Models\Registration;
 use Illuminate\Support\Carbon;
@@ -196,6 +197,18 @@ class PostEventCertificateService
             Registration::query()
                 ->where('registration_id', $registration->registration_id)
                 ->update($updates);
+
+            ActivityLogger::log(
+                action: 'Certificate Generated',
+                module: 'Certificates',
+                description: sprintf(
+                    'System generated %s for %s (%s) — event "%s".',
+                    $certificateLabel,
+                    $recipient['name'],
+                    $recipient['email'],
+                    $event->event_name
+                ),
+            );
 
             return true;
         } catch (Throwable $exception) {

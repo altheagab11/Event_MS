@@ -1,3 +1,7 @@
+@php
+    $authUser = auth()->user();
+@endphp
+
 <header class="sticky top-0 z-30 flex h-[78px] items-center justify-between border-b border-[#1E3357] bg-[#10213A]/90 px-9 backdrop-blur-md">
     <h2 class="text-sm font-black uppercase tracking-widest text-[#F8FAFC]">
         {{ $topbarTitle ?? 'Admin' }}
@@ -13,9 +17,9 @@
 
         <div class="flex items-center gap-2 rounded-xl border border-[#1E3357] bg-[#13284A]/70 px-3 py-2">
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#3B82F6] text-xs font-black text-white">
-                A
+                {{ $authUser?->initials() ?? 'U' }}
             </div>
-            <span class="text-sm font-bold text-[#F8FAFC]">Admin</span>
+            <span class="text-sm font-bold text-[#F8FAFC]">{{ $authUser?->roleLabel() ?? 'User' }}</span>
         </div>
     </div>
 </header>

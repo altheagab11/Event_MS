@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
   )
   ->withMiddleware(function (Middleware $middleware): void {
     $middleware->redirectGuestsTo('/login');
+    $middleware->alias([
+      'portal' => \App\Http\Middleware\EnsurePortalUser::class,
+      'account.active' => \App\Http\Middleware\EnsureAccountIsActive::class,
+      'dashboard' => \App\Http\Middleware\EnsureUserCanAccessDashboard::class,
+      'super_admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
+    ]);
   })
   ->withExceptions(function (Exceptions $exceptions): void {
     //

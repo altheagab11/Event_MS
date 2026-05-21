@@ -55,9 +55,12 @@
 
                                     <div>
                                         <h2 class="text-xl font-black text-[#F8FAFC]">
-                                            {{ $evaluation['reviewer_name'] }}
+                                            {{ $evaluation['participant_name'] }}
                                         </h2>
                                         <p class="mt-1 text-sm text-[#94A3B8]">
+                                            {{ $evaluation['participant_email'] }}
+                                        </p>
+                                        <p class="mt-0.5 text-xs text-[#64748B]">
                                             {{ $evaluation['date'] }}
                                         </p>
                                     </div>
@@ -99,9 +102,10 @@
                                     <button
                                         type="button"
                                         data-evaluation-id="{{ $evaluation['id'] }}"
-                                        class="text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:text-[#60A5FA]"
+                                        data-review-url="{{ route('admin.evaluations.review', ['evaluation' => $evaluation['id']]) }}"
+                                        class="view-full-review-btn text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:text-[#60A5FA] disabled:opacity-60"
                                     >
-                                        Read Full Review →
+                                        View Full Review →
                                     </button>
                                 </div>
                             </div>
@@ -113,7 +117,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M5 5h14v12H7l-4 4V7a2 2 0 012-2z"/>
                                 </svg>
                             </div>
-                            <p class="mt-5 text-lg font-black text-[#F8FAFC]">No evaluations yet</p>
+                            <p class="mt-5 text-lg font-black text-[#F8FAFC]">No evaluations yet.</p>
                             <p class="mt-2 text-sm text-[#94A3B8]">
                                 Submitted participant evaluations will appear here.
                             </p>
@@ -167,10 +171,11 @@
 
                         <div>
                             <h3 id="evaluationModalName" class="text-xl font-black text-[#F8FAFC]">
-                                Maria Santos
+                                Participant
                             </h3>
-                            <p id="evaluationModalDate" class="mt-1 text-sm text-[#94A3B8]">
-                                2026-04-21
+                            <p id="evaluationModalEmail" class="mt-1 text-sm text-[#94A3B8]"></p>
+                            <p id="evaluationModalDate" class="mt-0.5 text-xs text-[#64748B]">
+                                —
                             </p>
                         </div>
                     </div>
@@ -193,12 +198,17 @@
                     Review text
                 </p>
 
-                <div id="evaluationModalExtras" class="mt-6 hidden">
+                <div id="evaluationModalAnswers" class="mt-6 hidden">
                     <p class="text-sm font-black uppercase tracking-widest text-[#60A5FA]">
-                        Additional Responses
+                        Question Responses
                     </p>
-                    <div id="evaluationModalExtrasList" class="mt-3 space-y-3 text-sm text-[#CBD5E1]"></div>
+                    <div id="evaluationModalAnswersList" class="mt-3 space-y-4"></div>
                 </div>
+
+                <p id="evaluationModalLoading" class="mt-4 hidden text-sm font-medium text-[#94A3B8]">
+                    Loading review details...
+                </p>
+                <p id="evaluationModalError" class="mt-4 hidden text-sm font-semibold text-[#EF4444]"></p>
             </section>
 
             <div class="mt-5 flex justify-end">
@@ -221,12 +231,15 @@
     const evaluationModalStars = document.getElementById('evaluationModalStars');
     const evaluationModalName = document.getElementById('evaluationModalName');
     const evaluationModalInitial = document.getElementById('evaluationModalInitial');
+    const evaluationModalEmail = document.getElementById('evaluationModalEmail');
     const evaluationModalDate = document.getElementById('evaluationModalDate');
     const evaluationModalEvent = document.getElementById('evaluationModalEvent');
     const evaluationModalRating = document.getElementById('evaluationModalRating');
     const evaluationModalReview = document.getElementById('evaluationModalReview');
-    const evaluationModalExtras = document.getElementById('evaluationModalExtras');
-    const evaluationModalExtrasList = document.getElementById('evaluationModalExtrasList');
+    const evaluationModalAnswers = document.getElementById('evaluationModalAnswers');
+    const evaluationModalAnswersList = document.getElementById('evaluationModalAnswersList');
+    const evaluationModalLoading = document.getElementById('evaluationModalLoading');
+    const evaluationModalError = document.getElementById('evaluationModalError');
 
     function renderModalStars(rating) {
         if (!evaluationModalStars) return;
@@ -249,67 +262,122 @@
         }
     }
 
-    function renderModalExtras(extras) {
-        if (!evaluationModalExtras || !evaluationModalExtrasList) return;
-        const hasExtras = Array.isArray(extras) && extras.length > 0;
-        evaluationModalExtras.classList.toggle('hidden', !hasExtras);
-        evaluationModalExtrasList.innerHTML = '';
+    function renderModalAnswers(answers) {
+        if (!evaluationModalAnswers || !evaluationModalAnswersList) return;
+        const hasAnswers = Array.isArray(answers) && answers.length > 0;
+        evaluationModalAnswers.classList.toggle('hidden', !hasAnswers);
+        evaluationModalAnswersList.innerHTML = '';
 
-        if (!hasExtras) return;
+        if (!hasAnswers) return;
 
-        extras.forEach(item => {
-            const label = String(item.label || '').trim();
-            const value = String(item.value || '').trim();
-            if (!label && !value) return;
+        answers.forEach(item => {
+            const question = String(item.question_text || '').trim();
+            const value = String(item.display_value || '').trim();
+            if (!question && !value) return;
 
             const row = document.createElement('div');
-            row.className = 'flex flex-wrap items-start gap-2';
-            const labelEl = document.createElement('span');
-            labelEl.className = 'font-black text-[#F8FAFC]';
-            labelEl.textContent = label !== '' ? label + ':' : 'Response:';
-            const valueEl = document.createElement('span');
+            row.className = 'rounded-xl border border-[#60A5FA]/15 bg-[#0D1B31]/40 p-4';
+
+            const questionEl = document.createElement('p');
+            questionEl.className = 'text-sm font-black text-[#F8FAFC]';
+            questionEl.textContent = question !== '' ? question : 'Question';
+
+            const valueEl = document.createElement('p');
+            valueEl.className = 'mt-2 text-sm leading-6 text-[#CBD5E1]';
             valueEl.textContent = value !== '' ? value : 'Not provided';
-            row.append(labelEl, valueEl);
-            evaluationModalExtrasList.append(row);
+
+            row.append(questionEl, valueEl);
+            evaluationModalAnswersList.append(row);
         });
     }
 
-    function openEvaluationModalById(evaluationId) {
-        if (!evaluationModal) return;
-        const evaluation = evaluationMap.get(String(evaluationId));
+    function setModalLoading(isLoading) {
+        if (evaluationModalLoading) {
+            evaluationModalLoading.classList.toggle('hidden', !isLoading);
+        }
+        if (evaluationModalError) {
+            evaluationModalError.classList.add('hidden');
+            evaluationModalError.textContent = '';
+        }
+    }
 
-        if (!evaluation) {
-            if (evaluationModalName) evaluationModalName.textContent = 'Review not found';
-            if (evaluationModalInitial) evaluationModalInitial.textContent = '?';
-            if (evaluationModalDate) evaluationModalDate.textContent = '—';
-            if (evaluationModalEvent) evaluationModalEvent.textContent = '—';
-            if (evaluationModalRating) evaluationModalRating.textContent = '0/5';
-            if (evaluationModalReview) evaluationModalReview.textContent = 'Review not found.';
-            renderModalStars(0);
-            renderModalExtras([]);
-        } else {
-            const rating = parseInt(String(evaluation.rating), 10) || 0;
-            const scoreLabel = evaluation.score !== undefined && evaluation.score !== null && String(evaluation.score).trim() !== ''
-                ? String(evaluation.score)
-                : String(rating);
-            if (evaluationModalName) evaluationModalName.textContent = evaluation.reviewer_name || 'Unknown Reviewer';
-            if (evaluationModalInitial) evaluationModalInitial.textContent = evaluation.avatar || '?';
-            if (evaluationModalDate) evaluationModalDate.textContent = evaluation.date || '—';
-            if (evaluationModalEvent) evaluationModalEvent.textContent = evaluation.event_name || 'Unknown Event';
-            if (evaluationModalRating) evaluationModalRating.textContent = scoreLabel + '/5';
-            if (evaluationModalReview) {
-                const reviewText = evaluation.comment_full && String(evaluation.comment_full).trim() !== ''
-                    ? evaluation.comment_full
-                    : 'No comment provided.';
-                evaluationModalReview.textContent = '"' + reviewText + '"';
-            }
-            renderModalStars(rating);
-            renderModalExtras(evaluation.additional_answers || []);
+    function setModalError(message) {
+        if (evaluationModalError) {
+            evaluationModalError.textContent = message;
+            evaluationModalError.classList.remove('hidden');
+        }
+    }
+
+    function populateEvaluationModal(evaluation, answers = []) {
+        const rating = parseInt(String(evaluation?.rating), 10) || 0;
+        const scoreLabel = evaluation?.score !== undefined && evaluation?.score !== null && String(evaluation.score).trim() !== ''
+            ? String(evaluation.score)
+            : String(rating);
+
+        if (evaluationModalName) evaluationModalName.textContent = evaluation?.participant_name || 'Participant';
+        if (evaluationModalInitial) evaluationModalInitial.textContent = evaluation?.avatar || '?';
+        if (evaluationModalEmail) evaluationModalEmail.textContent = evaluation?.participant_email || '—';
+        if (evaluationModalDate) evaluationModalDate.textContent = evaluation?.date || '—';
+        if (evaluationModalEvent) evaluationModalEvent.textContent = evaluation?.event_name || 'Unknown Event';
+        if (evaluationModalRating) evaluationModalRating.textContent = scoreLabel + '/5';
+        if (evaluationModalReview) {
+            const reviewText = evaluation?.comment_full && String(evaluation.comment_full).trim() !== ''
+                ? evaluation.comment_full
+                : 'No comment provided.';
+            evaluationModalReview.textContent = '"' + reviewText + '"';
         }
 
+        renderModalStars(rating);
+        renderModalAnswers(answers);
+    }
+
+    function openEvaluationModalShell() {
+        if (!evaluationModal) return;
         evaluationModal.classList.remove('hidden');
         evaluationModal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
+    }
+
+    async function openEvaluationModalById(evaluationId, reviewUrl) {
+        const cached = evaluationMap.get(String(evaluationId));
+        populateEvaluationModal(cached || { participant_name: 'Participant', avatar: '?', date: '—', event_name: 'Unknown Event', rating: 0, score: '0', comment_full: '' });
+        renderModalAnswers([]);
+        openEvaluationModalShell();
+
+        if (!reviewUrl) {
+            setModalError('Unable to load review details.');
+            return;
+        }
+
+        setModalLoading(true);
+
+        try {
+            const response = await fetch(reviewUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load evaluation review.');
+            }
+
+            const payload = await response.json();
+            const evaluation = payload.evaluation || cached;
+            const answers = Array.isArray(payload.answers) ? payload.answers : [];
+
+            if (evaluation) {
+                evaluationMap.set(String(evaluationId), evaluation);
+                populateEvaluationModal(evaluation, answers);
+            } else {
+                renderModalAnswers(answers);
+            }
+        } catch (error) {
+            setModalError(error instanceof Error ? error.message : 'Failed to load evaluation review.');
+        } finally {
+            setModalLoading(false);
+        }
     }
 
     function closeEvaluationModal() {
@@ -317,13 +385,27 @@
         evaluationModal.classList.add('hidden');
         evaluationModal.classList.remove('flex');
         document.body.classList.remove('overflow-hidden');
+        setModalLoading(false);
+        if (evaluationModalError) {
+            evaluationModalError.classList.add('hidden');
+            evaluationModalError.textContent = '';
+        }
     }
 
     window.closeEvaluationModal = closeEvaluationModal;
 
-    const readButtons = Array.from(document.querySelectorAll('[data-evaluation-id]'));
-    readButtons.forEach(button => {
-        button.addEventListener('click', () => openEvaluationModalById(button.dataset.evaluationId));
+    document.querySelectorAll('.view-full-review-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+            const evaluationId = button.dataset.evaluationId;
+            const reviewUrl = button.dataset.reviewUrl;
+            button.disabled = true;
+
+            try {
+                await openEvaluationModalById(evaluationId, reviewUrl);
+            } finally {
+                button.disabled = false;
+            }
+        });
     });
 </script>
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\ActivityLogger;
 use App\Services\EventOnlineAttendanceTokenService;
 use App\Services\LandingAnnouncementService;
 use App\Services\PostEventCertificateService;
@@ -19,7 +20,7 @@ class EventController extends Controller
 {
     public function landing()
     {
-        if (auth()->check() && auth()->user()?->role === 'admin') {
+        if (auth()->check() && auth()->user()?->canAccessDashboard()) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -130,6 +131,12 @@ class EventController extends Controller
         $event = Event::query()->create($payload);
         app(EventOnlineAttendanceTokenService::class)->ensureToken($event);
 
+        ActivityLogger::log(
+            action: 'Event Created',
+            module: 'Events',
+            description: sprintf('Created event "%s" (ID %d).', $event->event_name, $event->event_id),
+        );
+
         return redirect()
             ->route('admin.events')
             ->with('status', 'Event created successfully.');
@@ -159,6 +166,12 @@ class EventController extends Controller
 
         $event->fill($payload)->save();
         app(EventOnlineAttendanceTokenService::class)->ensureToken($event);
+
+        ActivityLogger::log(
+            action: 'Event Updated',
+            module: 'Events',
+            description: sprintf('Updated event "%s" (ID %d).', $event->event_name, $event->event_id),
+        );
 
         return redirect()
             ->route('admin.events')
@@ -272,6 +285,17 @@ class EventController extends Controller
 
         $certificateCounts = $this->distributeAttendanceCertificatesIfNeeded($event, $certificateService);
         $statusType = $failedCount > 0 || $certificateCounts['failed'] > 0 ? 'warning' : 'success';
+
+        ActivityLogger::log(
+            action: 'Evaluation Links Sent',
+            module: 'Events',
+            description: sprintf(
+                'Sent evaluation links for event "%s" (ID %d). Failed deliveries: %d.',
+                $event->event_name,
+                $event->event_id,
+                $failedCount
+            ),
+        );
 
         return redirect()
             ->route('admin.events')

@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
         'firstname' => 'System',
         'lastname' => 'Admin',
         'password' => Hash::make('password123'),
-        'role' => 'admin',
+        'role' => 'super_admin',
+        'account_status' => 'active',
         'email_verified_at' => now(),
       ]
     );

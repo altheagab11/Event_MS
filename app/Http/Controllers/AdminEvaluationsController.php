@@ -2,72 +2,137 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Models\Evaluation;
+use App\Models\EvaluationAnswer;
+use App\Services\EventEvaluationService;
+use Illuminate\Http\JsonResponse;
 
 class AdminEvaluationsController extends Controller
 {
-    public function index()
+    public function index(EventEvaluationService $evaluationService)
     {
-        $hasEventId = Schema::hasColumn('evaluations', 'event_id');
+        $rows = Evaluation::query()
+            ->with([
+                'event:event_id,event_name',
+                'registration.eventRegistrant:event_registrant_id,first_name,last_name,email',
+                'registration.user:id,firstname,lastname,email',
+            ])
+            ->whereNotNull('registration_id')
+            ->orderByDesc('evaluated_at')
+            ->get();
 
-        $query = DB::table('evaluations as eval')
-            ->join('users as reviewer', 'reviewer.id', '=', 'eval.evaluator_id')
-            ->leftJoin('papers as paper', 'paper.paper_id', '=', 'eval.paper_id')
-            ->leftJoin('events as paper_event', 'paper_event.event_id', '=', 'paper.event_id');
-
-        if ($hasEventId) {
-            $query->leftJoin('events as direct_event', 'direct_event.event_id', '=', 'eval.event_id');
-        }
-
-        $eventNameExpr = $hasEventId
-          ? "COALESCE(direct_event.event_name, paper_event.event_name, 'Unknown Event')"
-          : "COALESCE(paper_event.event_name, 'Unknown Event')";
-
-        $evaluations = $query
-            ->selectRaw('eval.evaluation_id')
-            ->selectRaw('eval.score')
-            ->selectRaw('eval.comment')
-            ->selectRaw('eval.evaluated_at')
-            ->selectRaw("CONCAT(reviewer.firstname, ' ', reviewer.lastname) as reviewer_name")
-            ->selectRaw($eventNameExpr.' as event_name')
-            ->orderByDesc('eval.evaluated_at')
-            ->get()
-            ->map(function ($row): array {
-                $fullComment = trim((string) ($row->comment ?? ''));
-                $preview = $fullComment === ''
-                  ? 'No comment provided.'
-                  : (mb_strlen($fullComment) > 120 ? mb_substr($fullComment, 0, 120).'...' : $fullComment);
-
-                $score = (float) $row->score;
-                $scoreDisplay = fmod($score, 1.0) === 0.0
-                  ? (string) (int) $score
-                  : number_format($score, 1);
-
-                $rating = (int) max(1, min(5, (int) round($score)));
-
-                return [
-                    'id' => (int) $row->evaluation_id,
-                    'reviewer_name' => trim((string) ($row->reviewer_name ?? 'Unknown Reviewer')),
-                    'avatar' => strtoupper(mb_substr(trim((string) ($row->reviewer_name ?? 'U')), 0, 1)),
-                    'date' => optional($row->evaluated_at)->format('Y-m-d')
-                      ?? date('Y-m-d', strtotime((string) $row->evaluated_at)),
-                    'score' => $scoreDisplay,
-                    'score_numeric' => $score,
-                    'rating' => $rating,
-                    'event_name' => strtoupper((string) ($row->event_name ?? 'Unknown Event')),
-                    'comment_preview' => $preview,
-                    'comment_full' => $fullComment,
-                ];
-            });
+        $evaluations = $rows->map(fn (Evaluation $evaluation): array => $this->mapEvaluationCard($evaluation, $evaluationService));
 
         $averageRating = $evaluations->isEmpty()
-          ? null
-          : round($evaluations->avg(fn (array $e): float => $e['score_numeric']), 1);
+            ? null
+            : round($evaluations->avg(fn (array $e): float => $e['score_numeric']), 1);
 
         return view('admin.evaluations', [
             'evaluations' => $evaluations,
             'averageRating' => $averageRating,
         ]);
+    }
+
+    public function show(Evaluation $evaluation, EventEvaluationService $evaluationService): JsonResponse
+    {
+        if ($evaluation->registration_id === null) {
+            return response()->json(['message' => 'Evaluation not found.'], 404);
+        }
+
+        $evaluation->load([
+            'event:event_id,event_name',
+            'registration.eventRegistrant:event_registrant_id,first_name,last_name,email',
+            'registration.user:id,firstname,lastname,email',
+        ]);
+
+        $card = $this->mapEvaluationCard($evaluation, $evaluationService);
+
+        $answers = EvaluationAnswer::query()
+            ->join('evaluation_questions as eq', 'eq.question_id', '=', 'evaluation_answers.question_id')
+            ->where('evaluation_answers.evaluation_id', $evaluation->evaluation_id)
+            ->orderBy('eq.sort_order')
+            ->orderBy('eq.question_id')
+            ->get([
+                'evaluation_answers.answer_id',
+                'evaluation_answers.rating_value',
+                'evaluation_answers.answer_text',
+                'eq.question_id',
+                'eq.question_text',
+                'eq.question_type',
+                'eq.sort_order',
+            ])
+            ->map(fn ($row): array => [
+                'question_id' => (int) $row->question_id,
+                'question_text' => (string) $row->question_text,
+                'question_type' => (string) $row->question_type,
+                'rating_value' => $row->rating_value !== null ? (int) $row->rating_value : null,
+                'answer_text' => trim((string) ($row->answer_text ?? '')),
+                'display_value' => $this->formatAnswerDisplay($row),
+            ])
+            ->values();
+
+        return response()->json([
+            'evaluation' => $card,
+            'answers' => $answers,
+        ]);
+    }
+
+    private function mapEvaluationCard(Evaluation $evaluation, EventEvaluationService $evaluationService): array
+    {
+        $registration = $evaluation->registration;
+        $participantName = $registration !== null
+            ? $evaluationService->resolveParticipantName($registration)
+            : 'Participant';
+
+        $participantEmail = trim((string) ($evaluation->participant_email ?? ''));
+        if ($participantEmail === '' && $registration !== null) {
+            $participantEmail = $evaluationService->resolveParticipantEmail($registration);
+        }
+
+        $eventName = $evaluation->event?->event_name ?? 'Unknown Event';
+        $fullComment = trim((string) ($evaluation->comment ?? ''));
+        $preview = $fullComment === ''
+            ? 'No comment provided.'
+            : (mb_strlen($fullComment) > 120 ? mb_substr($fullComment, 0, 120).'...' : $fullComment);
+
+        $score = (float) $evaluation->score;
+        $scoreDisplay = fmod($score, 1.0) === 0.0
+            ? (string) (int) $score
+            : number_format($score, 1);
+
+        $rating = (int) max(1, min(5, (int) round($score)));
+
+        $evaluatedAt = $evaluation->evaluated_at;
+
+        return [
+            'id' => (int) $evaluation->evaluation_id,
+            'participant_name' => $participantName,
+            'participant_email' => $participantEmail !== '' ? $participantEmail : '—',
+            'avatar' => strtoupper(mb_substr(trim($participantName), 0, 1)),
+            'date' => $evaluatedAt?->format('M j, Y')
+                ?? date('M j, Y', strtotime((string) $evaluatedAt)),
+            'evaluated_at' => $evaluatedAt?->toIso8601String(),
+            'score' => $scoreDisplay,
+            'score_numeric' => $score,
+            'rating' => $rating,
+            'event_name' => strtoupper((string) $eventName),
+            'comment_preview' => $preview,
+            'comment_full' => $fullComment,
+        ];
+    }
+
+    private function formatAnswerDisplay(object $row): string
+    {
+        $type = (string) ($row->question_type ?? 'rating');
+
+        if ($type === 'text') {
+            $text = trim((string) ($row->answer_text ?? ''));
+
+            return $text !== '' ? $text : 'Not provided';
+        }
+
+        $rating = $row->rating_value !== null ? (int) $row->rating_value : 0;
+
+        return $rating >= 1 && $rating <= 5 ? $rating.'/5' : 'Not provided';
     }
 }

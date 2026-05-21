@@ -8,6 +8,7 @@ use App\Models\EventRegistrant;
 use App\Models\Paper;
 use App\Models\Registration;
 use App\Models\RegistrationVerificationCode;
+use App\Services\ActivityLogger;
 use App\Services\DigitalPassService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
@@ -257,6 +258,16 @@ class AdminParticipantsController extends Controller
             }
         }
 
+        ActivityLogger::log(
+            action: 'Participant Rejected',
+            module: 'Participants',
+            description: sprintf(
+                'Rejected registration #%d for event "%s".',
+                $registration->registration_id,
+                $registration->event->event_name ?? 'Unknown'
+            ),
+        );
+
         return redirect()
             ->route('admin.participants')
             ->with('status_type', 'success')
@@ -352,6 +363,16 @@ class AdminParticipantsController extends Controller
                 ->with('status_type', 'warning')
                 ->with('status_message', 'Application approved, but sending the digital ID email failed. Please check mail configuration.');
         }
+
+        ActivityLogger::log(
+            action: 'Participant Approved',
+            module: 'Participants',
+            description: sprintf(
+                'Approved registration #%d for event "%s" and sent digital ID.',
+                $registration->registration_id,
+                $registration->event->event_name ?? 'Unknown'
+            ),
+        );
 
         return redirect()
             ->route('admin.participants')
