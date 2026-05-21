@@ -146,6 +146,7 @@ class RegistrationController extends Controller
         }
 
         $participantRole = trim((string) $request->input('school_level'));
+        $attendanceMode = $event->resolveRegistrationAttendanceMode($request->input('attendance_mode'));
         $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
 
         $paperTempPath = null;
@@ -184,6 +185,7 @@ class RegistrationController extends Controller
                 'school_from' => trim((string) $request->input('school_from')),
                 'school_level' => trim((string) $request->input('school_level')),
                 'school_affiliation' => trim((string) $request->input('region')),
+                'attendance_mode' => $attendanceMode,
             ],
             'paper_temp_path' => $paperTempPath,
             'status' => 'pending',

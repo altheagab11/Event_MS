@@ -7,6 +7,7 @@ use App\Models\EventRegistrant;
 use App\Models\RegistrationVerificationCode;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -57,6 +58,10 @@ class EventRegistrantController extends Controller
             $schoolUniversity = trim((string) ($payload['school_university'] ?? $payload['region'] ?? ''));
             $userType = trim((string) ($payload['user_type'] ?? $payload['school_from'] ?? ''));
             $participantRole = trim((string) ($payload['participant_role'] ?? $payload['school_level'] ?? ''));
+            $attendanceMode = trim((string) ($payload['attendance_mode'] ?? ''));
+            if ($attendanceMode === '') {
+                $attendanceMode = $event->resolveRegistrationAttendanceMode(null);
+            }
 
             $registrant = EventRegistrant::query()->create([
                 'event_id' => $event->event_id,
@@ -70,13 +75,22 @@ class EventRegistrantController extends Controller
                 'registration_date' => now(),
             ]);
 
-            $registrationId = DB::table('registrations')->insertGetId([
+            $registrationRow = [
                 'user_id' => null,
                 'event_registrant_id' => $registrant->event_registrant_id,
                 'event_id' => $event->event_id,
                 'registration_date' => now(),
                 'status' => 'pending',
-            ], 'registration_id');
+            ];
+
+            if (Schema::hasColumn('registrations', 'attendance_mode')) {
+                $registrationRow['attendance_mode'] = $attendanceMode;
+            }
+
+            $registrationId = DB::table('registrations')->insertGetId(
+                $registrationRow,
+                'registration_id',
+            );
 
             $requiresPaper = $isConferenceEvent && strcasecmp($participantRole, 'Presentor') === 0;
 
@@ -120,6 +134,7 @@ class EventRegistrantController extends Controller
                 'school_level' => $participantRole !== '' ? $participantRole : 'Participant',
                 'region' => $schoolUniversity,
                 'school_from' => $userType,
+                'attendance_mode' => $attendanceMode,
             ];
         });
     }

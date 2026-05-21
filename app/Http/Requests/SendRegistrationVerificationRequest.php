@@ -24,14 +24,10 @@ class SendRegistrationVerificationRequest extends FormRequest
   public function rules(): array
   {
     $eventId = (int) $this->input('event_id');
-    $isConference = Event::query()
-      ->where('event_id', $eventId)
-      ->where('event_type', 'Conference')
-      ->exists();
-    $isSchoolEvent = Event::query()
-      ->where('event_id', $eventId)
-      ->where('event_type', 'School Event')
-      ->exists();
+    $event = Event::query()->where('event_id', $eventId)->first();
+    $isHybrid = $event !== null && $event->isHybridAttendanceFormat();
+    $isConference = $event !== null && (string) $event->event_type === 'Conference';
+    $isSchoolEvent = $event !== null && (string) $event->event_type === 'School Event';
     $role = strtolower(trim((string) $this->input('school_level')));
     $requiresPaper = $isConference && $role === 'presentor';
 
@@ -50,6 +46,12 @@ class SendRegistrationVerificationRequest extends FormRequest
         Rule::when($isSchoolEvent, ['in:Exhibitor,Participant']),
       ],
       'paper_file' => [Rule::requiredIf($requiresPaper), 'nullable', 'file', 'mimes:pdf', 'max:10240'],
+      'attendance_mode' => [
+        Rule::requiredIf($isHybrid),
+        'nullable',
+        'string',
+        'in:Face-to-Face,Online',
+      ],
     ];
   }
 
@@ -72,6 +74,8 @@ class SendRegistrationVerificationRequest extends FormRequest
       'school_level.in' => 'Please select a valid role for this event.',
       'paper_file.mimes' => 'The research paper must be a PDF file.',
       'paper_file.max' => 'The research paper must not exceed 10 MB.',
+      'attendance_mode.required' => 'Please select how you will attend this event.',
+      'attendance_mode.in' => 'Attendance mode must be Face-to-Face or Online.',
     ];
   }
 }

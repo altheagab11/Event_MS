@@ -26,6 +26,7 @@ class Registration extends Model
         'participation_certificate_sent_at',
         'evaluation_token',
         'evaluation_submitted_at',
+        'attendance_mode',
     ];
 
     protected function casts(): array

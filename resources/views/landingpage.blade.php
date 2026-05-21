@@ -705,6 +705,28 @@ $regions = [
       return value !== '' ? value : 'Not Specified';
     }
 
+    function isHybridAttendanceFormat(eventData) {
+      return getAttendanceFormat(eventData) === 'Hybrid';
+    }
+
+    function renderAttendanceModeField() {
+      return `
+        <div id="attendanceModeWrap" class="attendance-mode-wrap" style="display:none">
+          <label class="attendance-mode-label">Attendance Mode *</label>
+          <div class="attendance-mode-options">
+            <label class="attendance-mode-option">
+              <input type="radio" name="attendance_mode" value="Face-to-Face">
+              <span>Face-to-Face</span>
+            </label>
+            <label class="attendance-mode-option">
+              <input type="radio" name="attendance_mode" value="Online">
+              <span>Online</span>
+            </label>
+          </div>
+        </div>
+      `;
+    }
+
     async function postForm(url, formData) {
       const response = await fetch(url, {
         method: 'POST',
@@ -791,6 +813,7 @@ $regions = [
                             <div class="field"><label>User Type *</label><select name="userType" required>${renderSelectOptions(USER_TYPES, 'Select user type')}</select></div>
                             <div class="field"><label>Role *</label><select name="role" id="registrationRole" required>${renderSelectOptions(eventRoles, 'Select role')}</select></div>
                         </div>
+                        ${renderAttendanceModeField()}
                         <div class="upload-wrap" id="paperFormatDownloadWrap" style="display:none">
                             <div class="upload-title">Required Paper Format</div>
                             <div class="upload-note">Download the official format below, then upload your completed research paper as PDF.</div>
@@ -830,6 +853,22 @@ $regions = [
       const paperUploadReady = document.getElementById('paperUploadReady');
       const paperUploadMeta = document.getElementById('paperUploadMeta');
       const uploadDropMain = registrationForm.querySelector('.upload-drop-main');
+      const attendanceModeWrap = document.getElementById('attendanceModeWrap');
+
+      function syncAttendanceModeVisibility() {
+        const showAttendanceMode = isHybridAttendanceFormat(selectedEvent);
+        if (!attendanceModeWrap) {
+          return;
+        }
+
+        attendanceModeWrap.style.display = showAttendanceMode ? 'block' : 'none';
+        attendanceModeWrap.querySelectorAll('input[name="attendance_mode"]').forEach((input) => {
+          input.required = showAttendanceMode;
+          if (!showAttendanceMode) {
+            input.checked = false;
+          }
+        });
+      }
 
       function syncPaperUploadVisibility() {
         const showPaper = requiresPaperUpload(selectedEvent, roleSelect?.value || '');
@@ -922,6 +961,7 @@ $regions = [
       }
 
       syncPaperUploadVisibility();
+      syncAttendanceModeVisibility();
 
       registrationForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -936,6 +976,10 @@ $regions = [
         payload.append('region', String(formData.get('schoolUniversity') || '').trim());
         payload.append('school_from', String(formData.get('userType') || '').trim());
         payload.append('school_level', String(formData.get('role') || '').trim());
+
+        if (isHybridAttendanceFormat(selectedEvent)) {
+          payload.append('attendance_mode', String(formData.get('attendance_mode') || '').trim());
+        }
 
         const selectedRole = String(formData.get('role') || '').trim();
         const paperFile = formData.get('paperFile');

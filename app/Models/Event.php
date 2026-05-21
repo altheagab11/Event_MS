@@ -216,4 +216,24 @@ class Event extends Model
             'can_register' => false,
         ];
     }
+
+    public function isHybridAttendanceFormat(): bool
+    {
+        return trim((string) $this->attendance_format) === 'Hybrid';
+    }
+
+    public function resolveRegistrationAttendanceMode(?string $selectedMode): string
+    {
+        $format = trim((string) $this->attendance_format);
+
+        if ($format === 'Hybrid') {
+            return trim((string) $selectedMode);
+        }
+
+        if ($format === 'Online') {
+            return 'Online';
+        }
+
+        return 'Face-to-Face';
+    }
 }

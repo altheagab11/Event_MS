@@ -230,6 +230,10 @@
                     <div class="min-w-0">
                         <h3 id="participantModalName" class="text-xl font-black text-[#F8FAFC]">—</h3>
                         <p id="participantModalEmail" class="mt-1 text-sm text-[#94A3B8]">—</p>
+                        <p id="participantModalAttendanceMode" class="mt-2 hidden text-sm font-semibold text-[#CBD5E1]">
+                            <span class="text-[#94A3B8]">Attendance Mode:</span>
+                            <span id="participantModalAttendanceModeValue" class="font-black text-[#60A5FA]">—</span>
+                        </p>
                         <span
                             id="participantModalStatus"
                             class="mt-2 inline-flex rounded-xl border border-[#FACC15]/40 bg-[#FACC15]/15 px-3 py-1 text-xs font-black text-[#FACC15]"
@@ -397,6 +401,8 @@
         const participantModalUserType = document.getElementById('participantModalUserType');
         const participantModalRole = document.getElementById('participantModalRole');
         const participantModalEvent = document.getElementById('participantModalEvent');
+        const participantModalAttendanceMode = document.getElementById('participantModalAttendanceMode');
+        const participantModalAttendanceModeValue = document.getElementById('participantModalAttendanceModeValue');
 
         const paperSection = document.getElementById('participantModalPaperSection');
         const paperPresent = document.getElementById('paperPresent');
@@ -526,6 +532,13 @@
             participantModalInitial.textContent = participantInitial(participant.name);
             participantModalName.textContent = normalizeText(participant.name, 'Unknown Participant');
             participantModalEmail.textContent = normalizeText(participant.email, 'Not provided');
+
+            const attendanceMode = normalizeText(participant.attendance_mode, '');
+            if (participantModalAttendanceMode && participantModalAttendanceModeValue) {
+                const showAttendanceMode = attendanceMode !== '' && attendanceMode !== 'Not provided';
+                participantModalAttendanceMode.classList.toggle('hidden', !showAttendanceMode);
+                participantModalAttendanceModeValue.textContent = showAttendanceMode ? attendanceMode : '—';
+            }
 
             const label = normalizeText(participant.status_label, '—');
             participantModalStatus.textContent = label;

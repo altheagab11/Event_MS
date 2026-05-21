@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
@@ -22,6 +23,11 @@ class AdminParticipantsController extends Controller
 {
     public function index()
     {
+        $registrationColumns = ['registration_id', 'user_id', 'event_registrant_id', 'event_id', 'status', 'registration_date'];
+        if (Schema::hasColumn('registrations', 'attendance_mode')) {
+            $registrationColumns[] = 'attendance_mode';
+        }
+
         $registrations = Registration::query()
             ->where(function ($query) {
                 $query->whereHas('user', function ($userQuery) {
@@ -34,7 +40,7 @@ class AdminParticipantsController extends Controller
                 'event:event_id,event_name,event_type',
                 'attendance:attendance_id,registration_id,check_in_time',
             ])
-            ->select(['registration_id', 'user_id', 'event_registrant_id', 'event_id', 'status', 'registration_date'])
+            ->select($registrationColumns)
             ->orderByDesc('registration_date')
             ->get();
 
@@ -142,6 +148,8 @@ class AdminParticipantsController extends Controller
 
                 $displayEmail = (string) ($registration->user?->email ?? $registrant?->email ?? '');
 
+                $attendanceMode = trim((string) ($registration->attendance_mode ?? $payload['attendance_mode'] ?? ''));
+
                 return [
                     'registration_id' => (int) $registration->registration_id,
                     'registration_status' => (string) $registration->status,
@@ -155,6 +163,7 @@ class AdminParticipantsController extends Controller
                     'school_affiliation' => $schoolAffiliation !== '' ? $schoolAffiliation : 'Not provided',
                     'user_type' => $userType !== '' ? $userType : 'Not provided',
                     'participant_role' => $participantRole !== '' ? $participantRole : 'Not provided',
+                    'attendance_mode' => $attendanceMode !== '' ? $attendanceMode : 'Not provided',
                     'level_region' => $levelRegion,
                     'paper' => $paperDetails,
                     'approve_url' => route('admin.participants.approve', ['registration' => $registration->registration_id]),
