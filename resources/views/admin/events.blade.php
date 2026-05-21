@@ -2375,14 +2375,18 @@
                     ensureSwal(() => {
                         if (window.Swal) {
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Invalid date',
-                                text: msg,
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                input.value = '';
-                                input.focus();
-                            });
+                                    icon: 'error',
+                                    title: 'Invalid date',
+                                    text: msg,
+                                    confirmButtonText: 'OK',
+                                    background: '#0D1B31',
+                                    color: '#F8FAFC',
+                                    confirmButtonColor: '#3B82F6',
+                                    backdrop: 'rgba(13,27,49,0.7)'
+                                }).then(() => {
+                                    input.value = '';
+                                    input.focus();
+                                });
                         } else {
                             alert(msg);
                             input.value = '';
