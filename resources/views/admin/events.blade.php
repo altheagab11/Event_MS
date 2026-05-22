@@ -1944,7 +1944,9 @@
 
         const resolveAttendanceForSession = (sessionAttendance, sessionKey) => {
             if (sessionKey === 'all') {
-                const attendedSessions = sessionAttendance.filter((item) => item.attendance_status === 'attended');
+                const attendedSessions = sessionAttendance.filter(
+                    (item) => item.attendance_status === 'attended' && item.check_in_time,
+                );
                 if (attendedSessions.length === 0) {
                     return {
                         attendance_status: 'not_attended',
@@ -1963,10 +1965,14 @@
             }
 
             const sessionRow = sessionAttendance.find((item) => String(item.session_id) === String(sessionKey));
-            return sessionRow || {
-                attendance_status: 'not_attended',
-                check_in_time: '—',
-            };
+            if (!sessionRow || sessionRow.attendance_status !== 'attended' || !sessionRow.check_in_time) {
+                return {
+                    attendance_status: 'not_attended',
+                    check_in_time: '—',
+                };
+            }
+
+            return sessionRow;
         };
 
         const updateSummaryCards = () => {

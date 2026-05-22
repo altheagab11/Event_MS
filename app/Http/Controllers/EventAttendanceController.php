@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Services\DigitalPassQrService;
 use App\Services\EventOnlineAttendanceTokenService;
 use App\Services\EventSessionSyncService;
-use App\Services\DigitalPassQrService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -91,19 +91,14 @@ class EventAttendanceController extends Controller
             $registrantId = (int) $row->event_registrant_id;
             $registrantAttendance = $attendanceMap[$registrantId] ?? [];
 
-            $registrationAttendanceStatus = trim((string) ($row->attendance_status ?? ''));
-            $isPresentOnRegistration = strcasecmp($registrationAttendanceStatus, 'Present') === 0;
-
             $sessionAttendance = [];
-            $hasAnyAttendance = $isPresentOnRegistration;
-            $latestCheckIn = isset($row->checked_in_at) && $row->checked_in_at !== null
-                ? Carbon::parse((string) $row->checked_in_at)
-                : null;
+            $hasAnyAttendance = false;
+            $latestCheckIn = null;
 
             foreach ($sessions as $session) {
                 $sessionId = (int) $session->session_id;
                 $checkIn = $registrantAttendance[$sessionId] ?? null;
-                $hasAttended = $checkIn !== null || $isPresentOnRegistration;
+                $hasAttended = $checkIn !== null;
 
                 if ($checkIn !== null) {
                     $hasAnyAttendance = true;
