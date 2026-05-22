@@ -284,7 +284,7 @@ $regions = [
                           <line x1="16" y1="3.8" x2="16" y2="7"></line>
                         </svg>
                       </span>
-                      <span>{{ $event['date'] }}</span>
+                      <span class="schedule-range">{{ $event['date'] }}</span>
                     </span>
                     <span class="meta-row">
                       <span class="meta-icon" aria-hidden="true">
@@ -803,7 +803,7 @@ $regions = [
                                     <line x1="16" y1="3.8" x2="16" y2="7"></line>
                                 </svg>
                             </span>
-                            <span>${selectedEvent.date}</span>
+                            <span class="schedule-range">${selectedEvent.date}</span>
                         </div>
                         <div class="chip-item">
                             <span class="chip-icon" aria-hidden="true">

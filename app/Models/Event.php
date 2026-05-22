@@ -59,11 +59,29 @@ class Event extends Model
             return $start->format('F j, Y');
         }
 
-        if ($start->toDateString() !== $end->toDateString()) {
-            return $start->format('F j, Y g:i A').' - '.$end->format('F j, Y g:i A');
+        $startDay = $start->copy()->startOfDay();
+        $endDay = $end->copy()->startOfDay();
+
+        if ($startDay->diffInDays($endDay) >= 1) {
+            return $this->formatMultiDayScheduleDateLine($startDay, $endDay)
+                ."\n"
+                .$start->format('g:i A').' – '.$end->format('g:i A').' daily';
         }
 
-        return $start->format('F j, Y g:i A').' - '.$end->format('g:i A');
+        return $start->format('F j, Y g:i A').' – '.$end->format('g:i A');
+    }
+
+    private function formatMultiDayScheduleDateLine(Carbon $start, Carbon $end): string
+    {
+        if ($start->year === $end->year && $start->month === $end->month) {
+            return $start->format('F j').'–'.$end->format('j').', '.$start->format('Y');
+        }
+
+        if ($start->year === $end->year) {
+            return $start->format('F j').' – '.$end->format('F j').', '.$start->format('Y');
+        }
+
+        return $start->format('F j, Y').' – '.$end->format('F j, Y');
     }
 
     public function getBannerUrlAttribute(): ?string

@@ -2,6 +2,10 @@
 
 @section('content')
 <style>
+    .schedule-range {
+        white-space: pre-line;
+    }
+
     .attendance-modal-overlay {
         position: fixed;
         inset: 0;
@@ -574,11 +578,11 @@
                         </h2>
 
                         <div class="mt-5 space-y-2 text-sm font-medium text-[#CBD5E1]">
-                            <div class="flex items-center gap-3">
-                                <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <div class="flex items-start gap-3">
+                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                                 </svg>
-                                {{ $eventDate }}
+                                <span class="schedule-range">{{ $eventDate }}</span>
                             </div>
 
                             <div class="flex items-center gap-3">
@@ -613,7 +617,7 @@
                                     data-event-id="{{ $event->event_id }}"
                                     data-event-title="{{ $event->event_name }}"
                                     data-event-type="{{ $eventTypeLabel }}"
-                                    data-event-date="{{ $eventDate }}"
+                                    data-event-date=@json($eventDate)
                                     data-event-location="{{ $event->location ?: 'Location TBA' }}"
                                     data-event-image="{{ $bannerImage }}"
                                     data-event-status="{{ $eventStatusLabel }}"
@@ -1046,7 +1050,7 @@
                                             <svg class="h-4 w-4 text-[#60A5FA]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
                                             </svg>
-                                            <span id="manageEventDate">Date TBA</span>
+                                            <span id="manageEventDate" class="schedule-range">Date TBA</span>
                                         </div>
 
                                         <div class="flex items-center gap-2">
@@ -1717,6 +1721,18 @@
 </div>
 
 <script>
+    function parseEventScheduleDate(raw) {
+        if (!raw) {
+            return 'Date TBA';
+        }
+
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return raw;
+        }
+    }
+
     const createEventModal = document.getElementById('createEventModal');
     const openCreateEventModalButton = document.getElementById('openCreateEventModal');
     const manageEventModal = document.getElementById('manageEventModal');
@@ -2484,7 +2500,7 @@
                 id: trigger.dataset.eventId,
                 title: trigger.dataset.eventTitle,
                 type: trigger.dataset.eventType,
-                date: trigger.dataset.eventDate,
+                date: parseEventScheduleDate(trigger.getAttribute('data-event-date')),
                 location: trigger.dataset.eventLocation,
                 image: trigger.dataset.eventImage,
                 status: trigger.dataset.eventStatus,
