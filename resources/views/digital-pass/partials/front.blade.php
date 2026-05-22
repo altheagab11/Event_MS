@@ -4,7 +4,7 @@
     <div class="card-content front-layout">
         <div class="front-top">
             <div class="front-mark" aria-hidden="true">
-                <span class="front-mark-icon"></span>
+                <span class="front-mark-text">EMS</span>
             </div>
             <div class="confirmed-badge">
                 <span class="confirmed-badge-icon">&#10003;</span>

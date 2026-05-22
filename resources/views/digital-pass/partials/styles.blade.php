@@ -97,6 +97,16 @@
         box-shadow: 0 0 0 2px rgba(255, 120, 150, 0.35);
     }
 
+    .front-mark-text {
+        display: inline-block;
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        color: rgba(255, 255, 255, 0.18);
+        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    }
+
     .confirmed-badge {
         display: inline-flex;
         align-items: center;
@@ -222,24 +232,14 @@
         min-width: 72px;
     }
 
-    .front-scan-icon {
-        display: block;
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, 0.28);
-        background:
-            linear-gradient(#ffffff 0 0) center/2px 58% no-repeat,
-            linear-gradient(#ffffff 0 0) center/58% 2px no-repeat,
-            radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85) 2px, transparent 3px),
-            radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.85) 2px, transparent 3px),
-            radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.85) 2px, transparent 3px);
-        opacity: 0.75;
-    }
-
-    .card-content {
-        position: relative;
-        z-index: 2;
+    .front-mark-text {
+        display: inline-block;
+        font-size: 14px;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        color: #ffffff;
+        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
         height: 100%;
     }
 

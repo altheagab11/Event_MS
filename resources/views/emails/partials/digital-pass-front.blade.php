@@ -10,7 +10,7 @@
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
         <tr>
           <td width="50%" style="vertical-align:top;">
-            <span style="display:inline-block; width:34px; height:34px; border-radius:8px; border:2px solid rgba(255,120,150,0.35); background-color:#ff6b8a;"></span>
+            <span style="display:inline-block; font-size:24px; line-height:1; font-weight:800; letter-spacing:1.4px; color:rgba(255,255,255,0.18); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">EMS</span>
           </td>
           <td width="50%" style="vertical-align:top; text-align:right;">
             <span style="display:inline-block; padding:7px 14px; border-radius:999px; background:rgba(34,197,94,0.18); border:1px solid rgba(74,222,128,0.45); color:#86efac; font-size:12px; font-weight:800; letter-spacing:1.2px; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
