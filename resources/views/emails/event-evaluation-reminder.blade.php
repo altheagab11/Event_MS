@@ -10,7 +10,7 @@
 <body style="margin:0; padding:24px; background:#f3f6fb; font-family:Arial, Helvetica, sans-serif; color:#132f61;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #dde6f3; border-radius:12px; overflow:hidden;">
     <tr>
-      <td style="padding:22px 24px; background:#173b74; color:#ffffff; font-size:20px; font-weight:700;">NU Lipa EMS</td>
+      <td style="padding:22px 24px; background:#173b74; color:#ffffff; font-size:20px; font-weight:700;">Event Management System</td>
     </tr>
     <tr>
       <td style="padding:22px 24px;">

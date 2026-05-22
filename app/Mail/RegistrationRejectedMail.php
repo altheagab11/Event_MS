@@ -21,7 +21,7 @@ class RegistrationRejectedMail extends Mailable
   public function envelope(): Envelope
   {
     return new Envelope(
-      subject: 'NU Lipa EMS Registration Update'
+      subject: 'Event Management System Registration Update'
     );
   }
 

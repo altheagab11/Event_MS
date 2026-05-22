@@ -23,7 +23,7 @@ class EventEvaluationReminderMail extends Mailable
   public function envelope(): Envelope
   {
     return new Envelope(
-      subject: 'NU Lipa EMS Event Evaluation Reminder'
+      subject: 'Event Management System Event Evaluation Reminder'
     );
   }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checked In — NU Lipa EMS</title>
+    <title>Checked In — Event Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -13,8 +13,8 @@
 <body>
     <main class="eval-page">
         <div class="eval-brand">
-            <span class="eval-brand-badge" aria-hidden="true">NU</span>
-            <h1>NU Lipa Event Management</h1>
+            <span class="eval-brand-badge" aria-hidden="true">EMS</span>
+            <h1>Event Management System</h1>
         </div>
 
         <article class="eval-card eval-status-card">

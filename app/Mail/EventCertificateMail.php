@@ -23,7 +23,7 @@ class EventCertificateMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'NU Lipa EMS — '.$this->certificateLabel
+            subject: 'Event Management System — '.$this->certificateLabel
         );
     }
 
