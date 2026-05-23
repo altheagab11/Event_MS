@@ -1,5 +1,16 @@
 @php
   $qrCode = strtoupper(trim((string) ($passData['qr_code'] ?? $passData['pass_code'] ?? '')));
+  $qrImageHtml = '';
+
+  if (! empty($passData['qr_embed']['bytes']) && isset($message)) {
+      $qrImageHtml = $message->embedData(
+          $passData['qr_embed']['bytes'],
+          $passData['qr_embed']['filename'],
+          $passData['qr_embed']['mime']
+      );
+  } elseif (! empty($passData['qr_svg'])) {
+      $qrImageHtml = $passData['qr_svg'];
+  }
 @endphp
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:760px; border-collapse:separate; border-spacing:0; border-radius:22px; border:1px solid rgba(100,160,255,0.55); background-color:#123768; background-image:linear-gradient(135deg,#0b1f3f 0%,#123768 48%,#1d4f9c 100%); box-shadow:0 24px 60px rgba(0,0,0,0.22);">
   <tr>
@@ -15,8 +26,12 @@
             <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="background:#ffffff; border-radius:22px; box-shadow:0 16px 36px rgba(52,96,150,0.22);">
               <tr>
                 <td style="padding:14px;">
-                  @if (! empty($passData['qr_embed']['bytes']))
-                    <img src="{{ $message->embedData($passData['qr_embed']['bytes'], $passData['qr_embed']['filename'], $passData['qr_embed']['mime']) }}" alt="Event pass QR code" width="190" height="190" style="display:block; width:190px; height:190px;">
+                  @if (! empty($qrImageHtml))
+                    @if (str_contains($qrImageHtml, '<svg'))
+                      {!! $qrImageHtml !!}
+                    @else
+                      <img src="{{ $qrImageHtml }}" alt="Event pass QR code" width="190" height="190" style="display:block; width:190px; height:190px;">
+                    @endif
                   @endif
                 </td>
               </tr>
