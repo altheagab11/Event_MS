@@ -54,7 +54,7 @@
               <tr>
                 <td width="28%" style="vertical-align:bottom; padding-right:12px;">
                   <span style="font-size:11px; font-weight:700; letter-spacing:1.4px; color:rgba(255,255,255,0.72); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">VALID THRU</span>
-                  <p style="margin:6px 0 0; font-size:24px; line-height:1.2; font-weight:600; color:#ffffff; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">{{ $passData['valid_thru'] ?? 'TBA' }}</p>
+                  <p style="margin:6px 0 0; font-size:16px; line-height:1.25; font-weight:600; color:#ffffff; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">{{ $passData['valid_thru'] ?? 'TBA' }}</p>
                 </td>
                 <td width="52%" style="vertical-align:bottom; padding-right:12px;">
                   <span style="font-size:11px; font-weight:700; letter-spacing:1.4px; color:rgba(255,255,255,0.72); font-family:'Segoe UI',Arial,Helvetica,sans-serif;">EMAIL</span>
