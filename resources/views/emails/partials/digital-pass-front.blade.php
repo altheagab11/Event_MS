@@ -29,6 +29,13 @@
             {{ $passData['full_name'] }}
           </td>
         </tr>
+        @if (! empty($passData['event_schedule']))
+        <tr>
+          <td colspan="2" style="padding-top:8px; font-size:14px; line-height:1.4; font-weight:600; color:rgba(255,255,255,0.82); font-family:'Segoe UI',Arial,Helvetica,sans-serif; word-break:break-word;">
+            {!! nl2br(e($passData['event_schedule'] ?? '')) !!}
+          </td>
+        </tr>
+        @endif
         <tr>
           <td colspan="2" style="padding-top:10px; font-size:18px; line-height:1.45; font-weight:500; color:rgba(255,255,255,0.88); font-family:'Segoe UI',Arial,Helvetica,sans-serif; word-break:break-word;">
             {{ $profileLine }}

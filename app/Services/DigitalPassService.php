@@ -129,6 +129,7 @@ class DigitalPassService
             'event_date' => $this->formatEventDate($event->event_date ?? null),
             'event_start' => $this->formatEventDateTime($event->start_date ?? $event->event_date ?? null),
             'event_end' => $this->formatEventDateTime($event->end_date ?? $event->start_date ?? $event->event_date ?? null),
+            'event_schedule' => $this->formatEventScheduleLine($event),
             'location' => (string) ($event->location ?? 'TBA'),
             'attendance_format' => trim((string) ($event->attendance_format ?? 'Face-to-Face')),
             'full_name' => $fullName,
@@ -255,5 +256,65 @@ class DigitalPassService
         } catch (Throwable) {
             return (string) $eventDateTime;
         }
+    }
+
+    /**
+     * @param  object  $event
+     */
+    private function formatEventScheduleLine(object $event): string
+    {
+        $startRaw = $event->start_date ?? $event->event_date ?? null;
+        $endRaw = $event->end_date ?? $startRaw ?? null;
+
+        if ($startRaw === null || (string) $startRaw === '') {
+            return 'TBA';
+        }
+
+        try {
+            $start = Carbon::parse((string) $startRaw);
+            $end = Carbon::parse((string) ($endRaw ?? $startRaw));
+        } catch (Throwable) {
+            return 'TBA';
+        }
+
+        $startDay = $start->copy()->startOfDay();
+        $endDay = $end->copy()->startOfDay();
+        $startHasTime = $this->hasTimeComponent($startRaw);
+        $endHasTime = $this->hasTimeComponent($endRaw);
+
+        // Build date line
+        if ($startDay->equalTo($endDay)) {
+            $dateLine = $start->format('F j, Y');
+        } else {
+            if ($start->year === $end->year && $start->month === $end->month) {
+                $dateLine = $start->format('F j').' – '.$end->format('j, Y');
+            } elseif ($start->year === $end->year) {
+                $dateLine = $start->format('F j').' – '.$end->format('F j, Y');
+            } else {
+                $dateLine = $start->format('F j, Y').' – '.$end->format('F j, Y');
+            }
+        }
+
+        // Build time line when time components exist
+        $timeLine = '';
+        if ($startHasTime || $endHasTime) {
+            $timeLine = $start->format('g:i A').' – '.$end->format('g:i A');
+            if (! $startDay->equalTo($endDay)) {
+                $timeLine .= ' daily';
+            }
+        }
+
+        return $timeLine !== '' ? $dateLine."\n".$timeLine : $dateLine;
+    }
+
+    private function hasTimeComponent(mixed $value): bool
+    {
+        if ($value instanceof Carbon) {
+            return ! ($value->hour === 0 && $value->minute === 0 && $value->second === 0);
+        }
+
+        $value = trim((string) $value);
+
+        return (bool) preg_match('/(?:T|\s)\d{2}:\d{2}/', $value);
     }
 }

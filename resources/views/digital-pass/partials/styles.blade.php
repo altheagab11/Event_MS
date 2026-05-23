@@ -140,6 +140,16 @@
         letter-spacing: 0.2px;
     }
 
+    .front-schedule {
+        margin-top: 8px;
+        font-size: clamp(12px, 1.8vw, 15px);
+        font-weight: 600;
+        line-height: 1.35;
+        color: rgba(255, 255, 255, 0.82);
+        letter-spacing: 0.1px;
+        word-break: break-word;
+    }
+
     .front-name {
         margin-top: 10px;
         font-size: clamp(34px, 6vw, 52px);

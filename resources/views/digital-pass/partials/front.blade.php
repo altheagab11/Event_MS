@@ -14,6 +14,10 @@
 
         <div class="front-event">{{ $passData['event_name'] }}</div>
 
+        @if (! empty($passData['event_schedule']))
+            <div class="front-schedule">{!! nl2br(e($passData['event_schedule'] ?? '')) !!}</div>
+        @endif
+
         <div class="front-name">{{ $passData['full_name'] }}</div>
 
         @if (! empty($passData['profile_line']))
