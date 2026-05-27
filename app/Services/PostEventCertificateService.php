@@ -185,20 +185,25 @@ class PostEventCertificateService
             : 'Certificate of Attendance';
 
         try {
+            $hostedBy = trim((string) ($event->hosted_by ?? ''));
+            $eventEndDate = $this->resolveEventEndDate($event)->format('F j, Y');
+
             $certificateImage = $this->certificateImageService->generateForDelivery(
                 fullName: $recipient['name'],
                 eventName: (string) $event->event_name,
                 certificateLabel: $certificateLabel,
-                eventEndDate: $this->resolveEventEndDate($event)->format('F j, Y'),
+                eventEndDate: $eventEndDate,
                 type: $type,
+                hostedBy: $hostedBy,
             );
 
             Mail::to($recipient['email'])->send(new EventCertificateMail(
                 eventName: (string) $event->event_name,
                 fullName: $recipient['name'],
                 certificateLabel: $certificateLabel,
-                eventEndDate: $this->resolveEventEndDate($event)->format('F j, Y'),
+                eventEndDate: $eventEndDate,
                 certificateType: $type,
+                hostedBy: $hostedBy,
                 certificateImage: $certificateImage,
             ));
 

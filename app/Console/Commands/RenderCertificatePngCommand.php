@@ -32,6 +32,7 @@ class RenderCertificatePngCommand extends Command
             certificateLabel: $payload['certificate_label'],
             eventEndDate: $payload['event_end_date'],
             type: $payload['type'],
+            hostedBy: $payload['hosted_by'],
         );
 
         if (($image['mime'] ?? '') !== 'image/png' || ($image['bytes'] ?? '') === '') {
@@ -46,7 +47,7 @@ class RenderCertificatePngCommand extends Command
     }
 
     /**
-     * @return array{full_name: string, event_name: string, certificate_label: string, event_end_date: string, type: string}|null
+     * @return array{full_name: string, event_name: string, certificate_label: string, event_end_date: string, type: string, hosted_by: string}|null
      */
     private function decodePayload(string $encoded): ?array
     {
@@ -76,6 +77,7 @@ class RenderCertificatePngCommand extends Command
             'certificate_label' => $payload['certificate_label'],
             'event_end_date' => $payload['event_end_date'],
             'type' => $payload['type'],
+            'hosted_by' => is_string($payload['hosted_by'] ?? null) ? trim($payload['hosted_by']) : '',
         ];
     }
 }

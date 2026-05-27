@@ -24,6 +24,7 @@ class EventCertificateMail extends Mailable
         public readonly string $certificateLabel,
         public readonly string $eventEndDate,
         public readonly string $certificateType,
+        public readonly string $hostedBy,
         array $certificateImage,
     ) {
         $this->certificateImage = $this->resolveCertificateImage($certificateImage);
@@ -65,6 +66,7 @@ class EventCertificateMail extends Mailable
                     certificateLabel: $this->certificateLabel,
                     eventEndDate: $this->eventEndDate,
                     type: $this->certificateType,
+                    hostedBy: $this->hostedBy,
                 );
             }
 
@@ -104,6 +106,7 @@ class EventCertificateMail extends Mailable
                 certificateLabel: $this->certificateLabel,
                 eventEndDate: $this->eventEndDate,
                 type: $this->certificateType,
+                hostedBy: $this->hostedBy,
             );
         }
 
@@ -138,6 +141,7 @@ class EventCertificateMail extends Mailable
             certificateLabel: $this->certificateLabel,
             eventEndDate: $this->eventEndDate,
             type: $this->certificateType,
+            hostedBy: $this->hostedBy,
         );
     }
 }

@@ -47,7 +47,10 @@
   <text x="600" y="478" fill="#2e4672" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="18" text-anchor="middle">held and concluded on {{ $eventEndDate }}</text>
   <text x="600" y="540" fill="#60789f" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="16" font-style="italic" text-anchor="middle">{{ $footer }}</text>
 
-  {{-- Signature lines --}}
+  {{-- Signatory: host name on line, role label below (no signature image) --}}
+  @if (! empty($hostedByName))
+    <text x="320" y="628" fill="#123768" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="12" font-weight="600" text-anchor="middle">{{ $hostedByName }}</text>
+  @endif
   <line x1="120" y1="640" x2="520" y2="640" stroke="#8eb6ff" stroke-width="1" />
   <text x="320" y="668" fill="#60789f" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="12" letter-spacing="1" text-anchor="middle">EVENT ORGANIZER</text>
 

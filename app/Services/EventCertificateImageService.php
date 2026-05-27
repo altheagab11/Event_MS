@@ -22,8 +22,9 @@ class EventCertificateImageService
         string $certificateLabel,
         string $eventEndDate,
         string $type = 'attendance',
+        string $hostedBy = '',
     ): array {
-        return $this->generateForDelivery($fullName, $eventName, $certificateLabel, $eventEndDate, $type);
+        return $this->generateForDelivery($fullName, $eventName, $certificateLabel, $eventEndDate, $type, $hostedBy);
     }
 
     /**
@@ -37,17 +38,18 @@ class EventCertificateImageService
         string $certificateLabel,
         string $eventEndDate,
         string $type = 'attendance',
+        string $hostedBy = '',
     ): array {
         if (extension_loaded('gd') && function_exists('imagecreatetruecolor')) {
-            return $this->generatePng($fullName, $eventName, $certificateLabel, $eventEndDate, $type);
+            return $this->generatePng($fullName, $eventName, $certificateLabel, $eventEndDate, $type, $hostedBy);
         }
 
-        $png = $this->generatePngViaCli($fullName, $eventName, $certificateLabel, $eventEndDate, $type);
+        $png = $this->generatePngViaCli($fullName, $eventName, $certificateLabel, $eventEndDate, $type, $hostedBy);
         if ($png !== null) {
             return $png;
         }
 
-        $svg = $this->generateSvg($fullName, $eventName, $certificateLabel, $eventEndDate, $type);
+        $svg = $this->generateSvg($fullName, $eventName, $certificateLabel, $eventEndDate, $type, $hostedBy);
         $converted = $this->convertSvgBytesToPng($svg['bytes']);
         if ($converted !== null) {
             return [
@@ -71,6 +73,7 @@ class EventCertificateImageService
         string $certificateLabel,
         string $eventEndDate,
         string $type,
+        string $hostedBy = '',
     ): ?array {
         if (PHP_SAPI === 'cli') {
             return null;
@@ -82,6 +85,7 @@ class EventCertificateImageService
             'certificate_label' => $certificateLabel,
             'event_end_date' => $eventEndDate,
             'type' => $type,
+            'hosted_by' => $hostedBy,
         ], JSON_THROW_ON_ERROR));
 
         try {
@@ -154,6 +158,7 @@ class EventCertificateImageService
         string $certificateLabel,
         string $eventEndDate,
         string $type,
+        string $hostedBy = '',
     ): array {
         $image = imagecreatetruecolor(self::WIDTH, self::HEIGHT);
         imagealphablending($image, true);
@@ -215,6 +220,19 @@ class EventCertificateImageService
 
         $this->writeCenteredText($image, 524, $footer, $fontItalic ?? $fontRegular, 13, $textMuted);
 
+        $hostedByName = trim($hostedBy);
+        if ($hostedByName !== '') {
+            $this->writeCenteredText(
+                $image,
+                608,
+                $this->truncateText($hostedByName, 48),
+                $fontRegular,
+                12,
+                $navyMid,
+                320
+            );
+        }
+
         imageline($image, 120, 624, 520, 624, $accentSoft);
         $this->writeCenteredText($image, 652, 'EVENT ORGANIZER', $fontRegular, 10, $textMuted, 320);
 
@@ -251,6 +269,7 @@ class EventCertificateImageService
         string $certificateLabel,
         string $eventEndDate,
         string $type,
+        string $hostedBy = '',
     ): array {
         $verb = $type === 'participation' ? 'has successfully participated in' : 'has attended';
         $footer = $type === 'participation'
@@ -268,6 +287,7 @@ class EventCertificateImageService
             'footer' => $this->escapeSvg($footer),
             'issued' => $this->escapeSvg($issued),
             'certId' => $this->escapeSvg($certId),
+            'hostedByName' => $this->escapeSvg(trim($hostedBy)),
         ])->render();
 
         return [
