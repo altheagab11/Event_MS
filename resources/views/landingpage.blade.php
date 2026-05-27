@@ -1193,6 +1193,13 @@ $regions = [
           renderSuccessStep(serverData);
         } catch (error) {
           showOtpMessage('error', error instanceof Error ? error.message : 'Unable to verify code.');
+          otpInputs.forEach(input => {
+            input.disabled = false;
+          });
+          if (otpInputs.length > 0) {
+            otpInputs[otpInputs.length - 1].focus();
+            otpInputs[otpInputs.length - 1].select();
+          }
         } finally {
           verifyButton.disabled = false;
           verifyButton.textContent = 'Verify & Submit';

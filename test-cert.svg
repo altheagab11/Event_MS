@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="848" viewBox="0 0 1200 848" role="img" aria-label="Certificate of Attendance">
+  <defs>
+    <linearGradient id="panelGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="55%" stop-color="#f8fbff" />
+      <stop offset="100%" stop-color="#f3f6fb" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="848" fill="#1d4f9c" />
+  <rect x="8" y="8" width="1184" height="832" fill="#123768" />
+  <rect x="16" y="16" width="1168" height="816" fill="url(#panelGradient)" />
+
+  <rect x="36" y="36" width="1128" height="776" fill="none" stroke="#60a5fa" stroke-width="2" />
+  <rect x="48" y="48" width="1104" height="752" fill="none" stroke="#dde6f3" stroke-width="1" />
+
+  <text x="600" y="470" fill="#dce6f5" font-family="Segoe UI, Arial, sans-serif" font-size="220" font-weight="800" letter-spacing="28" text-anchor="middle" opacity="0.55">EMS</text>
+
+  <text x="72" y="88" font-size="28" fill="#60a5fa" font-family="Segoe UI, Arial, sans-serif">&#9670;</text>
+  <text x="1128" y="88" text-anchor="end" font-size="28" fill="#60a5fa" font-family="Segoe UI, Arial, sans-serif">&#9670;</text>
+
+  <text x="600" y="108" fill="#60789f" font-family="Segoe UI, Arial, sans-serif" font-size="13" letter-spacing="4" text-anchor="middle">EVENT MANAGEMENT SYSTEM</text>
+  <text x="600" y="138" fill="#123768" font-family="Segoe UI, Arial, sans-serif" font-size="14" letter-spacing="6" font-weight="700" text-anchor="middle">OFFICIAL CERTIFICATE</text>
+  <text x="600" y="198" fill="#0b1f3f" font-family="Georgia, serif" font-size="36" font-style="italic" font-weight="700" text-anchor="middle">Certificate of Attendance</text>
+
+  <line x1="420" y1="222" x2="520" y2="222" stroke="#60a5fa" stroke-width="2" />
+  <text x="600" y="230" fill="#0052c9" font-family="Segoe UI, Arial, sans-serif" font-size="16" text-anchor="middle">&#9670;</text>
+  <line x1="680" y1="222" x2="780" y2="222" stroke="#60a5fa" stroke-width="2" />
+
+  <text x="600" y="288" fill="#516a92" font-family="Georgia, serif" font-size="20" text-anchor="middle">This is to certify that</text>
+  <text x="600" y="368" fill="#0b1f3f" font-family="Georgia, serif" font-size="48" font-style="italic" font-weight="700" text-anchor="middle">Althea Gabrielle Reyes</text>
+  <text x="600" y="428" fill="#516a92" font-family="Georgia, serif" font-size="20" text-anchor="middle">has attended</text>
+  <text x="600" y="478" fill="#0052c9" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700" text-anchor="middle">ahhahahahahah</text>
+  <text x="600" y="528" fill="#2e4672" font-family="Segoe UI, Arial, sans-serif" font-size="18" text-anchor="middle">held and concluded on May 27, 2026</text>
+  <text x="600" y="590" fill="#60789f" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-style="italic" text-anchor="middle">Awarded in recognition of verified event attendance.</text>
+
+  <line x1="180" y1="660" x2="480" y2="660" stroke="#8eb6ff" stroke-width="1" />
+  <text x="330" y="688" fill="#60789f" font-family="Segoe UI, Arial, sans-serif" font-size="11" letter-spacing="1" text-anchor="middle">EVENT ORGANIZER</text>
+
+  <line x1="720" y1="660" x2="1020" y2="660" stroke="#8eb6ff" stroke-width="1" />
+  <text x="870" y="688" fill="#60789f" font-family="Segoe UI, Arial, sans-serif" font-size="11" letter-spacing="1" text-anchor="middle">EMS AUTHORIZED</text>
+
+  <line x1="48" y1="748" x2="1152" y2="748" stroke="#dde6f3" stroke-width="1" />
+  <text x="72" y="782" fill="#60789f" font-family="Segoe UI, Arial, sans-serif" font-size="13">Issued on May 27, 2026</text>
+  <text x="1128" y="782" fill="#123768" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="end">Certificate No. EC052438D869</text>
+</svg>

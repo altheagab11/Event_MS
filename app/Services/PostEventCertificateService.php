@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Mail\EventCertificateMail;
 use App\Models\Evaluation;
-use App\Services\ActivityLogger;
 use App\Models\Event;
 use App\Models\Registration;
 use Illuminate\Support\Carbon;
@@ -16,6 +15,10 @@ use Throwable;
 
 class PostEventCertificateService
 {
+    public function __construct(
+        private readonly EventCertificateImageService $certificateImageService,
+    ) {}
+
     public function hasCheckedIn(Registration $registration): bool
     {
         if (Schema::hasColumn('registrations', 'attendance_status')
@@ -182,11 +185,21 @@ class PostEventCertificateService
             : 'Certificate of Attendance';
 
         try {
+            $certificateImage = $this->certificateImageService->generateForDelivery(
+                fullName: $recipient['name'],
+                eventName: (string) $event->event_name,
+                certificateLabel: $certificateLabel,
+                eventEndDate: $this->resolveEventEndDate($event)->format('F j, Y'),
+                type: $type,
+            );
+
             Mail::to($recipient['email'])->send(new EventCertificateMail(
                 eventName: (string) $event->event_name,
                 fullName: $recipient['name'],
                 certificateLabel: $certificateLabel,
                 eventEndDate: $this->resolveEventEndDate($event)->format('F j, Y'),
+                certificateType: $type,
+                certificateImage: $certificateImage,
             ));
 
             $timestamp = now();

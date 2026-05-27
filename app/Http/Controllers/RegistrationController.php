@@ -10,7 +10,6 @@ use App\Models\Event;
 use App\Models\RegistrationVerificationCode;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +31,12 @@ class RegistrationController extends Controller
         if ($verification->status === 'verified') {
             throw ValidationException::withMessages([
                 'verification_id' => 'Registration is already verified. No resend is needed.',
+            ]);
+        }
+
+        if ($verification->expires_at->isPast()) {
+            throw ValidationException::withMessages([
+                'verification_id' => 'Verification code expired. Please start registration again.',
             ]);
         }
 
@@ -243,9 +248,19 @@ class RegistrationController extends Controller
     {
         $verification = RegistrationVerificationCode::query()->findOrFail($request->integer('verification_id'));
 
-        if ($verification->status !== 'pending') {
+        if ($verification->status === 'verified') {
             throw ValidationException::withMessages([
-                'code' => 'This verification session is no longer active. Please register again.',
+                'code' => 'This registration is already verified.',
+            ]);
+        }
+
+        if ($verification->expires_at->isPast()) {
+            if ($verification->status === 'pending') {
+                $verification->update(['status' => 'expired']);
+            }
+
+            throw ValidationException::withMessages([
+                'code' => 'Verification code expired. Click Resend Code to get a new one.',
             ]);
         }
 
@@ -261,26 +276,20 @@ class RegistrationController extends Controller
             ]);
         }
 
-        if ($verification->expires_at->isPast()) {
-            $verification->update(['status' => 'expired']);
-
-            throw ValidationException::withMessages([
-                'code' => 'Verification code expired. Please request a new code.',
-            ]);
+        if ($verification->status !== 'pending') {
+            $verification->update(['status' => 'pending']);
+            $verification->refresh();
         }
 
         $inputCode = strtoupper(trim((string) $request->input('code')));
         if (! Hash::check($inputCode, $verification->verification_code_hash)) {
-            $attempts = $verification->attempts + 1;
             $verification->update([
-                'attempts' => $attempts,
-                'status' => $attempts >= 5 ? 'failed' : 'pending',
+                'attempts' => $verification->attempts + 1,
+                'status' => 'pending',
             ]);
 
             throw ValidationException::withMessages([
-                'code' => $attempts >= 5
-                  ? 'Too many invalid attempts. Please restart registration.'
-                  : 'Invalid verification code. Please try again.',
+                'code' => 'Invalid verification code. You can keep trying until the code expires.',
             ]);
         }
 
