@@ -525,6 +525,12 @@ body {
     justify-content: space-between;
     gap: 12px;
 }
+.announce-card-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
 .announce-icon-tile {
     width: 44px;
     height: 44px;
@@ -553,8 +559,15 @@ body {
     background: var(--brand-soft);
     color: var(--brand);
 }
+.announce-card h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.35;
+}
 .announce-card-body { flex: 1; }
-.announce-card h3 { margin: 0 0 10px; font-size: 17px; font-weight: 700; color: #fff; line-height: 1.35; }
+.announce-card-body p { margin-top: 10px; }
 .announce-card p { margin: 0; font-size: 14px; line-height: 1.65; color: rgba(248, 250, 252, .82); }
 .announce-btn {
     width: 100%;

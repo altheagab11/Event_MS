@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ResetStaffPasswordRequest;
 use App\Http\Requests\StoreStaffAccountRequest;
 use App\Http\Requests\UpdateStaffAccountRequest;
+use App\Mail\PortalAccountCreatedMail;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AdminStaffController extends Controller
 {
@@ -15,21 +19,36 @@ class AdminStaffController extends Controller
 
     public function store(StoreStaffAccountRequest $request): RedirectResponse
     {
+        $temporaryPassword = Str::random(12);
+
         $attributes = User::splitFullName($request->string('full_name')->toString(), [
             'email' => strtolower(trim($request->string('email')->toString())),
-            'password' => $request->string('password')->toString(),
+            'password' => $temporaryPassword,
             'role' => $request->string('role')->toString(),
             'account_status' => $request->string('account_status')->toString(),
             'email_verified_at' => now(),
         ]);
 
         $account = User::query()->create($attributes);
+        $resetToken = Password::broker()->createToken($account);
+        $resetUrl = route('password.reset', [
+            'token' => $resetToken,
+            'email' => $account->email,
+        ]);
+
+        Mail::to($account->email)->send(new PortalAccountCreatedMail(
+            fullName: $account->fullName(),
+            roleLabel: $account->roleLabel(),
+            email: $account->email,
+            temporaryPassword: $temporaryPassword,
+            resetUrl: $resetUrl
+        ));
 
         ActivityLogger::log(
             action: 'Account Created',
             module: 'Account Management',
             description: sprintf(
-                'Super Admin created %s account for %s (%s).',
+                'Super Admin created %s account for %s (%s) and sent credentials via email.',
                 $account->roleLabel(),
                 $account->fullName(),
                 $account->email
@@ -38,7 +57,7 @@ class AdminStaffController extends Controller
 
         return redirect()
             ->route('admin.settings', ['tab' => 'accounts'])
-            ->with('status', 'Account created successfully.');
+            ->with('status', 'Account created successfully. Temporary credentials and reset instructions were sent via email.');
     }
 
     public function update(UpdateStaffAccountRequest $request, User $staff): RedirectResponse

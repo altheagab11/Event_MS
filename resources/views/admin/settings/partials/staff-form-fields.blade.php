@@ -36,19 +36,24 @@
         <input type="email" name="email" value="{{ old('email') }}" class="{{ $inputClass }}" required>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div>
-            <label class="{{ $labelClass }}">Password</label>
-            <input type="password" name="password" class="{{ $inputClass }}" {{ $requirePassword ? 'required' : '' }} autocomplete="new-password">
-            @unless ($requirePassword)
+    @if ($requirePassword)
+        <div class="rounded-2xl border border-[#1E3357] bg-[#0D1B31]/50 px-5 py-4 text-sm text-[#CBD5E1]">
+            A temporary password will be generated automatically and sent to the account email.
+            The user can reset it anytime using the email reset link.
+        </div>
+    @else
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+                <label class="{{ $labelClass }}">Password</label>
+                <input type="password" name="password" class="{{ $inputClass }}" autocomplete="new-password">
                 <p class="mt-2 text-xs leading-relaxed text-[#64748B]">Leave blank to keep current password.</p>
-            @endunless
+            </div>
+            <div>
+                <label class="{{ $labelClass }}">Confirm Password</label>
+                <input type="password" name="password_confirmation" class="{{ $inputClass }}" autocomplete="new-password">
+            </div>
         </div>
-        <div>
-            <label class="{{ $labelClass }}">Confirm Password</label>
-            <input type="password" name="password_confirmation" class="{{ $inputClass }}" {{ $requirePassword ? 'required' : '' }} autocomplete="new-password">
-        </div>
-    </div>
+    @endif
 
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>

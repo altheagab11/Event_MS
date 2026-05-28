@@ -49,44 +49,73 @@
                 <form method="POST" action="{{ $submitUrl }}" id="evaluationForm" novalidate>
                     @csrf
 
-                    @foreach ($questions as $question)
-                        @if ($question->question_type === 'rating')
-                            <section class="eval-question" data-question-id="{{ $question->question_id }}">
-                                <label class="eval-question-label" for="rating-{{ $question->question_id }}">
-                                    {{ $question->question_text }}
-                                    @if ($question->is_required)
-                                        <span aria-hidden="true">*</span>
-                                    @endif
-                                </label>
+                    @php
+                        $ratingQuestions = $questions->where('question_type', 'rating')->values();
+                        $useStructuredTemplate = $ratingQuestions->count() >= 12;
+                        $sectionHeadings = [
+                            0 => '1. Seminar / Training Content',
+                            3 => '2. Presentation / Speaker',
+                            6 => '3. Logistics & Organization',
+                            9 => '4. Overall Experience',
+                        ];
+                    @endphp
 
-                                <input
-                                    type="hidden"
-                                    name="ratings[{{ $question->question_id }}]"
-                                    id="rating-{{ $question->question_id }}"
-                                    value="{{ old('ratings.'.$question->question_id) }}"
-                                    @if ($question->is_required) data-required-rating="1" @endif
-                                >
+                    <div class="eval-scale" aria-hidden="true">
+                        <span>Strongly Agree</span>
+                        <span>Agree</span>
+                        <span>Neutral</span>
+                        <span>Disagree</span>
+                        <span>Strongly Disagree</span>
+                    </div>
 
-                                <div class="eval-stars" role="radiogroup" aria-label="{{ $question->question_text }}">
-                                    @for ($star = 1; $star <= 5; $star++)
-                                        <button
-                                            type="button"
-                                            class="rating-star"
-                                            data-question="{{ $question->question_id }}"
-                                            data-rate="{{ $star }}"
-                                            aria-label="{{ $star }} star{{ $star > 1 ? 's' : '' }}"
-                                        >
-                                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                                <polygon points="12,4.5 14.4,9.4 19.8,10.2 15.9,14 16.8,19.4 12,16.9 7.2,19.4 8.1,14 4.2,10.2 9.6,9.4"></polygon>
-                                            </svg>
-                                        </button>
-                                    @endfor
-                                </div>
-                            </section>
+                    @foreach ($ratingQuestions as $index => $question)
+                        @if ($useStructuredTemplate && isset($sectionHeadings[$index]))
+                            <h3 class="eval-section-title">{{ $sectionHeadings[$index] }}</h3>
                         @endif
+
+                        <section class="eval-question" data-question-id="{{ $question->question_id }}">
+                            <p class="eval-question-label">
+                                {{ $question->question_text }}
+                                @if ($question->is_required)
+                                    <span aria-hidden="true">*</span>
+                                @endif
+                            </p>
+
+                            <div class="eval-options" role="radiogroup" aria-label="{{ $question->question_text }}">
+                                @for ($score = 5; $score >= 1; $score--)
+                                    <label class="eval-option">
+                                        <input
+                                            type="radio"
+                                            name="ratings[{{ $question->question_id }}]"
+                                            value="{{ $score }}"
+                                            @checked((int) old('ratings.'.$question->question_id) === $score)
+                                            @if ($question->is_required) data-required-rating="1" @endif
+                                        >
+                                        <span class="sr-only">
+                                            @switch($score)
+                                                @case(5)
+                                                    Strongly Agree
+                                                    @break
+                                                @case(4)
+                                                    Agree
+                                                    @break
+                                                @case(3)
+                                                    Neutral
+                                                    @break
+                                                @case(2)
+                                                    Disagree
+                                                    @break
+                                                @default
+                                                    Strongly Disagree
+                                            @endswitch
+                                        </span>
+                                    </label>
+                                @endfor
+                            </div>
+                        </section>
                     @endforeach
 
-                    <label class="eval-label" for="comment">Additional comments (optional)</label>
+                    <label class="eval-label" for="comment">Comments/Suggestions</label>
                     <textarea
                         class="eval-text"
                         id="comment"
@@ -107,63 +136,20 @@
         (function () {
             const form = document.getElementById('evaluationForm');
             const submitBtn = document.getElementById('evalSubmitBtn');
-            const requiredInputs = Array.from(document.querySelectorAll('[data-required-rating="1"]'));
-            const starButtons = Array.from(document.querySelectorAll('.rating-star'));
-            const ratings = {};
-
-            requiredInputs.forEach((input) => {
-                const questionId = input.id.replace('rating-', '');
-                const initial = Number.parseInt(input.value || '0', 10);
-                if (!Number.isNaN(initial) && initial > 0) {
-                    ratings[questionId] = initial;
-                }
-            });
-
-            function paintStars(questionId, activeValue) {
-                starButtons
-                    .filter((button) => button.dataset.question === questionId)
-                    .forEach((button) => {
-                        const rate = Number.parseInt(button.dataset.rate || '0', 10);
-                        button.classList.toggle('active', rate <= activeValue);
-                    });
-            }
+            const requiredGroups = Array.from(document.querySelectorAll('[data-question-id]'))
+                .filter((section) => section.querySelector('[data-required-rating="1"]'));
 
             function syncSubmitState() {
-                const allAnswered = requiredInputs.every((input) => {
-                    const questionId = input.id.replace('rating-', '');
-                    const value = Number.parseInt(ratings[questionId] || '0', 10);
-                    return value >= 1 && value <= 5;
+                const allAnswered = requiredGroups.every((section) => {
+                    const checked = section.querySelector('input[type="radio"]:checked');
+
+                    return checked !== null;
                 });
                 submitBtn.disabled = !allAnswered;
             }
 
-            requiredInputs.forEach((input) => {
-                const questionId = input.id.replace('rating-', '');
-                const initial = Number.parseInt(ratings[questionId] || '0', 10);
-                if (initial > 0) {
-                    paintStars(questionId, initial);
-                }
-            });
+            form.addEventListener('change', syncSubmitState);
             syncSubmitState();
-
-            starButtons.forEach((button) => {
-                const questionId = button.dataset.question;
-                const rate = Number.parseInt(button.dataset.rate || '0', 10);
-
-                button.addEventListener('mouseenter', () => paintStars(questionId, rate));
-                button.addEventListener('mouseleave', () => {
-                    paintStars(questionId, Number.parseInt(ratings[questionId] || '0', 10));
-                });
-                button.addEventListener('click', () => {
-                    ratings[questionId] = rate;
-                    const input = document.getElementById(`rating-${questionId}`);
-                    if (input) {
-                        input.value = String(rate);
-                    }
-                    paintStars(questionId, rate);
-                    syncSubmitState();
-                });
-            });
 
             form.addEventListener('submit', () => {
                 submitBtn.disabled = true;

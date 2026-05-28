@@ -77,6 +77,60 @@ class AdminEvaluationsController extends Controller
         ]);
     }
 
+    public function showPage(Evaluation $evaluation, EventEvaluationService $evaluationService)
+    {
+        if ($evaluation->registration_id === null) {
+            abort(404, 'Evaluation not found.');
+        }
+
+        $evaluation->load([
+            'event:event_id,event_name',
+            'registration.eventRegistrant:event_registrant_id,first_name,last_name,email',
+            'registration.user:id,firstname,lastname,email',
+        ]);
+
+        $card = $this->mapEvaluationCard($evaluation, $evaluationService);
+        $answers = $this->fetchEvaluationAnswers($evaluation->evaluation_id);
+
+        $ratingAnswers = $answers
+            ->filter(fn (array $item): bool => $item['rating_value'] !== null)
+            ->values();
+
+        $totalResponses = $ratingAnswers->count();
+        $averageRating = $totalResponses > 0
+            ? round($ratingAnswers->avg(fn (array $item): float => (float) $item['rating_value']), 1)
+            : round((float) ($card['score_numeric'] ?? 0), 1);
+
+        $lowestRated = collect();
+        $strengths = collect();
+
+        if ($totalResponses > 0) {
+            $minRating = (int) $ratingAnswers->min(fn (array $item): int => (int) $item['rating_value']);
+            $lowestRated = $ratingAnswers
+                ->filter(fn (array $item): bool => (int) $item['rating_value'] === $minRating)
+                ->take(3)
+                ->values();
+
+            $strengths = $ratingAnswers
+                ->filter(fn (array $item): bool => (int) $item['rating_value'] >= 4)
+                ->sortByDesc(fn (array $item): int => (int) $item['rating_value'])
+                ->take(3)
+                ->values();
+        }
+
+        $recommendation = $this->buildRecommendation($lowestRated);
+
+        return view('admin.evaluations.show', [
+            'evaluation' => $card,
+            'answers' => $answers,
+            'averageRating' => $averageRating,
+            'totalResponses' => $totalResponses,
+            'lowestRated' => $lowestRated,
+            'strengths' => $strengths,
+            'recommendation' => $recommendation,
+        ]);
+    }
+
     private function mapEvaluationCard(Evaluation $evaluation, EventEvaluationService $evaluationService): array
     {
         $registration = $evaluation->registration;
@@ -134,5 +188,52 @@ class AdminEvaluationsController extends Controller
         $rating = $row->rating_value !== null ? (int) $row->rating_value : 0;
 
         return $rating >= 1 && $rating <= 5 ? $rating.'/5' : 'Not provided';
+    }
+
+    private function fetchEvaluationAnswers(int $evaluationId)
+    {
+        return EvaluationAnswer::query()
+            ->join('evaluation_questions as eq', 'eq.question_id', '=', 'evaluation_answers.question_id')
+            ->where('evaluation_answers.evaluation_id', $evaluationId)
+            ->orderBy('eq.sort_order')
+            ->orderBy('eq.question_id')
+            ->get([
+                'evaluation_answers.answer_id',
+                'evaluation_answers.rating_value',
+                'evaluation_answers.answer_text',
+                'eq.question_id',
+                'eq.question_text',
+                'eq.question_type',
+                'eq.sort_order',
+            ])
+            ->map(fn ($row): array => [
+                'question_id' => (int) $row->question_id,
+                'question_text' => (string) $row->question_text,
+                'question_type' => (string) $row->question_type,
+                'rating_value' => $row->rating_value !== null ? (int) $row->rating_value : null,
+                'answer_text' => trim((string) ($row->answer_text ?? '')),
+                'display_value' => $this->formatAnswerDisplay($row),
+            ])
+            ->values();
+    }
+
+    private function buildRecommendation($lowestRated): string
+    {
+        if ($lowestRated->isEmpty()) {
+            return 'Maintain current delivery standards and continue gathering participant feedback to sustain strong results.';
+        }
+
+        $focusAreas = $lowestRated
+            ->pluck('question_text')
+            ->filter(fn ($text): bool => trim((string) $text) !== '')
+            ->map(fn ($text): string => strtolower(trim((string) $text)))
+            ->take(4)
+            ->values();
+
+        if ($focusAreas->isEmpty()) {
+            return 'Focus on the lowest-rated criteria and reinforce session quality before the next run.';
+        }
+
+        return 'Focus on '.implode(', ', $focusAreas->all()).' before the next run. Prioritize delivery quality, organization, and participant support to improve overall satisfaction.';
     }
 }

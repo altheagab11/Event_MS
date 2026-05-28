@@ -45,6 +45,12 @@
         <h2>Admin Portal</h2>
         <p>Secure access to your admin dashboard</p>
 
+        @if (session('status'))
+        <div style="margin-bottom: 12px; padding: 10px 12px; border: 1px solid #86efac; border-radius: 8px; background: #f0fdf4; color: #166534; font-size: 13px;">
+          {{ session('status') }}
+        </div>
+        @endif
+
         @if ($errors->any())
         <div style="margin-bottom: 12px; padding: 10px 12px; border: 1px solid #ef9a9a; border-radius: 8px; background: #fff3f3; color: #8b1c1c; font-size: 13px;">
           @foreach ($errors->all() as $error)
@@ -73,6 +79,9 @@
             </span>
             <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
           </label>
+          <div style="margin: -4px 0 12px; text-align: right;">
+            <a href="{{ route('password.request') }}" style="font-size: 12px; color: #1d4ed8; text-decoration: none;">Forgot password?</a>
+          </div>
           <button type="submit" class="admin-access-btn">Access Dashboard</button>
         </form>
       </div>

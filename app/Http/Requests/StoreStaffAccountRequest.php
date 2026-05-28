@@ -18,7 +18,6 @@ class StoreStaffAccountRequest extends FormRequest
         return [
             'full_name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', Rule::in(User::manageableAccountRoles())],
             'account_status' => ['required', Rule::in([User::STATUS_ACTIVE, User::STATUS_INACTIVE])],
         ];
@@ -29,7 +28,6 @@ class StoreStaffAccountRequest extends FormRequest
         return [
             'full_name.required' => 'Full name is required.',
             'email.unique' => 'This email is already registered.',
-            'password.confirmed' => 'Password confirmation does not match.',
             'role.in' => 'Please select a valid role.',
             'account_status.in' => 'Please select a valid account status.',
         ];

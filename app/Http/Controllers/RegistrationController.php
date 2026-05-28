@@ -8,7 +8,6 @@ use App\Http\Requests\VerifyRegistrationCodeRequest;
 use App\Mail\RegistrationVerificationCodeMail;
 use App\Models\Event;
 use App\Models\RegistrationVerificationCode;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -116,13 +115,6 @@ class RegistrationController extends Controller
         $this->ensureRegistrationAllowed($event);
 
         $email = Str::lower(trim((string) $request->input('email')));
-
-        $existingUser = User::query()->where('email', $email)->first();
-        if ($existingUser !== null && $existingUser->role !== 'participant') {
-            throw ValidationException::withMessages([
-                'email' => 'This email is already used by a non-participant account.',
-            ]);
-        }
 
         $activeEventRegistrant = DB::table('event_registrants')
             ->where('event_id', $event->event_id)

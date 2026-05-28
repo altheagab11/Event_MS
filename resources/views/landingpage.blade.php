@@ -167,11 +167,13 @@ $regions = [
               @php $isImportant = ($item['type'] ?? '') === 'important'; @endphp
               <article class="announce-card {{ $isImportant ? 'important' : '' }} reveal">
                 <div class="announce-card-head">
-                  <span class="announce-icon-tile" aria-hidden="true">{{ $item['emoji'] ?? '' }}</span>
+                  <div class="announce-card-title-wrap">
+                    <span class="announce-icon-tile" aria-hidden="true">{{ $item['emoji'] ?? '' }}</span>
+                    <h3>{{ $item['title'] }}</h3>
+                  </div>
                   <span class="announce-tag">{{ $isImportant ? 'Important' : 'Update' }}</span>
                 </div>
                 <div class="announce-card-body">
-                  <h3>{{ $item['title'] }}</h3>
                   <p>{{ $item['description'] }}</p>
                 </div>
                 @if (($item['cta'] ?? 'register') === 'events' || empty($item['can_register']))

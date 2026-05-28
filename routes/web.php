@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminParticipantsController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\AdminStaffController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\DigitalPassController;
 use App\Http\Controllers\EventAttendanceController;
 use App\Http\Controllers\EventController;
@@ -53,7 +55,13 @@ Route::get('/login', [LoginController::class, 'create'])->name('admin.login');
 
 Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'store'])->name('admin.login.store');
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 });
+
+// Must stay outside guest middleware so email reset links work while another user is logged in.
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 
 Route::middleware(['auth', 'portal', 'account.active'])->group(function () {
     Route::get('/admin/events', [EventController::class, 'index'])->name('admin.events');
@@ -79,6 +87,9 @@ Route::middleware(['auth', 'portal', 'account.active'])->group(function () {
 
     Route::get('/admin/evaluations', [AdminEvaluationsController::class, 'index'])
         ->name('admin.evaluations');
+
+    Route::get('/admin/evaluations/{evaluation}', [AdminEvaluationsController::class, 'showPage'])
+        ->name('admin.evaluations.show');
 
     Route::get('/admin/evaluations/{evaluation}/review', [AdminEvaluationsController::class, 'show'])
         ->name('admin.evaluations.review');

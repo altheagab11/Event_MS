@@ -99,14 +99,12 @@
 
                             <div class="mt-5 border-t border-[#1E3357] pt-5">
                                 <div class="flex justify-end">
-                                    <button
-                                        type="button"
-                                        data-evaluation-id="{{ $evaluation['id'] }}"
-                                        data-review-url="{{ route('admin.evaluations.review', ['evaluation' => $evaluation['id']]) }}"
-                                        class="view-full-review-btn text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:text-[#60A5FA] disabled:opacity-60"
+                                    <a
+                                        href="{{ route('admin.evaluations.show', ['evaluation' => $evaluation['id']]) }}"
+                                        class="text-sm font-black uppercase tracking-wide text-[#F8FAFC] transition hover:text-[#60A5FA]"
                                     >
                                         View Full Review →
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </article>
