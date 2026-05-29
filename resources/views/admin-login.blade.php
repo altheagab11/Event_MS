@@ -33,7 +33,6 @@
         </a>
       </div>
     </header>
-
     
     <div class="admin-portal-main">
       <div class="admin-card">
