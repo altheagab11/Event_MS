@@ -2,8 +2,12 @@
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
+    "engines": {
+        "node": ">=20.19.0"
+    },
     "scripts": {
         "build": "vite build",
+        "build:hostinger": "NODE_OPTIONS=--max-old-space-size=1024 vite build",
         "dev": "vite"
     },
     "devDependencies": {
