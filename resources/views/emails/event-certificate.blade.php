@@ -16,7 +16,7 @@
       <td style="padding:0 0 18px; font-size:15px; line-height:1.6;">
         <p style="margin:0 0 8px; font-size:16px; font-weight:700; color:#1a3358;">Hi {{ $fullName }},</p>
         <p style="margin:0; font-size:14px; color:#3d5a80;">
-          Your <strong>{{ $certificateLabel }}</strong> for <strong>{{ $eventName }}</strong> (concluded {{ $eventEndDate }}) is ready. Your certificate is shown below; a copy is also attached to this email for printing.
+          Your <strong>{{ $certificateLabel }}</strong> for <strong>{{ $eventName }}</strong> (concluded {{ $eventEndDate }}) is ready. Your certificate is shown below — right-click the image to save or print it.
         </p>
       </td>
     </tr>
@@ -35,7 +35,7 @@
             <tr>
               <td style="padding:28px 24px; font-size:14px; line-height:1.6; color:#3d5a80; text-align:center; font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
                 <p style="margin:0 0 10px; font-size:16px; font-weight:700; color:#1a3358;">{{ $certificateLabel }}</p>
-                <p style="margin:0;">Your certificate is attached to this email. Open the attachment to view or print the full certificate.</p>
+                <p style="margin:0;">Your certificate could not be displayed in this email. Please contact EMS Support for assistance.</p>
               </td>
             </tr>
           </table>

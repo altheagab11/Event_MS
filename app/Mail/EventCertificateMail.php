@@ -5,7 +5,6 @@ namespace App\Mail;
 use App\Services\EventCertificateImageService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -77,7 +76,7 @@ class EventCertificateMail extends Mailable
             ) {
                 $viewData['certificatePreviewSrc'] = $viewData['message']->embedData(
                     $image['bytes'],
-                    'certificate-inline.png',
+                    $image['filename'],
                     'image/png'
                 );
             }
@@ -86,40 +85,6 @@ class EventCertificateMail extends Mailable
                 view('emails.event-certificate', $viewData)->render()
             );
         };
-    }
-
-    /**
-     * @return array<int, Attachment>
-     */
-    public function attachments(): array
-    {
-        $image = $this->certificateImage;
-
-        if (($image['bytes'] ?? '') === '') {
-            return [];
-        }
-
-        if (($image['mime'] ?? '') !== 'image/png') {
-            $image = app(EventCertificateImageService::class)->generateForDelivery(
-                fullName: $this->fullName,
-                eventName: $this->eventName,
-                certificateLabel: $this->certificateLabel,
-                eventEndDate: $this->eventEndDate,
-                type: $this->certificateType,
-                hostedBy: $this->hostedBy,
-            );
-        }
-
-        if (($image['bytes'] ?? '') === '') {
-            return [];
-        }
-
-        return [
-            Attachment::fromData(
-                fn () => $image['bytes'],
-                $image['filename']
-            )->withMime($image['mime']),
-        ];
     }
 
     /**

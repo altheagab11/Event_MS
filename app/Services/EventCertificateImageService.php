@@ -299,9 +299,11 @@ class EventCertificateImageService
 
     private function buildFilename(string $certificateLabel, string $fullName, string $extension): string
     {
-        $slug = Str::slug($certificateLabel.'-'.$fullName, '-');
+        $basename = trim($certificateLabel.' - '.$fullName);
+        $basename = preg_replace('/[\\\\\\/:*?"<>|]/', '-', $basename) ?? '';
+        $basename = trim($basename);
 
-        return ($slug !== '' ? $slug : 'event-certificate').'.'.$extension;
+        return ($basename !== '' ? $basename : 'event-certificate').'.'.$extension;
     }
 
     private function resolveFontPath(bool $bold = false, bool $italic = false): ?string
