@@ -7,16 +7,22 @@ use App\Models\Event;
 use App\Models\Paper;
 use App\Models\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class AdminDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $participantRegistrations = Registration::query()
-            ->where(function ($query) {
+        $participantRegistrations = Registration::query();
+
+        if (Schema::hasColumn('registrations', 'event_registrant_id')) {
+            $participantRegistrations->where(function ($query) {
                 $query->whereHas('user', fn ($userQuery) => $userQuery->where('role', 'participant'))
                     ->orWhereNotNull('event_registrant_id');
             });
+        } else {
+            $participantRegistrations->whereHas('user', fn ($userQuery) => $userQuery->where('role', 'participant'));
+        }
 
         $totalParticipants = (clone $participantRegistrations)->count();
 
@@ -32,11 +38,16 @@ class AdminDashboardController extends Controller
             ->where('status', 'accepted')
             ->count();
 
-        $activeEvents = Event::query()
-            ->where(function ($query) {
+        $activeEventsQuery = Event::query();
+
+        if (Schema::hasColumn('events', 'status')) {
+            $activeEventsQuery->where(function ($query) {
                 $query->whereNull('status')
                     ->orWhere('status', '!=', 'archived');
-            })
+            });
+        }
+
+        $activeEvents = $activeEventsQuery
             ->whereDate('event_date', '>=', now()->startOfDay())
             ->count();
 
